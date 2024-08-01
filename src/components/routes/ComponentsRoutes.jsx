@@ -1,10 +1,13 @@
 import { Route, Routes } from 'react-router-dom';
-
-import { Calendar } from '../pages/Calendar';
-import { NavBar } from '../layout/nabvar/NavBar';
-import { Clientes } from '../pages/Clientes';
-import { Info } from '../pages/Info';
 import { Container } from '@mui/material';
+
+import { Calendar,
+  Clientes,
+  Patients,
+  Info
+} from '../pages/index';
+import { NavBar } from '../layout/nabvar/NavBar';
+
 
 const drawerWidth = 240;
 
@@ -19,7 +22,7 @@ export const ComponentesRoutes = () => {
         <Route path="/clientes" element={<Clientes />} />
         <Route path="/info" element={<Info />} />
         <Route path="/calendar" element={<Calendar />} />
-
+        <Route path="/patients" element={<Patients />} />
         <Route path="/*" element={<Info />} />
 
       </Routes>

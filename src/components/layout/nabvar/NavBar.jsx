@@ -63,6 +63,17 @@ export const NavBar = () => {
             <ListItemText primary='Info' />
           </ListItemButton>
         </ListItem>
+        <ListItem key='Pacientes' disablePadding>
+          <ListItemButton
+            component={NavLink}
+            to='/pacientes'
+          >
+            <ListItemIcon>
+              <PermContactCalendarIcon />
+            </ListItemIcon>
+            <ListItemText primary='Pacientes' />
+          </ListItemButton>
+        </ListItem>
         <ListItem key='Cliente' disablePadding>
           <ListItemButton
             component={NavLink}
@@ -87,7 +98,19 @@ export const NavBar = () => {
         </ListItem>
       </List>
       <Divider />
-
+      <ListItem key='Logout' disablePadding
+        sx={{
+          color: 'error.main',
+          display: { xs: 'block', sm: 'block', md: 'none', lg: 'none' }
+        }}
+        component={NavLink} to="/login"      >
+        <ListItemButton        >
+          <ListItemIcon sx={{ color: 'error.main' }}>
+            <LogoutIcon />
+          </ListItemIcon>
+          <ListItemText primary='Logout' />
+        </ListItemButton>
+      </ListItem>
     </div>
   );
 
@@ -112,24 +135,27 @@ export const NavBar = () => {
             <MenuIcon />
           </IconButton>
           <Grid container direction='row' justifyContent='space-between' alignItems='center'>
-          <Typography variant='h4' noWrap >
-            Optica Echeverria
-          </Typography>
-          <Box 
-           sx={{
-            display: { xs: 'none', sm: 'none', md: 'flex', lg: 'flex', bg: 'flex'}}}
-          >
-          <Typography variant='h6' noWrap sx={{marginRight: 3}} >
-            Lesly
-          </Typography> 
-          <Button 
-            variant='contained' 
-            color='error'
-            endIcon={<LogoutIcon />} >
-            Logout
-            </Button>
-          </Box>
-            </Grid>
+            <Typography variant='h4' noWrap >
+              Optica Echeverria
+            </Typography>
+            <Box
+              sx={{
+                display: { xs: 'none', sm: 'none', md: 'flex', lg: 'flex', bg: 'flex' }
+              }}
+            >
+              <Typography variant='h6' noWrap sx={{ marginRight: 3 }} >
+                Lesly
+              </Typography>
+              <Button
+                variant='contained'
+                color='error'
+                component={NavLink} 
+                to="/login"
+                endIcon={<LogoutIcon />} >
+                Logout
+              </Button>
+            </Box>
+          </Grid>
         </Toolbar>
       </AppBar>
       <Box
