@@ -15,12 +15,15 @@ import {
   ListItemButton,
   ListItemIcon,
   ListItemText,
+  Button,
+  Grid,
 } from '@mui/material';
 
 import MenuIcon from '@mui/icons-material/Menu';
 import PermContactCalendarIcon from '@mui/icons-material/PermContactCalendar';
 import InfoIcon from '@mui/icons-material/Info';
 import EditCalendarIcon from '@mui/icons-material/EditCalendar';
+import LogoutIcon from '@mui/icons-material/Logout';
 
 const drawerWidth = 240;
 
@@ -92,7 +95,7 @@ export const NavBar = () => {
     <Box sx={{ display: 'flex' }}>
       <CssBaseline />
       <AppBar
-        position="fixed"
+        position='fixed'
         sx={{
           width: { sm: `calc(100% - ${drawerWidth}px)` },
           ml: { sm: `${drawerWidth}px` },
@@ -100,27 +103,43 @@ export const NavBar = () => {
       >
         <Toolbar>
           <IconButton
-            color="inherit"
-            aria-label="open drawer"
-            edge="start"
+            color='inherit'
+            aria-label='open drawer'
+            edge='start'
             onClick={handleDrawerToggle}
             sx={{ mr: 2, display: { sm: 'none' } }}
           >
             <MenuIcon />
           </IconButton>
-          <Typography variant="h6" noWrap component="div">
+          <Grid container direction='row' justifyContent='space-between' alignItems='center'>
+          <Typography variant='h4' noWrap >
             Optica Echeverria
           </Typography>
+          <Box 
+           sx={{
+            display: { xs: 'none', sm: 'none', md: 'flex', lg: 'flex', bg: 'flex'}}}
+          >
+          <Typography variant='h6' noWrap sx={{marginRight: 3}} >
+            Lesly
+          </Typography> 
+          <Button 
+            variant='contained' 
+            color='error'
+            endIcon={<LogoutIcon />} >
+            Logout
+            </Button>
+          </Box>
+            </Grid>
         </Toolbar>
       </AppBar>
       <Box
-        component="nav"
+        component='nav'
         sx={{ width: { sm: drawerWidth }, flexShrink: { sm: 0 } }}
-        aria-label="mailbox folders"
+        aria-label='mailbox folders'
       >
         {/* The implementation can be swapped with js to avoid SEO duplication of links. */}
         <Drawer
-          variant="temporary"
+          variant='temporary'
           open={mobileOpen}
           onTransitionEnd={handleDrawerTransitionEnd}
           onClose={handleDrawerClose}
@@ -135,7 +154,7 @@ export const NavBar = () => {
           {drawer}
         </Drawer>
         <Drawer
-          variant="permanent"
+          variant='permanent'
           sx={{
             display: { xs: 'none', sm: 'block' },
             '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth },
@@ -146,7 +165,7 @@ export const NavBar = () => {
         </Drawer>
       </Box>
       <Box
-        component="main"
+        component='main'
         sx={{ flexGrow: 1, p: 3, width: { sm: `calc(100% - ${drawerWidth}px)` } }}
       >
       </Box>
