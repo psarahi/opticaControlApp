@@ -1,7 +1,13 @@
-import React from 'react'
+// eslint-disable-next-line 
+import React from 'react';
+
 
 export const Info = () => {
+
   return (
-    <h1>Infoggggggggggggggggggggggggggggggggggggg </h1>
+    <>
+      <h1>Informacion </h1>
+  
+    </>
   )
 }

@@ -1,7 +1,8 @@
 import { Route, Routes } from 'react-router-dom';
 import { Container } from '@mui/material';
 
-import { Calendar,
+import { 
+  Calendar,
   Clientes,
   Patients,
   Info
@@ -22,7 +23,7 @@ export const ComponentesRoutes = () => {
         <Route path="/clientes" element={<Clientes />} />
         <Route path="/info" element={<Info />} />
         <Route path="/calendar" element={<Calendar />} />
-        <Route path="/patients" element={<Patients />} />
+        <Route path="/pacientes" element={<Patients />} />
         <Route path="/*" element={<Info />} />
 
       </Routes>
