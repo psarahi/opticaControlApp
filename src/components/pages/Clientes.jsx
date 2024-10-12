@@ -1,25 +1,36 @@
 // eslint-disable-next-line
-import React, { useState, useEffect } from 'react';
-import { Alert, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Snackbar, TextField } from '@mui/material';
+import React, { useState, useEffect, useRef } from 'react';
+import { 
+  Button, 
+  Dialog, 
+  DialogActions, 
+  DialogContent, 
+  DialogContentText, 
+  DialogTitle, 
+  IconButton, 
+  TextField } 
+  from '@mui/material';
 import { FilterMatchMode, DataTable, Column } from 'primereact';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
+
 import dayjs from 'dayjs';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 
-import appointmentApi from '../services/appointmentApi.js'
-import { formatearFecha } from '../helpers/formato.js'
-import { textValidator } from '../helpers/validator.js'
+import { ConfirmDialog, confirmDialog } from 'primereact/confirmdialog';
+import { Toast } from 'primereact/toast';
+
+import { formatearFecha } from '../../helpers/formato.js'
+import { textValidator } from '../../helpers/validator.js'
+import { DatePicker } from '@mui/x-date-pickers';
+
+import { appointmentApi } from '../../services/appointmentApi';
 
 export const Clientes = () => {
-  console.log(process.env.REACT_APP_API_URL);
-
+  let clienteSeleccionado = '';
   const [clientes, setclientes] = useState([]);
-  const [optiosAlert, setoptiosAlert] = useState({
-    severity: 'info',
-    message: '',
-    open: false,
-  })
+  const [selectedCliente, setSelectedCliente] = useState(null);
   const [openDialog, setOpenDialog] = useState(false);
   const [formValues, setFormValues] = useState({
     nombre: '',
@@ -45,7 +56,7 @@ export const Clientes = () => {
     return formatearFecha(date);
   };
 
-  const handleClickOpenDialog = () => {
+  const handleOpenDialog = () => {
     setOpenDialog(true);
   };
 
@@ -60,6 +71,8 @@ export const Clientes = () => {
       direccion: '',
       ultimaCita: null,
     });
+    setSelectedCliente('');
+    clienteSeleccionado = '';
   };
 
   const handleChangeText = ({ target }, select) => {
@@ -69,38 +82,150 @@ export const Clientes = () => {
     })
   };
 
-  const handleCloseSnackbar = (event, reason) => {
-    if (reason === 'clickaway') {
-      return;
-    }
-    setoptiosAlert({
-      ...optiosAlert,
-      open: false,
+  const handleEdit = () => {
+    handleOpenDialog();
+  };
+
+  const handleDelete = () => {
+    confirmDialog({
+      message: `¿Desea eliminar el registro? `,
+      header: 'Eliminar',
+      icon: 'pi pi-info-circle',
+      defaultFocus: 'reject',
+      acceptClassName: 'p-button-danger',
+      accept: acceptDialog,
+      reject: rejectDialog
     });
+  };
+
+  const acceptDialog = () => {
+    if (!textValidator(clienteSeleccionado)) {
+      appointmentApi.delete(`cliente/${clienteSeleccionado}`)
+        .then((response) => {
+          if (response.status === 200) {
+            createToast(
+              'success',
+              'Confirmado',
+              'El registro a sido eliminado'
+            );
+            const clientesFiltrados = clientes.filter((cliente) => (cliente._id !== clienteSeleccionado));
+            setclientes([...clientesFiltrados]);
+            console.log(response);
+            cleanForm();
+          } else {
+            createToast(
+              'error',
+              'Error',
+              response.statusText,
+            );
+            console.log(response.data);
+            cleanForm();
+            return;
+          }
+        })
+        .catch((err) => {
+          createToast(
+            'error',
+            'Error',
+            'Ha ocurrido un error al intentar crear el registro'
+          );
+          console.log(err);
+          handleCloseDialog();
+          cleanForm();
+        });
+    } else {
+      createToast(
+        'warn',
+        'Acction requerida',
+        'No se selecciono el cliente correctamente'
+      );
+    }
+  }
+
+  const rejectDialog = () => {
+    createToast(
+      'warn',
+      'Cancelado',
+      'Acción cancelada'
+    );
+  }
+
+  const renderDeleteButton = (value) => {
+    return (
+      <IconButton aria-label="Eliminar" color="primary">
+        <DeleteIcon />
+      </IconButton>
+    );
+  };
+
+  const renderEditButton = () => {
+    return (
+      <IconButton aria-label="Editar" color="error" onClick={handleEdit}>
+        <EditIcon />
+      </IconButton>
+    );
+  };
+
+  const toast = useRef(null);
+
+  const createToast = (severity, summary, detail) => {
+    toast.current.show({ severity: severity, summary: summary, detail: detail, life: 6000 });
+  };
+
+  const onCellSelect = (event) => {
+    console.log(event);
+
   };
 
   return (
     <>
       <h1>Informacion sobre clientes </h1>
-      <Button variant='contained' onClick={handleClickOpenDialog}>Agrega nuevo cliente</Button>
+      <Button variant='contained' onClick={handleOpenDialog}>Agrega nuevo cliente</Button>
       <br />
       <br />
-      <DataTable value={clientes}
-        showGridlines
-        stripedRows
-        tableStyle={{ minWidth: '50rem' }}
-        size='small'
-        paginator
-        rows={10}
-        rowsPerPageOptions={[10, 25, 50]}
-        filters={filters}
-        filterDisplay='row'
-      >
-        <Column field="nombre" header="Nombre" sortable filter></Column>
-        <Column field="apellido" header="Apellido" sortable filter></Column>
-        <Column field="direccion" header="Direccion" sortable filter></Column>
-        <Column field="ultimaCita" header="UltimaCita" body={fechaBodyTemplate}></Column>
-      </DataTable>
+      <Toast ref={toast} />
+      <ConfirmDialog />
+      <div style={{ width: '95%' }}>
+        <DataTable value={clientes}
+          showGridlines
+          stripedRows
+          size='small'
+          paginator
+          rows={10}
+          rowsPerPageOptions={[5, 10, 25, 50]}
+          filters={filters}
+          filterDisplay='row'
+          selectionMode="single"
+          selection={selectedCliente}
+          cellSelection
+          onCellSelect={onCellSelect}
+          onSelectionChange={(e) => {
+            console.log(e);
+            const cliente = e.value.rowData;
+            setSelectedCliente(cliente._id);
+            clienteSeleccionado = cliente._id;
+            setFormValues({
+              nombre: cliente.nombre,
+              apellido: cliente.apellido,
+              direccion: cliente.direccion,
+              ultimaCita: dayjs(cliente.ultimaCita),
+            })
+
+            if (e.value.cellIndex === 0) {
+              handleEdit();
+            } else if (e.value.cellIndex === 1) {
+              handleDelete();
+            }
+          }}
+        >
+          <Column body={renderEditButton}></Column>
+          <Column body={renderDeleteButton}></Column>
+          <Column field="nombre" header="Nombre" sortable filter></Column>
+          <Column field="apellido" header="Apellido" sortable filter></Column>
+          <Column field="direccion" header="Direccion" sortable filter></Column>
+          <Column field="ultimaCita" header="UltimaCita" body={fechaBodyTemplate}></Column>
+        </DataTable>
+      </div>
 
       <Dialog
         open={openDialog}
@@ -115,49 +240,87 @@ export const Clientes = () => {
                 ...formValues,
                 ultimaCita: null
               })
-
-              setoptiosAlert({
-                severity: 'error',
-                message: 'Por favor ingrese todos los campos',
-                open: true,
-              });
+              createToast(
+                'warn',
+                'Accion requerida',
+                'Por favor ingrese todos los campos'
+              );
               return;
             }
-       
-            appointmentApi.post('cliente', formValues)
-              .then((response) => {
-                debugger
-                if (response.status === 201) {
-                  setoptiosAlert({
-                    severity: 'success',
-                    message: 'El registro fue creado correctamente',
-                    open: true,
-                  });
+
+            if (!textValidator(selectedCliente)) {
+              appointmentApi.put(`cliente/${selectedCliente}`, formValues)
+                .then((response) => {
+                  console.log(response.status);
+
+                  if (response.status === 202) {
+                    createToast(
+                      'success',
+                      'Confirmado',
+                      'El registro fue editado correctamente'
+                    );
+                    handleCloseDialog();
+                    const clientesFiltrados = clientes.filter((cliente) => (cliente._id !== selectedCliente));
+                    setclientes([response.data, ...clientesFiltrados]);
+                    console.log(response);
+                    cleanForm();
+                  } else {
+                    createToast(
+                      'error',
+                      'Error',
+                      response.statusText,
+                    );
+                    console.log(response.data);
+                    cleanForm();
+                    return;
+                  }
+                })
+                .catch((err) => {
+                  createToast(
+                    'error',
+                    'Error',
+                    'Ha ocurrido un error al intentar crear el registro'
+                  );
+                  console.log(err);
                   handleCloseDialog();
-                  setclientes([...clientes, response.data]);
-                  console.log(response);
                   cleanForm();
-                } else {
-                  setoptiosAlert({
-                    severity: 'error',
-                    message: response.statusText,
-                    open: true,
-                  });
-                  console.log(response.data);
-                  cleanForm();
-                  return;
-                }
-              })
-              .catch((err) => {
-                setoptiosAlert({
-                  severity: 'error',
-                  message: 'Ha ocurrido un error al intentar crear el registro',
-                  open: true,
                 });
-                console.log(err);
-                handleCloseDialog();
-                cleanForm();
-              })              ;
+            } else {
+              appointmentApi.post('cliente', formValues)
+                .then((response) => {
+                  if (response.status === 201) {
+                    createToast(
+                      'success',
+                      'Confirmado',
+                      'El registro fue creado correctamente'
+                    );
+                    handleCloseDialog();
+                    setclientes([...clientes, response.data]);
+                    console.log(response);
+                    cleanForm();
+                  } else {
+                    createToast(
+                      'error',
+                      'Error',
+                      response.statusText,
+                    );
+                    console.log(response.data);
+                    cleanForm();
+                    return;
+                  }
+                })
+                .catch((err) => {
+                  createToast(
+                    'error',
+                    'Error',
+                    'Ha ocurrido un error al intentar crear el registro'
+                  );
+                  console.log(err);
+                  handleCloseDialog();
+                  cleanForm();
+                });
+            }
+
           },
         }}
       >
@@ -211,11 +374,12 @@ export const Clientes = () => {
           <br />
           <br />
           <LocalizationProvider dateAdapter={AdapterDayjs}>
-            <DateTimePicker
+            <DatePicker
               label="Ultima Cita *"
               nombre="ultimaCita"
               variant="standard"
               value={formValues.ultimaCita}
+              format='YYYY-MM-DD'
               onChange={(event) => {
                 setFormValues({
                   ...formValues,
@@ -230,19 +394,6 @@ export const Clientes = () => {
           <Button variant='contained' type="submit">Guardar</Button>
         </DialogActions>
       </Dialog>
-      {
-        optiosAlert.open &&
-        <Snackbar autoHideDuration={5000} anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
-          open={optiosAlert.open} onClose={handleCloseSnackbar}>
-          <Alert
-            severity={optiosAlert.severity}
-            variant="filled"
-            sx={{ width: '100%' }}
-          >
-            {optiosAlert.message}
-          </Alert>
-        </Snackbar>
-      }
     </>
   )
 };

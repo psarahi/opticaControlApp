@@ -21,8 +21,7 @@ import {
 
 import MenuIcon from '@mui/icons-material/Menu';
 import PermContactCalendarIcon from '@mui/icons-material/PermContactCalendar';
-import InfoIcon from '@mui/icons-material/Info';
-import EditCalendarIcon from '@mui/icons-material/EditCalendar';
+import EditNoteIcon from '@mui/icons-material/EditNote';
 import LogoutIcon from '@mui/icons-material/Logout';
 
 const drawerWidth = 240;
@@ -52,15 +51,15 @@ export const NavBar = () => {
       />
       <Divider />
       <List >
-        <ListItem key='Info' disablePadding>
+        <ListItem key='Inventario' disablePadding>
           <ListItemButton
             component={NavLink}
-            to='/info'
+            to='/inventario'
           >
             <ListItemIcon>
-              <InfoIcon />
+              <EditNoteIcon />
             </ListItemIcon>
-            <ListItemText primary='Info' />
+            <ListItemText primary='Inventario' />
           </ListItemButton>
         </ListItem>
         <ListItem key='Pacientes' disablePadding>
@@ -72,28 +71,6 @@ export const NavBar = () => {
               <PermContactCalendarIcon />
             </ListItemIcon>
             <ListItemText primary='Pacientes' />
-          </ListItemButton>
-        </ListItem>
-        <ListItem key='Cliente' disablePadding>
-          <ListItemButton
-            component={NavLink}
-            to='/clientes'
-          >
-            <ListItemIcon>
-              <PermContactCalendarIcon />
-            </ListItemIcon>
-            <ListItemText primary='Clientes' />
-          </ListItemButton>
-        </ListItem>
-        <ListItem key='Calendario' disablePadding>
-          <ListItemButton
-            component={NavLink}
-            to='/calendar'
-          >
-            <ListItemIcon>
-              <EditCalendarIcon />
-            </ListItemIcon>
-            <ListItemText primary='Calendario' />
           </ListItemButton>
         </ListItem>
       </List>

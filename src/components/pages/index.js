@@ -1,4 +1,5 @@
 export * from './Calendar';
 export * from './Clientes';
 export * from './Info';
-export * from './Patients';
+export * from './Pacientes';
+export * from './Inventario';
