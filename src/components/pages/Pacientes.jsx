@@ -1,8 +1,12 @@
 import React, { useEffect, useState, useRef } from 'react'
 
 import AddIcon from '@mui/icons-material/Add';
-import { ConfirmDialog, confirmDialog, Toast, FilterMatchMode, DataTable, Column, TabView, TabPanel } from 'primereact';
-
+import {
+  ConfirmDialog, confirmDialog, Toast,
+  FilterMatchMode, DataTable, Column, TabView,
+  TabPanel, InputNumber,
+}
+  from 'primereact';
 
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -13,8 +17,10 @@ import AddShoppingCartIcon from '@mui/icons-material/AddShoppingCart';
 import {
   Button, Chip, Dialog, DialogActions, DialogContent,
   DialogContentText, DialogTitle, FormControl, FormControlLabel, FormLabel, InputLabel,
-  MenuItem, Radio, RadioGroup, Select, TextField
+  MenuItem, Radio, RadioGroup, TextField, Select
 } from '@mui/material';
+
+import { Select as SelectReact } from "react-dropdown-select";
 
 import dayjs from 'dayjs';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
@@ -26,6 +32,9 @@ import { formatearFecha, formatearNumero } from '../../helpers/formato';
 import { textValidator, validarFechaProxima } from '../../helpers/validator';
 import './PacienteStyle.css';
 import { agudezaVisual, obtenerAdicion, obtenerGraduaciones } from '../../helpers/metricas';
+import afternoon from '../../assets/afternoon.png';
+import crescentMoon from '../../assets/crescent-moon.png';
+import sunny from '../../assets/sunny.png';
 
 const pacienteJson = {
   nombre: '',
@@ -71,31 +80,30 @@ const expedientes = {
 const detalleVenta = {
   tipoVenta: '',
   tipoLente: '',
-  proteccion: '',
+  proteccion: null,
   material: '',
-  modaArmazon: '',
-  pacientes: '',
+  moda: '',
+  paciente: '',
   detalleInventario: [{
     inventario: '',
     cantidad: 0,
-    precioVendido: 0,
     descuento: 0,
   }],
-  fecha: '',
-  fechaEntrega: '',
+  fecha: new Date(),
+  fechaEntrega: null,
   detallePagos: [{
-    fecha: '',
+    fecha: new Date(),
     formaPago: '',
     monto: 0
   }],
   descuentoTotal: '',
-  cantPagos: '',
-  montoPagos: '',
-  total: '',
-  acuenta: '',
+  cantPagos: 0,
+  montoPagos: 0,
+  total: 0,
+  acuenta: 0,
 };
 
-document.body.style.zoom = '90%';
+//document.body.style.zoom = '90%';
 export const Pacientes = () => {
   let pacienteSeleccionado = '';
   const [openDialogPaciente, setOpenDialogPaciente] = useState(false);
@@ -114,7 +122,20 @@ export const Pacientes = () => {
   const [formExpedientes, setformExpedientes] = useState(expedientes)
   const [formVenta, setformVenta] = useState(detalleVenta);
   const [listInventario, setListInventario] = useState([]);
-  const [listExpedientePaciente, setlistExpedientePaciente] = useState([])
+  const [listInventarioSeleccionado, setlistInventarioSeleccionado] = useState([])
+  const [listExpedientePaciente, setlistExpedientePaciente] = useState([]);
+  const [totalVenta, settotalVenta] = useState(0);
+  const [subtotalVenta, setsubtotalVenta] = useState(0);
+  const [totalDescuento, settotalDescuento] = useState(0);
+  const [cantPagos, setcantPagos] = useState(0);
+  const [montoPagos, setmontoPagos] = useState(0);
+  const [acuenta, setacuenta] = useState(0);
+  const [detallePagos, setdetallePagos] = useState({
+    fecha: new Date(),
+    formaPago: '',
+    monto: 0
+  });
+
   const tipoVenta = [
     'Cambio de aro',
     'Cambio de lente',
@@ -122,12 +143,30 @@ export const Pacientes = () => {
   ]
 
   const proteccion = [
-    'Transitions',
-    'Blanco',
-    'Antireflejo',
-    'Fotocromatico',
-    'Foto AR',
-    'Blue'
+    {
+      value: 1,
+      label: 'Transitions'
+    },
+    {
+      value: 2,
+      label: 'Blanco'
+    },
+    {
+      value: 3,
+      label: 'Antireflejo'
+    },
+    {
+      value: 4,
+      label: 'Fotocromatico'
+    },
+    {
+      value: 5,
+      label: 'Foto AR'
+    },
+    {
+      value: 6,
+      label: 'Blue'
+    }
   ];
 
   const tipoLente = [
@@ -142,12 +181,15 @@ export const Pacientes = () => {
     'L/C Torico',
     'L/C Gas permiable'
   ];
-  //historial
+
+  const tipoPago = [
+    'Efectivo',
+    'Tarjeta',
+  ];
 
   useEffect(() => {
+    bienvenida();
     appointmentApi.get('paciente', '').then((response) => {
-      console.log(response.data);
-
       setListPaciente(response.data);
     });
     appointmentApi.get('sucursal', '').then((response) => {
@@ -156,7 +198,7 @@ export const Pacientes = () => {
     appointmentApi.get('optometrista', '').then((response) => {
       setlistoptometrista(response.data);
     });
-    appointmentApi.get('inventario', '').then((response) => {
+    appointmentApi.get('inventario/inventarioExistente', '').then((response) => {
       setListInventario(response.data);
     })
     cleanForm();
@@ -167,12 +209,89 @@ export const Pacientes = () => {
 
   }, [])
 
+  const bienvenida = () => {
+    let saludo = '';
+    let imagen = '';
+    const hour = new Date().getHours();
+
+    if (hour <= 12) {
+      saludo = 'Buen día';
+      imagen = sunny;
+    }
+    if (hour > 12 && hour < 18) {
+      saludo = 'Buenas tardes';
+      imagen = afternoon;
+    }
+    if (hour > 17) {
+      saludo = 'Buenas noches';
+      imagen = crescentMoon;
+    }
+
+    const nombre = `${localStorage.getItem('nombre')}`;
+    createToastSaludo(
+      'success',
+      saludo,
+      nombre,
+      imagen
+    );
+  };
+
+  const createToastSaludo = (severity, summary, detail, imagen) => {
+    toast.current.show({
+      severity: severity, summary: summary, detail: detail, life: 6000,
+      content: (props) => (
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+          }}
+        >
+          <img src={imagen} style={{ width: '15%' }} />
+          <div style={{
+            marginLeft: '4%'
+          }}>
+            <p
+              style={{
+                fontSize: '20px',
+                margin: '0%',
+                fontWeight: 'bold',
+              }}
+            >{props.message.summary}</p>
+            <p
+              style={{
+                fontSize: '19px',
+                margin: '0%',
+                fontWeight: 300
+              }}
+            >{props.message.detail}</p>
+          </div>
+        </div>
+      )
+    });
+  };
+
   const cleanForm = () => {
     setFormPaciente(pacienteJson);
     setSelectedPaciente(null);
     setformExpedientes(expedientes);
     setlistExpedientePaciente([]);
     setPacienteDatos(pacienteJson);
+    setlistInventarioSeleccionado([]);
+    setformVenta(detalleVenta);
+    settotalVenta(0);
+    setsubtotalVenta(0);
+    settotalDescuento(0);
+    setcantPagos(0);
+    setmontoPagos(0);
+    setacuenta(0);
+    setdetallePagos({
+      fecha: new Date(),
+      formaPago: '',
+      monto: 0
+    });
+    appointmentApi.get('inventario/inventarioExistente', '').then((response) => {
+      setListInventario(response.data);
+    })
   };
 
   const handleOpenDialogPost = () => {
@@ -205,11 +324,14 @@ export const Pacientes = () => {
   };
 
   const handleCloseDialogVenta = () => {
+    cleanForm();
     setOpenDialogVenta(false);
   };
 
   const toast = useRef(null);
+  const toastSaludo = useRef(null);
   const toastForm = useRef(null);
+  const toastFormVenta = useRef(null);
 
   const createToast = (severity, summary, detail) => {
     toast.current.show({ severity: severity, summary: summary, detail: detail, life: 6000 });
@@ -218,22 +340,57 @@ export const Pacientes = () => {
   const createToastForm = (severity, summary, detail) => {
     toastForm.current.show({ severity: severity, summary: summary, detail: detail, life: 6000 });
   };
-
+  const createToastFormVenta = (severity, summary, detail) => {
+    toastFormVenta.current.show({ severity: severity, summary: summary, detail: detail, life: 6000 });
+  };
 
   const onCellSelect = (event) => {
-    console.log(event);
-    console.log(event.cellIndex);
+    const paciente = event.rowData;
+    pacienteSeleccionado = paciente._id;
+
+    setformExpedientes({
+      ...formExpedientes,
+      paciente: paciente._id
+    });
+
+    setSelectedPaciente(paciente._id);
+
+    setFormPaciente({
+      nombre: paciente.nombre,
+      edad: paciente.edad,
+      genero: paciente.genero,
+      telefono: paciente.telefono,
+      email: paciente.email,
+      direccion: paciente.direccion,
+      citaProxima: (textValidator(paciente.citaProxima)) ? dayjs(paciente.citaProxima) : null,
+      fechaRegistro: (textValidator(paciente.fechaRegistro)) ? dayjs(paciente.fechaRegistro) : null,
+      ultimaCita: (textValidator(paciente.ultimaCita)) ? dayjs(paciente.ultimaCita) : null,
+      sucursales: paciente.sucursales._id,
+    })
+
+    setPacienteDatos({
+      nombre: paciente.nombre,
+      edad: paciente.edad,
+      genero: paciente.genero,
+      telefono: paciente.telefono,
+      email: paciente.email,
+      direccion: paciente.direccion,
+      ultimaCita: (textValidator(paciente.ultimaCita)) ? formatearFecha(paciente.ultimaCita) : '-',
+      citaProxima: (textValidator(paciente.citaProxima)) ? formatearFecha(paciente.citaProxima) : '-',
+      fechaRegistro: (textValidator(paciente.fechaRegistro)) ? formatearFecha(paciente.fechaRegistro) : '-',
+      sucursales: paciente.sucursales.nombre,
+    }
+    );
 
     if (event.cellIndex === 0) {
-      handleEdit();
+      handleOpenDialogPost();
     } else if (event.cellIndex === 1) {
       handleDelete();
     } else if (event.cellIndex === 2) {
-      handleVenta();
+      handleOpenDialogVenta();
     } else if (event.cellIndex === 3) {
       appointmentApi.get(`expediente/paciente/${event.rowData._id}`, '')
         .then(async (response) => {
-          console.log(response.data);
 
           setlistExpedientePaciente(await response.data);
         });
@@ -243,9 +400,152 @@ export const Pacientes = () => {
     } else if (event.cellIndex === 4) {
       handleOpenDialogAddExpediente();
     }
-    // console.log(selectedPaciente);
+  };
 
+  const onCellSelectedInventario = (event) => {
+    if (event.cellIndex === 0) {
+      const existe = listInventarioSeleccionado.filter(
+        (item) => item.inventario === event.rowData._id
+      );
 
+      if (existe.length > 0) {
+        let total = 0;
+        let seleccionado = listInventario.filter((i) => i._id === event.rowData._id);
+        if (existe[0].cantidad <= seleccionado[0].existencia) {
+
+          setlistInventarioSeleccionado(
+            listInventarioSeleccionado.map((i) =>
+              i.inventario === event.rowData._id ? { ...i, cantidad: i.cantidad + 1 } : i
+
+            )
+          );
+          total = listInventarioSeleccionado.reduce((acc, current) => acc + current.precioVenta * current.cantidad, 0);
+          // settotalDescuento(descuento);
+          settotalVenta((prev) => prev + total);
+          setsubtotalVenta((prev) => prev + total);
+          setcantPagos(0);
+          setmontoPagos(0);
+          setacuenta(0);
+          setdetallePagos({
+            fecha: new Date(),
+            formaPago: '',
+            monto: 0
+          });
+
+          setListInventario(
+            listInventario.map((i) =>
+              i._id === event.rowData._id ? { ...i, existencia: i.existencia - 1 } : i
+            )
+          );
+        } else {
+          createToastFormVenta(
+            'warn',
+            'Acction no permitida',
+            'No puede agregar, no tiene más existencia'
+          );
+        }
+      } else {
+        setListInventario(
+          listInventario.map((i) =>
+            i._id === event.rowData._id ? { ...i, existencia: i.existencia - 1 } : i
+          )
+        );
+
+        setlistInventarioSeleccionado([
+          ...listInventarioSeleccionado,
+          {
+            descripcion: event.rowData.descripcion,
+            inventario: event.rowData._id,
+            cantidad: 1,
+            existencia: event.rowData.existencia,
+            precioVenta: event.rowData.precioVenta,
+            descuento: 0,
+            moda: event.rowData.moda
+          }
+        ]);
+
+        settotalDescuento((prev) => prev + 0);
+        settotalVenta((prev) => prev + event.rowData.precioVenta);
+        setsubtotalVenta((prev) => prev + event.rowData.precioVenta);
+        setcantPagos(0);
+        setmontoPagos(0);
+        setacuenta(0);
+        setdetallePagos({
+          fecha: new Date(),
+          formaPago: '',
+          monto: 0
+        });
+      }
+    }
+  };
+
+  const calcularTotal = (inv) => {
+    let total = 0;
+    let descuento = 0;
+    inv.forEach((item) => {
+      descuento += item.descuento;
+      total += item.precioVenta * item.cantidad;
+    });
+    settotalDescuento(descuento);
+    setsubtotalVenta(total);
+    settotalVenta(total - descuento);
+    setcantPagos(0);
+    setmontoPagos(0);
+    setacuenta(0);
+    setdetallePagos({
+      fecha: new Date(),
+      formaPago: '',
+      monto: 0
+    });
+  };
+
+  const onCellInventarioVenta = (event) => {
+    if (event.cellIndex === 0) {
+
+      const seleccionado = listInventarioSeleccionado.filter(
+        (item) => item.inventario === event.rowData.inventario
+      );
+
+      if (seleccionado[0].cantidad === 1) {
+        const inventarioFiltrado = listInventarioSeleccionado.filter((inv) => (inv.inventario !== event.rowData.inventario));
+
+        setlistInventarioSeleccionado([...inventarioFiltrado]);
+
+        calcularTotal(inventarioFiltrado);
+        setListInventario(
+          listInventario.map((i) =>
+            i._id === event.rowData._id ? { ...i, existencia: i.existencia + 1 } : i
+          )
+        );
+      }
+
+      if (seleccionado[0].cantidad > 1) {
+        let total = 0;
+        // let descuento = 0;
+        setlistInventarioSeleccionado(
+          listInventarioSeleccionado.map((i) =>
+            i.inventario === event.rowData.inventario ? { ...i, cantidad: i.cantidad - 1 } : i
+          )
+        );
+        total = listInventarioSeleccionado.reduce((acc, current) => acc + current.precioVenta * current.cantidad, 0);
+        // settotalDescuento(descuento);
+        settotalVenta((prev) => prev + total);
+        setsubtotalVenta((prev) => prev + total);
+        setcantPagos(0);
+        setmontoPagos(0);
+        setacuenta(0);
+        setdetallePagos({
+          fecha: new Date(),
+          formaPago: '',
+          monto: 0
+        });
+        setListInventario(
+          listInventario.map((i) =>
+            i._id === event.rowData.inventario ? { ...i, existencia: i.existencia + 1 } : i
+          )
+        );
+      }
+    }
   };
 
   const handleChangeTextPaciente = ({ target }, select) => {
@@ -257,7 +557,7 @@ export const Pacientes = () => {
 
   const handleChangeTextVenta = ({ target }, select) => {
     setformVenta({
-      ...formPacientes,
+      ...formVenta,
       [select]: target.value
     })
   };
@@ -269,15 +569,8 @@ export const Pacientes = () => {
     })
   };
 
-  const handleEdit = () => {
-    handleOpenDialogPost();
-  };
-
   const handleReceta = () => {
     handleOpenDialogReceta();
-  };
-  const handleVenta = () => {
-    handleOpenDialogVenta();
   };
 
   const handleDelete = () => {
@@ -304,7 +597,6 @@ export const Pacientes = () => {
             );
             const inventarioFiltrado = listPaciente.filter((inv) => (inv._id !== pacienteSeleccionado));
             setListPaciente([...inventarioFiltrado]);
-            console.log(response);
             cleanForm();
           } else {
             createToast(
@@ -350,6 +642,12 @@ export const Pacientes = () => {
     );
   };
 
+  const renderAddButton = () => {
+    return (
+      <AddIcon color='primary' fontSize='medium' />
+    );
+  };
+
   const renderDeleteButton = () => {
     return (
       <DeleteIcon color='error' fontSize='medium' />
@@ -373,9 +671,9 @@ export const Pacientes = () => {
     );
   };
 
-  const precioVentaBodyTemplate = ({ precioVenta }) => {
-    return formatearNumero(precioVenta);
-};
+  const precioBodyTemplate = (precio) => {
+    return formatearNumero(precio);
+  };
 
   const [filters] = useState({
     nombre: { value: '', matchMode: FilterMatchMode.STARTS_WITH },
@@ -386,34 +684,150 @@ export const Pacientes = () => {
     genero: { value: '', matchMode: FilterMatchMode.STARTS_WITH },
   });
 
-
   const [filtersInventario] = useState({
     descripcion: { value: '', matchMode: FilterMatchMode.STARTS_WITH },
     categoria: { value: '', matchMode: FilterMatchMode.STARTS_WITH },
     moda: { value: '', matchMode: FilterMatchMode.STARTS_WITH },
     proveedor: { value: '', matchMode: FilterMatchMode.STARTS_WITH },
     linea: { value: '', matchMode: FilterMatchMode.STARTS_WITH }
-});
+  });
 
-  const citaProximaBodyTemplate = (date) => {
-    return formatearFecha(date.citaProxima);
+  const fechaBodyTemplate = (fecha) => {
+    return formatearFecha(fecha);
   };
 
-  const ultimaCitaBodyTemplate = (date) => {
-    return formatearFecha(date.ultimaCita);
+  const onRowEditComplete = (e) => {
+    let _inventario = [...listInventarioSeleccionado];
+    let { newData, index } = e;
+
+    _inventario[index] = newData;
+
+    setlistInventarioSeleccionado(_inventario);
+    calcularTotal(_inventario);
   };
 
-  const fechaRegistroBodyTemplate = (date) => {
-    return formatearFecha(date.fechaRegistro);
+  const textEditor = (options) => {
+    return <InputNumber type="text" value={options.value} onValueChange={(e) => options.editorCallback(e.value)} />;
   };
+
+  const allowEdit = (rowData) => {
+    return true;
+  };
+
+  const generarFactura = () => {
+    if (!textValidator(formVenta)) {
+      createToastFormVenta(
+        'warn',
+        'Acction requerida',
+        'No selecciono ningun tipo de venta'
+      );
+      return;
+    }
+
+    if (listInventarioSeleccionado.length <= 0) {
+      createToastFormVenta(
+        'warn',
+        'Acction requerida',
+        'No selecciono ningun actículo'
+      );
+      return;
+    }
+
+    if (acuenta <= 0) {
+      createToastFormVenta(
+        'warn',
+        'Acction requerida',
+        'No recibio ningun pago'
+      );
+      return;
+    }
+
+    let detalleInv = [];
+
+    let proteccionList = (textValidator(formVenta.proteccion)) ? formVenta.proteccion.map(p => p.label) : '';
+    listInventarioSeleccionado.forEach(inv => {
+      detalleInv.push({
+        inventario: inv.inventario,
+        cantidad: inv.cantidad,
+        descuento: inv.descuento,
+      })
+    })
+
+    let datosSave = {
+      tipoVenta: formVenta.tipoVenta,
+      tipoLente: formVenta.tipoLente,
+      proteccion: proteccionList,
+      material: formVenta.material, //Falta
+      moda: formVenta.moda, // Falta
+      paciente: selectedPaciente,
+      sucursales: localStorage.getItem('sucursalID'),
+      detalleInventario: detalleInv, // Falta
+      fecha: formVenta.fecha,
+      fechaEntrega: formVenta.fechaEntrega,
+      detallePagos: detallePagos,
+      descuentoTotal: totalDescuento,
+      cantPagos: cantPagos,
+      montoPagos: montoPagos,
+      total: totalVenta,
+      acuenta: acuenta
+    };
+
+    console.log(datosSave);
+
+    appointmentApi.post('detalleVentas', datosSave)
+      .then((response) => {
+        if (response.status === 201) {
+          appointmentApi.put('inventario/actualizarInventario', { detalleInventario: listInventarioSeleccionado })
+            .then((response) => {
+              if (response.status === 202) {
+                createToast(
+                  'success',
+                  'Confirmado',
+                  'El inventario ha sido actualizado'
+                );
+              }
+            });
+          createToast(
+            'success',
+            'Confirmado',
+            'La factura a sido generada'
+          );
+          console.log(response);
+          cleanForm();
+          handleCloseDialogVenta();
+        } else {
+          createToast(
+            'error',
+            'Error',
+            response.statusText,
+          );
+          console.log(response.data);
+          cleanForm();
+          handleCloseDialogVenta();
+          return;
+        }
+      })
+      .catch((err) => {
+        createToast(
+          'error',
+          'Error',
+          'Ha ocurrido un error al intentar generar la factura'
+        );
+        handleCloseDialogVenta();
+      })
+
+  };
+
 
   return (
     <>
       <h1>Informacion sobre Pacientes </h1>
-      <Button variant='outlined' startIcon={<AddIcon />} onClick={handleOpenDialogPost}>Agregar Paciente</Button>
+      <Button variant='contained' startIcon={<AddIcon />} onClick={handleOpenDialogPost}>Agregar Paciente</Button>
       <br />
       <br />
       <Toast ref={toast} />
+      <Toast ref={toastSaludo} />
+
       <ConfirmDialog />
 
       <div style={{ width: '97%' }}>
@@ -431,50 +845,6 @@ export const Pacientes = () => {
           selection={setSelectedPaciente}
           cellSelection
           onCellSelect={onCellSelect}
-          onSelectionChange={(e) => {
-            console.log(e);
-
-            const paciente = e.value.rowData;
-
-            // setSelectedPaciente(paciente._id);
-            pacienteSeleccionado = paciente._id;
-
-            setformExpedientes({
-              ...formExpedientes,
-              paciente: paciente._id
-            });
-
-            setSelectedPaciente(paciente._id);
-
-            setFormPaciente({
-              nombre: paciente.nombre,
-              edad: paciente.edad,
-              genero: paciente.genero,
-              telefono: paciente.telefono,
-              email: paciente.email,
-              direccion: paciente.direccion,
-              citaProxima: (textValidator(paciente.citaProxima)) ? dayjs(paciente.citaProxima) : null,
-              fechaRegistro: (textValidator(paciente.fechaRegistro)) ? dayjs(paciente.fechaRegistro) : null,
-              ultimaCita: (textValidator(paciente.ultimaCita)) ? dayjs(paciente.ultimaCita) : null,
-              sucursales: paciente.sucursales._id,
-            })
-
-            setPacienteDatos({
-              nombre: paciente.nombre,
-              edad: paciente.edad,
-              genero: paciente.genero,
-              telefono: paciente.telefono,
-              email: paciente.email,
-              direccion: paciente.direccion,
-              ultimaCita: (textValidator(paciente.ultimaCita)) ? formatearFecha(paciente.ultimaCita) : '-',
-              citaProxima: (textValidator(paciente.citaProxima)) ? formatearFecha(paciente.citaProxima) : '-',
-              fechaRegistro: (textValidator(paciente.fechaRegistro)) ? formatearFecha(paciente.fechaRegistro) : '-',
-              sucursales: paciente.sucursales.nombre,
-            }
-            );
-
-
-          }}
           scrollable
           columnResizeMode="expand"
           resizableColumns
@@ -491,9 +861,9 @@ export const Pacientes = () => {
           <Column field="telefono" header="Telefono" filter bodyStyle={{ textAlign: 'center' }}></Column>
           <Column field="direccion" header="Direccion" filter></Column>
           <Column field="sucursales.nombre" header="Sucursal" filter></Column>
-          <Column field="fechaRegistro" header="Registro" body={fechaRegistroBodyTemplate}></Column>
-          <Column field="ultimaCita" header="Ultima cita" body={ultimaCitaBodyTemplate}></Column>
-          <Column field="citaProxima" header="Cita Proxima" body={citaProximaBodyTemplate}></Column>
+          <Column field="fechaRegistro" header="Registro" body={(data) => fechaBodyTemplate(data.fechaRegistro)}></Column>
+          <Column field="ultimaCita" header="Ultima cita" body={(data) => fechaBodyTemplate(data.ultimaCita)}></Column>
+          <Column field="citaProxima" header="Cita Proxima" body={(data) => fechaBodyTemplate(data.citaProxima)}></Column>
         </DataTable>
       </div >
       {/* Formulario para guardar Paciente*/}
@@ -587,7 +957,7 @@ export const Pacientes = () => {
         <DialogTitle>Datos sobre el Paciente</DialogTitle>
         <DialogContent                 >
           <DialogContentText>
-            Por favor rellene los campos sobre la informacion de su pacientes
+            Por favor rellene los campos sobre la informacion de su paciente
           </DialogContentText>
           <Toast ref={toastForm} />
           <div className='container'>
@@ -686,7 +1056,7 @@ export const Pacientes = () => {
                     );
                     setFormPaciente({
                       ...formPacientes,
-                      fechaRegistro: null
+                      fechaRegistro: dayjs()
                     })
                     return;
                   } else {
@@ -714,7 +1084,7 @@ export const Pacientes = () => {
                     );
                     setFormPaciente({
                       ...formPacientes,
-                      ultimaCita: null
+                      ultimaCita: dayjs()
                     })
                     return;
                   } else {
@@ -742,7 +1112,7 @@ export const Pacientes = () => {
                     );
                     setFormPaciente({
                       ...formPacientes,
-                      citaProxima: null
+                      citaProxima: dayjs()
                     })
                     return;
                   } else {
@@ -782,15 +1152,13 @@ export const Pacientes = () => {
       <Dialog Dialog
         open={openDialogAddExpediente}
         disableEscapeKeyDown={true}
-        maxWidth="md"
+        maxWidth="lg"
         fullWidth={true}
         onClose={handleCloseDialogAddExpediente}
         PaperProps={{
           component: 'form',
           onSubmit: (event) => {
             event.preventDefault();
-
-            console.log(formExpedientes);
 
             // if (!textValidator(selectedPaciente)) {
             //   appointmentApi.put(`inventario/${selectedPaciente}`, formValues)
@@ -879,7 +1247,7 @@ export const Pacientes = () => {
         <DialogTitle>Datos sobre el expediente</DialogTitle>
         <DialogContent                 >
           <DialogContentText>
-            Por favor rellene los campos sobre la informacion de su pacientes
+            Por favor rellene los campos sobre la informacion de su paciente
           </DialogContentText>
           <FormControl variant="standard" sx={{ width: '50%' }}>
             <InputLabel id="optometrista">Optometrista</InputLabel>
@@ -1407,83 +1775,130 @@ export const Pacientes = () => {
         <DialogTitle>Datos sobre la venta</DialogTitle>
         <DialogContent
         >
-          <p style={{ fontSize: '25px', textAlign: 'center', fontWeight: 'bold' }}>{pacienteDatos.nombre}</p>
-          <FormControl>
-            <FormLabel id="tipoVenta">Tipo de Venta</FormLabel>
-            <RadioGroup
-              row
-              autoFocus
-              fullWidth
-              required
-              value={formVenta.tipoVenta}
-              onChange={(event) => handleChangeTextVenta(event, 'tipoVenta')}
-              id="tipoVenta"
-              name="tipoVenta"
-              sx={{ width: '100%' }}
-              size="small"
-            >
-              {tipoVenta.map(op => {
-                return (
-                  <FormControlLabel value={op} control={<Radio />} label={op} />
-                )
-              }
+          <Toast ref={toastFormVenta} />
+          <p style={{ fontSize: '26px', textAlign: 'center', fontWeight: 'bold' }}>{pacienteDatos.nombre}</p>
+          <br />
+          <div style={{ display: 'flex', justifyContent: 'center' }}>
+            <FormControl>
+              <FormLabel id="tipoVenta">Tipo de Venta</FormLabel>
+              <RadioGroup
+                row
+                autoFocus
+                required
+                value={formVenta.tipoVenta}
+                onChange={(event) => handleChangeTextVenta(event, 'tipoVenta')}
+                id="tipoVenta"
+                name="tipoVenta"
+                size="small"
+              >
+                {tipoVenta.map(op => {
+                  return (
+                    <FormControlLabel value={op} control={<Radio />} label={op} />
+                  )
+                }
+                )}
+              </RadioGroup>
+            </FormControl>
 
-              )}
-            </RadioGroup>
-          </FormControl>
-          {/* {formVenta.tipoVenta === 'Cambio de aro' && */}
-          <FormControl variant="standard" sx={{ m: 1, minWidth: 120 }}>
-            <InputLabel id="tipoLente">Tipo de Lente</InputLabel>
-            <Select
-              labelId="tipoLente"
-              id="tipoLente"
-              value={formVenta.tipoLente}
-              onChange={(event) => handleChangeTextVenta(event, 'tipoLente')}
-              label="Adicion"
-            >
-              {tipoLente.map(op => (
-                <MenuItem key={op} value={op}>{op}</MenuItem>
-              )
-              )}
-            </Select>
-          </FormControl>
-          <FormControl variant="standard" sx={{ m: 1, minWidth: 120 }}>
-            <InputLabel id="proteccion">Protección</InputLabel>
-            <Select
-              labelId="proteccion"
-              id="proteccion"
-              value={formVenta.proteccion}
-              onChange={(event) => handleChangeTextVenta(event, 'proteccion')}
-              label="Adicion"
-            >
-              {proteccion.map(op => (
-                <MenuItem key={op} value={op}>{op}</MenuItem>
-              )
-              )}
-            </Select>
-          </FormControl>
-          <TextField
-            value={formVenta.material}
-            onChange={(event) => handleChangeTextVenta(event, 'email')}
-            margin="dense"
-            id="material"
-            name="material"
-            label="Material"
-            type="text"
-            variant="standard"
-            size="small"
-          />
-          <TextField
-            value={formVenta.modaArmazon}
-            onChange={(event) => handleChangeTextVenta(event, 'modaArmazon')}
-            margin="dense"
-            id="modaArmazon"
-            name="modaArmazon"
-            label="Moda Armazon"
-            type="text"
-            variant="standard"
-            size="small"
-          />
+          </div>
+          <br />
+          <div className='infoLentes'>
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
+              <DatePicker
+                label="Fecha entrega *"
+                nombre="fechaEntrega"
+                variant="standard"
+                value={formVenta.fechaEntrega}
+                format='YYYY-MM-DD'
+                onChange={(event) => {
+                  console.log(event);
+                  
+                  if (!validarFechaProxima(event)) {
+                    createToastFormVenta(
+                      'warn',
+                      'Acción requerida',
+                      'La fecha de registro debe ser mayor'
+                    );
+                    setformVenta({
+                      ...formVenta,
+                      fechaEntrega: dayjs()
+                    })
+                    return;
+                  } else {
+                    setformVenta({
+                      ...formVenta,
+                      fechaEntrega: dayjs(event)
+                    })
+                  }
+                }}
+              />
+            </LocalizationProvider>
+            <FormControl variant="standard" sx={{ m: 1, minWidth: 120 }}>
+              <InputLabel id="tipoLente">Tipo de Lente</InputLabel>
+              <Select
+                labelId="tipoLente"
+                id="tipoLente"
+                value={formVenta.tipoLente}
+                onChange={(event) => handleChangeTextVenta(event, 'tipoLente')}
+                label="Adicion"
+              >
+                {tipoLente.map(op => (
+                  <MenuItem key={op} value={op}>{op}</MenuItem>
+                )
+                )}
+              </Select>
+            </FormControl>
+            <div>
+              <p>Protección</p>
+              <SelectReact
+                options={proteccion}
+                value={formVenta.proteccion}
+                name='Proteccion'
+                multi={true}
+                style={{ width: '300px' }}
+                labelField="label"
+                valueField="value"
+                onChange={(e) => {
+                  console.log(e);
+                  setformVenta({
+                    ...formVenta,
+                    proteccion: e
+                  });
+                  // setvalue(e)
+                }
+                }
+              />
+            </div>
+            {(formVenta.tipoVenta === 'Cambio de aro' || formVenta.tipoVenta === 'Cambio de lente') &&
+              <TextField
+                value={formVenta.material}
+                onChange={(event) => handleChangeTextVenta(event, 'material')}
+                margin="dense"
+                id="material"
+                name="material"
+                label="Material"
+                type="text"
+                sx={{ m: 1 }}
+                variant="standard"
+                size="small"
+              />
+            }
+            {formVenta.tipoVenta === 'Cambio de lente' &&
+              <TextField
+                value={formVenta.moda}
+                onChange={(event) => handleChangeTextVenta(event, 'moda')}
+                margin="dense"
+                id="moda"
+                name="moda"
+                label="Moda Armazon"
+                type="text"
+                sx={{ m: 1 }}
+                variant="standard"
+                size="small"
+              />
+            }
+          </div>
+          <p className='titulo'>Seleccione el inventario</p>
           <DataTable value={listInventario}
             showGridlines
             stripedRows
@@ -1494,55 +1909,178 @@ export const Pacientes = () => {
             filters={filtersInventario}
             filterDisplay='row'
             selectionMode="single"
+            //selection={setSelectedPaciente}
             cellSelection
-           // onCellSelect={onCellSelect}
-            // onSelectionChange={(e) => {
-            //   console.log(e);
-
-            // }}
+            onCellSelect={onCellSelectedInventario}
             scrollable
             columnResizeMode="expand"
-            resizableColumns                >
-            <Column body={renderEditButton}></Column>
+            resizableColumns
+          >
+            <Column body={renderAddButton}></Column>
             <Column field="descripcion" header="Descripcion" sortable filter></Column>
             <Column field="linea" header="Linea" filter></Column>
             <Column field="existencia" header="Existencia" sortable ></Column>
-            <Column field="precioVenta" header="Precio Venta" sortable body={precioVentaBodyTemplate}></Column>
+            <Column field="precioVenta" header="Precio Venta" sortable body={(data) => precioBodyTemplate(data.precioVenta)}></Column>
             <Column field="moda" header="Moda" filter></Column>
             <Column field="color" header="Color"></Column>
             <Column field="diseno" header="Diseño"></Column>
             <Column field="proveedor" header="Proveedor" filter></Column>
           </DataTable>
-          {/* {tipoVenta: '',
-  tipoLente: '',
-  proteccion: '',
-  material: '',
-  modaArmazon: '',
-  pacientes: '',
-  detalleInventario: [{
-    inventario: '',
-    cantidad: 0,
-    precioVendido: 0,
-    descuento: 0,
-  }],
-  fecha: '',
-  fechaEntrega: '',
-  detallePagos: [{
-    fecha: '',
-    formaPago: '',
-    monto: 0
-  }],
-  descuentoTotal: '',
-  cantPagos: '',
-  montoPagos: '',
-  total: '',
-  acuenta: '',
-} */}
+          <br />
+          <br />
+          <DataTable value={listInventarioSeleccionado}
+            showGridlines
+            stripedRows
+            size='small'
+            sortMode="multiple"
+            paginator
+            rows={5}
+            selectionMode="single"
+            cellSelection
+            onCellSelect={onCellInventarioVenta}
+            scrollablev
+            columnResizeMode="expand"
+            resizableColumns
+            editMode="row"
+            onRowEditComplete={onRowEditComplete}
+          >
+            <Column body={renderDeleteButton} style={{ textAlign: 'center' }}></Column>
+            <Column field="descripcion" header="Descripcion" ></Column>
+            <Column field="cantidad" header="Cantidad"></Column>
+            <Column field="precioVenta" header="Precio Venta" body={(data) => precioBodyTemplate(data.precioVenta)}></Column>
+            <Column field="descuento" header="Descuento" editor={(options) => textEditor(options)}></Column>
+            <Column rowEditor={allowEdit} headerStyle={{ width: '10%', minWidth: '8rem' }} bodyStyle={{ textAlign: 'center' }}></Column>
+          </DataTable>
+          <br />
+          <br />
+          <p className='titulo'>Detalle de pago</p>
+          <br />
+          <div style={{
+            display: 'flex',
+            flexDirection: 'row',
+            justifyContent: 'space-around',
+            alignItems: 'center',
+          }}>
+            <div style={{
+              display: 'flex',
+              flexDirection: 'row',
+              gap: '5px'
+            }}>
+              <div>
+                <TextField
+                  id="cantPagos"
+                  label="Cantidad de Pagos"
+                  type="number"
+                  variant="standard"
+                  sx={{ m: 1 }}
+                  value={cantPagos}
+                  onChange={(event) => {
+                    if (event.target.value < 0) {
+                      createToastFormVenta(
+                        'error',
+                        'Error',
+                        'La cantidad de pagos no puede ser negativa'
+                      );
+                      return;
+                    } else {
+                      setcantPagos(event.target.value);
+                      setmontoPagos(totalVenta / event.target.value);
+                    }
+                  }}
+                  slotProps={{
+                    inputLabel: {
+                      shrink: true,
+                    },
+                  }}
+                />
+                <TextField
+                  id="montoPagos"
+                  label="Monto de Pagos"
+                  type="number"
+                  disabled={true}
+                  variant="standard"
+                  sx={{ m: 1 }}
+                  value={montoPagos}
+                  slotProps={{
+                    inputLabel: {
+                      shrink: true,
+                    },
+                  }}
+                />
+              </div>
+              <div>
+                <FormControl variant="standard" sx={{ m: 1, minWidth: 120 }}>
+                  <InputLabel id="tipoPago">Tipo pago</InputLabel>
+                  <Select
+                    labelId="tipoPago"
+                    id="tipoPago"
+                    value={detallePagos.formaPago}
+                    onChange={(event) => {
+                      setdetallePagos({
+                        ...detallePagos,
+                        formaPago: event.target.value
+                      })
+                    }}
+                    label="tipoPago"
+                  >
+                    {tipoPago.map(op => {
+                      return (
+                        <MenuItem key={op} value={op}>{op}</MenuItem>
+                      )
+                    })}
+                  </Select>
+                </FormControl>
+                <TextField
+                  id="acuenta"
+                  label="Acuenta"
+                  type="number"
+                  variant="standard"
+                  sx={{ m: 1 }}
+                  value={acuenta}
+                  onChange={(event) => {
+                    setdetallePagos({
+                      ...detallePagos,
+                      monto: event.target.value
+                    })
+                    setacuenta(event.target.value);
+                  }}
+                  slotProps={{
+                    inputLabel: {
+                      shrink: true,
+                    },
+                  }}
+                />
+              </div>
+            </div>
+            <div >
+              <p style={{ fontSize: '25px' }}>
+                <span style={{ fontWeight: 200 }}>Sub Total: </span>
+                <span>{subtotalVenta}</span>
+              </p>
+              <p style={{ fontSize: '25px' }}>
+                <span style={{ fontWeight: 200 }}>Descuento: </span>
+                <span>{totalDescuento}</span>
+              </p>
+              <p style={{ fontSize: '25px' }}>
+                <span style={{ fontWeight: 200 }}>Total: </span>
+                <span>{totalVenta}</span>
+              </p>
+            </div>
+          </div>
+          <div style={{
+            display: 'flex',
+            flexDirection: 'row',
+            justifyContent: 'center',
+            alignItems: 'center',
+            gap: '30px'
+          }}>
+            <Button variant='contained' >Generar recibo</Button>
+            <Button variant='contained' onClick={generarFactura} type="submit">Generar factura</Button>
+          </div>
 
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseDialogVenta} >Cancelar</Button>
-          <Button variant='contained' type="submit">Guardar</Button>
+          <Button variant='contained' onClick={handleCloseDialogVenta}>Cancelar</Button>
         </DialogActions>
       </Dialog>
     </>

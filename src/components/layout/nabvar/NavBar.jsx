@@ -2,33 +2,24 @@ import { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 
 import {
-  AppBar,
-  Box,
-  Drawer,
-  Divider,
-  IconButton,
-  Toolbar,
-  Typography,
-  CssBaseline,
-  List,
-  ListItem,
-  ListItemButton,
-  ListItemIcon,
-  ListItemText,
-  Button,
-  Grid,
+  AppBar, Box, Drawer, Divider, IconButton, Toolbar, Typography,
+  CssBaseline, List, ListItem, ListItemButton, ListItemIcon,
+  ListItemText, Button, Grid,
 } from '@mui/material';
 
 import MenuIcon from '@mui/icons-material/Menu';
 import PermContactCalendarIcon from '@mui/icons-material/PermContactCalendar';
 import EditNoteIcon from '@mui/icons-material/EditNote';
 import LogoutIcon from '@mui/icons-material/Logout';
+import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 
 const drawerWidth = 240;
 
 export const NavBar = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
+  const sucursal = localStorage.getItem('sucursalNombre');
+  const nombre = localStorage.getItem('nombre');
 
   const handleDrawerClose = () => {
     setIsClosing(true);
@@ -75,6 +66,20 @@ export const NavBar = () => {
         </ListItem>
       </List>
       <Divider />
+      <List >
+        <ListItem key='DetalleVenta' disablePadding>
+          <ListItemButton
+            component={NavLink}
+            to='/detalleVentas'
+          >
+            <ListItemIcon>
+              <AttachMoneyIcon />
+            </ListItemIcon>
+            <ListItemText primary='Detalle Ventas' />
+          </ListItemButton>
+        </ListItem>
+      </List>
+      <Divider />
       <ListItem key='Logout' disablePadding
         sx={{
           color: 'error.main',
@@ -112,8 +117,8 @@ export const NavBar = () => {
             <MenuIcon />
           </IconButton>
           <Grid container direction='row' justifyContent='space-between' alignItems='center'>
-            <Typography variant='h4' noWrap >
-              Optica Echeverria
+            <Typography variant='h5' noWrap >
+              {sucursal}
             </Typography>
             <Box
               sx={{
@@ -121,12 +126,12 @@ export const NavBar = () => {
               }}
             >
               <Typography variant='h6' noWrap sx={{ marginRight: 3 }} >
-                Lesly
+                {nombre}
               </Typography>
               <Button
                 variant='contained'
                 color='error'
-                component={NavLink} 
+                component={NavLink}
                 to="/login"
                 endIcon={<LogoutIcon />} >
                 Logout

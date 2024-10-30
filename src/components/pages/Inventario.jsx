@@ -47,6 +47,8 @@ export const Inventario = () => {
 
     useEffect(() => {
         appointmentApi.get('inventario', '').then((response) => {
+            console.log(response.data);
+
             setListInventario(response.data);
         })
         cleanForm();
@@ -81,9 +83,14 @@ export const Inventario = () => {
     };
 
     const toast = useRef(null);
+    const toastForm = useRef(null);
 
     const createToast = (severity, summary, detail) => {
         toast.current.show({ severity: severity, summary: summary, detail: detail, life: 6000 });
+    };
+
+    const createToastForm = (severity, summary, detail) => {
+        toastForm.current.show({ severity: severity, summary: summary, detail: detail, life: 6000 });
     };
 
     const onCellSelect = (event) => {
@@ -196,6 +203,12 @@ export const Inventario = () => {
     const precioCompraBodyTemplate = ({ precioCompra }) => {
         return formatearNumero(precioCompra);
     };
+
+    const rowClass = (data) => {
+        return {
+            'bg-red-100': data.existencia < 0
+        }
+    };
     return (
         <>
             <h1>Informacion sobre Inventario </h1>
@@ -207,13 +220,14 @@ export const Inventario = () => {
 
             <div style={{ width: '95%' }}>
                 <DataTable value={listInventario}
-                    showGridlines
-                    stripedRows
+                    // showGridlines
+                    //stripedRows
                     size='small'
                     sortMode="multiple"
                     paginator
                     rows={5}
                     rowsPerPageOptions={[5, 10, 25, 50]}
+                    rowClassName={rowClass}
                     filters={filters}
                     filterDisplay='row'
                     selectionMode="single"
@@ -278,18 +292,19 @@ export const Inventario = () => {
                         if (textValidator(selectedInventario)) {
                             appointmentApi.put(`inventario/${selectedInventario}`, formValues)
                                 .then((response) => {
-                                    console.log(response.status);
-
                                     if (response.status === 202) {
                                         createToast(
                                             'success',
                                             'Confirmado',
                                             'El registro fue editado correctamente'
                                         );
-                                        handleCloseDialog();
-                                        const inventarioFiltrados = listInventario.filter((inventario) => (inventario._id !== selectedInventario));
-                                        setListInventario([response.data, ...inventarioFiltrados]);
-                                        console.log(response);
+                                        handleCloseDialog();                                        
+                                        setListInventario(
+                                            listInventario.map((i) =>
+                                              i._id === selectedInventario ? { ...i, ...formValues } : i
+                                            )
+                                          );
+                                        
                                         cleanForm();
                                     } else {
                                         createToast(
@@ -356,6 +371,7 @@ export const Inventario = () => {
                     <DialogContentText>
                         Por favor rellene los campos sobre la informacion de su inventario
                     </DialogContentText>
+                    <Toast ref={toastForm} />
                     <TextField
                         autoFocus
                         required
@@ -390,8 +406,20 @@ export const Inventario = () => {
                         <TextField
                             required
                             value={formValues.precioVenta}
-                            onChange={(event) => handleChangeText(event, 'precioVenta')}
-                            margin="dense"
+                            onChange={(event) => {
+                                if (event.target.value <= 0) {
+                                    createToastForm(
+                                        'error',
+                                        'Error',
+                                        'No se puede ingresar una cantidad negativa'
+                                    );
+                                    setFormValues({ ...formValues, precioVenta: 0 });
+                                    return;
+                                }
+                                else {
+                                    handleChangeText(event, 'precioVenta');
+                                }
+                            }} margin="dense"
                             id="precioVenta"
                             name="precioVenta"
                             label="Precio Venta"
@@ -403,7 +431,20 @@ export const Inventario = () => {
                         <TextField
                             required
                             value={formValues.precioCompra}
-                            onChange={(event) => handleChangeText(event, 'precioCompra')}
+                            onChange={(event) => {
+                                if (event.target.value <= 0) {
+                                    createToastForm(
+                                        'error',
+                                        'Error',
+                                        'No se puede ingresar una cantidad negativa'
+                                    );
+                                    setFormValues({ ...formValues, precioCompra: 0 });
+                                    return;
+                                }
+                                else {
+                                    handleChangeText(event, 'precioCompra');
+                                }
+                            }}
                             margin="dense"
                             id="precioCompra"
                             name="precioCompra"
@@ -416,7 +457,20 @@ export const Inventario = () => {
                         <TextField
                             required
                             value={formValues.existencia}
-                            onChange={(event) => handleChangeText(event, 'existencia')}
+                            onChange={(event) => {
+                                if (event.target.value <= 0) {
+                                    createToastForm(
+                                        'error',
+                                        'Error',
+                                        'No se puede ingresar una cantidad negativa de existencia'
+                                    );
+                                    setFormValues({ ...formValues, existencia: 0 });
+                                    return;
+                                }
+                                else {
+                                    handleChangeText(event, 'existencia');
+                                }
+                            }}
                             margin="dense"
                             id="existencia"
                             name="existencia"

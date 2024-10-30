@@ -1,12 +1,12 @@
 .container {
-    display: grid; 
-    grid-template-columns: 1fr 1fr 0.5fr; 
-    grid-template-rows: 1fr 1fr 1fr; 
-    gap: 0px 50px; 
-    grid-template-areas: 
-      ". . ."
-      ". . ."
-      ". . .";
+    display: grid;
+    grid-template-columns: 1fr 1fr 0.5fr;
+    grid-template-rows: 1fr 1fr 1fr;
+    gap: 0px 50px;
+    grid-template-areas:
+        ". . ."
+        ". . ."
+        ". . .";
 }
 
 .containerEspecificaciones {
@@ -17,6 +17,7 @@
     grid-auto-flow: row;
     grid-template-areas:
         ". . . . . . .";
+    align-items: center;
 }
 
 .containerReceta {
@@ -27,9 +28,10 @@
     grid-auto-flow: row;
     grid-template-areas:
         ". . . . . . .";
+        align-items: center;
 }
 
-.cajasReceta{
+.cajasReceta {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -41,16 +43,16 @@ p {
     margin: 0%;
 }
 
-.parrafoReceta{
+.parrafoReceta {
     font-size: 17px;
     margin: 1%;
 }
 
-.campo{
+.campo {
     font-weight: 700;
 }
 
-.valor{
+.valor {
     font-weight: 300;
 }
 
@@ -61,4 +63,12 @@ p {
 
 .subtitulo {
     font-weight: 300;
+}
+
+.infoLentes {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center; 
+    gap: 20px 20px;
 }

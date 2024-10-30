@@ -1,5 +1,5 @@
-import { Box, Button, IconButton, Input, InputAdornment, InputLabel, TextField } from '@mui/material'
-import React, { useState, useRef } from 'react'
+import { Box, Button, FormControl, IconButton, Input, InputAdornment, InputLabel, MenuItem, Select, TextField } from '@mui/material'
+import React, { useState, useRef, useEffect } from 'react'
 import LoginIcon from '@mui/icons-material/Login';
 import { Link, useNavigate } from 'react-router-dom';
 import Visibility from '@mui/icons-material/Visibility';
@@ -8,9 +8,31 @@ import { textValidator } from '../helpers/validator';
 import { Toast } from 'primereact/toast';
 
 import { appointmentApi } from '../services/appointmentApi';
+//document.body.style.zoom = '100%';
 
 export const LoginPage = () => {
   const navigate = useNavigate();
+  const [sucursales, setsucursales] = useState([]);
+  const [sucursal, setsucursal] = useState('');
+
+  useEffect(() => {
+    appointmentApi.get('sucursal', '')
+      .then((response) => {
+        if (response.status === 200) {
+          setsucursales(response.data);
+        }
+        console.log(response);
+      })
+      .catch((err) => {
+        createToast(
+          'error',
+          'Error',
+          err.response.data,
+        );
+      });
+
+  }, [])
+
 
   const [formValues, setFormValues] = useState({
     usuario: '',
@@ -59,16 +81,14 @@ export const LoginPage = () => {
       return;
     }
     appointmentApi.post(`usuario/login`, formValues)
-      .then((response) => {
-        //console.log(response);
-
-
+      .then(async (response) => {
         if (response.status === 201) {
-          navigate('/info');
-          localStorage.setItem('token', response.data.token);
-          localStorage.setItem('nombre', response.data.nombre);
-          localStorage.setItem('apellido', response.data.apellido);
-
+          localStorage.setItem('token', await response.data.token);
+          localStorage.setItem('nombre', await response.data.nombre);
+          localStorage.setItem('sucursalID', sucursal);
+          const sucrsalFilter = sucursales.filter(s => s._id === sucursal);
+          localStorage.setItem('sucursalNombre', sucrsalFilter[0].nombre);
+          navigate('/pacientes');
           cleanForm();
         } else {
           createToast(
@@ -134,6 +154,24 @@ export const LoginPage = () => {
               noValidate
               autoComplete='off'
             >
+              <FormControl variant="standard">
+                <InputLabel id="sucursal">Sucursal</InputLabel>
+                <br />
+                <Select
+                  labelId="sucursal"
+                  id="sucursal"
+                  value={sucursal}
+                  onChange={(e) => setsucursal(e.target.value)}
+                  label="Age"
+                >
+                  {
+                    sucursales.map((s, index) => (
+                      <MenuItem key={index} value={s._id}>{s.nombre}</MenuItem>
+                    ))
+                  }
+                </Select>
+              </FormControl>
+              <br />
               <InputLabel>Usuario</InputLabel>
               <TextField
                 id="usuario"
