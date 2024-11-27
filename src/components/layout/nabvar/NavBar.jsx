@@ -1,17 +1,23 @@
 import { useState } from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 
 import {
   AppBar, Box, Drawer, Divider, IconButton, Toolbar, Typography,
   CssBaseline, List, ListItem, ListItemButton, ListItemIcon,
-  ListItemText, Button, Grid,
+  ListItemText, Button, Grid, Collapse
 } from '@mui/material';
 
 import MenuIcon from '@mui/icons-material/Menu';
+import ContactPageIcon from '@mui/icons-material/ContactPage';
 import PermContactCalendarIcon from '@mui/icons-material/PermContactCalendar';
 import EditNoteIcon from '@mui/icons-material/EditNote';
 import LogoutIcon from '@mui/icons-material/Logout';
-import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
+import ExpandLess from '@mui/icons-material/ExpandLess';
+import ExpandMore from '@mui/icons-material/ExpandMore';
+import DescriptionIcon from '@mui/icons-material/Description';
+import SettingsIcon from '@mui/icons-material/Settings';
+import FolderIcon from '@mui/icons-material/Folder';
+import PointOfSaleIcon from '@mui/icons-material/PointOfSale';
 
 const drawerWidth = 240;
 
@@ -20,6 +26,21 @@ export const NavBar = () => {
   const [isClosing, setIsClosing] = useState(false);
   const sucursal = localStorage.getItem('sucursalNombre');
   const nombre = localStorage.getItem('nombre');
+  const [openConfi, setOpenConfi] = useState(true);
+  const [openReporte, setOpenReporte] = useState(true);
+  const navigate = useNavigate();
+
+  const handleClickConfi = () => {
+    setOpenConfi(!openConfi);
+  };
+  const handleClickReporte = () => {
+    setOpenReporte(!openReporte);
+  };
+
+  const logout = () => {
+    localStorage.clear();
+    navigate('/login');
+  };
 
   const handleDrawerClose = () => {
     setIsClosing(true);
@@ -67,17 +88,72 @@ export const NavBar = () => {
       </List>
       <Divider />
       <List >
+        <ListItem key='DetalleExpediente' disablePadding>
+          <ListItemButton
+            component={NavLink}
+            to='/detalleExpediente'
+          >
+            <ListItemIcon>
+              <ContactPageIcon />
+            </ListItemIcon>
+            <ListItemText primary='Detalle Expendiente' />
+          </ListItemButton>
+        </ListItem>
         <ListItem key='DetalleVenta' disablePadding>
           <ListItemButton
             component={NavLink}
             to='/detalleVentas'
           >
             <ListItemIcon>
-              <AttachMoneyIcon />
+              <PointOfSaleIcon />
             </ListItemIcon>
             <ListItemText primary='Detalle Ventas' />
           </ListItemButton>
         </ListItem>
+        <Divider />
+        <ListItemButton onClick={handleClickReporte}>
+          <ListItemIcon>
+            <FolderIcon />
+          </ListItemIcon>
+          <ListItemText primary="Reportes" />
+          {openReporte ? <ExpandLess /> : <ExpandMore />}
+        </ListItemButton>
+        <Collapse in={openReporte} timeout="auto" unmountOnExit>
+          <List component="div" disablePadding>
+            <ListItemButton
+              sx={{ pl: 4 }}
+              component={NavLink}
+              to='/detalleInventario'
+            >
+              <ListItemIcon>
+                <DescriptionIcon />
+              </ListItemIcon>
+              <ListItemText primary="Inventario" />
+            </ListItemButton>
+          </List>
+        </Collapse>
+        <Divider />
+        <ListItemButton onClick={handleClickConfi}>
+          <ListItemIcon>
+            <SettingsIcon />
+          </ListItemIcon>
+          <ListItemText primary="Configuraciones" />
+          {openConfi ? <ExpandLess /> : <ExpandMore />}
+        </ListItemButton>
+        <Collapse in={openConfi} timeout="auto" unmountOnExit>
+          <List component="div" disablePadding>
+            <ListItemButton
+              sx={{ pl: 4 }}
+              component={NavLink}
+              to='/rangoFactura'
+            >
+              <ListItemIcon>
+                <DescriptionIcon />
+              </ListItemIcon>
+              <ListItemText primary="Facturas" />
+            </ListItemButton>
+          </List>
+        </Collapse>
       </List>
       <Divider />
       <ListItem key='Logout' disablePadding
@@ -85,7 +161,8 @@ export const NavBar = () => {
           color: 'error.main',
           display: { xs: 'block', sm: 'block', md: 'none', lg: 'none' }
         }}
-        component={NavLink} to="/login"      >
+        onClick={logout}
+      >
         <ListItemButton        >
           <ListItemIcon sx={{ color: 'error.main' }}>
             <LogoutIcon />
@@ -131,8 +208,7 @@ export const NavBar = () => {
               <Button
                 variant='contained'
                 color='error'
-                component={NavLink}
-                to="/login"
+                onClick={logout}
                 endIcon={<LogoutIcon />} >
                 Logout
               </Button>

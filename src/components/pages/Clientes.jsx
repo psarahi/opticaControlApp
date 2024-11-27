@@ -127,7 +127,7 @@ export const Clientes = () => {
           createToast(
             'error',
             'Error',
-            'Ha ocurrido un error al intentar crear el registro'
+            'Ha ocurrido un error'
           );
           console.log(err);
           handleCloseDialog();
@@ -279,7 +279,7 @@ export const Clientes = () => {
                   createToast(
                     'error',
                     'Error',
-                    'Ha ocurrido un error al intentar crear el registro'
+                    'Ha ocurrido un error'
                   );
                   console.log(err);
                   handleCloseDialog();
@@ -313,7 +313,7 @@ export const Clientes = () => {
                   createToast(
                     'error',
                     'Error',
-                    'Ha ocurrido un error al intentar crear el registro'
+                    'Ha ocurrido un error'
                   );
                   console.log(err);
                   handleCloseDialog();

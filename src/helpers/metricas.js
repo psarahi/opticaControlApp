@@ -5,8 +5,6 @@ export const obtenerGraduaciones = () => {
     let graduacionesFinales = [];
   for (let x = 0.0; x <= 20; ) {
     valores.push(formatearNumero(x));
-    // graduaciones.push(`-${formatearNumero(x)}`);
-    // graduaciones.push(`+${formatearNumero(x)}`);
     x += 0.25;
   }
 
@@ -36,7 +34,7 @@ export const agudezaVisual = [
 export const obtenerAdicion = () => {
   let adicion = [];
 
-  for (let x = 0.0; x <= 3; ) {
+  for (let x = 1; x <= 3; ) {
     adicion.push(`+${formatearNumero(x)}`);
     x += 0.25;
   }

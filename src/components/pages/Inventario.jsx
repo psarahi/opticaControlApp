@@ -3,9 +3,10 @@ import React, { useEffect, useState, useRef } from 'react'
 import AddIcon from '@mui/icons-material/Add';
 import { Toast } from 'primereact/toast';
 import { ConfirmDialog, confirmDialog } from 'primereact/confirmdialog';
-import { FilterMatchMode, DataTable, Column } from 'primereact';
+import { FilterMatchMode, DataTable, Column, Tag } from 'primereact';
 import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
+import CancelIcon from '@mui/icons-material/Cancel';
+import DoneIcon from '@mui/icons-material/Done';
 
 import {
     Button, Dialog, DialogActions, DialogContent, DialogContentText,
@@ -18,24 +19,36 @@ import { appointmentApi } from '../../services/appointmentApi';
 import { formatearNumero } from '../../helpers/formato';
 import './InventarioStyle.css';
 import { textValidator } from '../../helpers/validator';
+import { obtenerAdicion, obtenerGraduaciones } from '../../helpers/metricas';
 
 export const Inventario = () => {
     let inventarioSeleccionado = '';
     const [openDialog, setOpenDialog] = useState(false);
     const [listInventario, setListInventario] = useState([]);
     const [selectedInventario, setSelectedInventario] = useState(null);
+    const [listGraduaciones, setListGraduaciones] = useState([]);
+    const [disabledGravado, setdisabledGravado] = useState(true);
+    const [listAdicion, setListAdicion] = useState([]);
     const [formValues, setFormValues] = useState({
         descripcion: '',
+        esfera: '',
+        cilindro: '',
+        adicion: '',
         linea: '',
         precioVenta: '',
         precioCompra: '',
         existencia: '',
+        importe: '',
+        valorGravado: '',
         categoria: '',
         proveedor: '',
         telefono: '',
         moda: '',
+        material: '',
         diseno: '',
         color: '',
+        estado: true,
+        sucursales: localStorage.getItem('sucursalID')
         //fechaRegistro: new Date()
     });
     const lineas = [
@@ -45,18 +58,32 @@ export const Inventario = () => {
         'Economica'
     ];
 
-    useEffect(() => {
-        appointmentApi.get('inventario', '').then((response) => {
-            console.log(response.data);
+    const importe = [
+        'Exento',
+        'Gravado'
+    ];
+    const valorGravado = [
+        '15%',
+        '18%'
+    ];
 
+    useEffect(() => {
+        const sucursal = localStorage.getItem('sucursalID');
+        appointmentApi.get(`inventario/bySucursal/${sucursal}`, '').then((response) => {
             setListInventario(response.data);
         })
         cleanForm();
+
+        setListGraduaciones(obtenerGraduaciones());
+        setListAdicion(obtenerAdicion());
     }, [])
 
     const cleanForm = () => {
         setFormValues({
             descripcion: '',
+            esfera: '',
+            cilindro: '',
+            adicion: '',
             linea: '',
             precioVenta: '',
             precioCompra: '',
@@ -67,6 +94,7 @@ export const Inventario = () => {
             moda: '',
             diseno: '',
             color: '',
+            sucursales: localStorage.getItem('sucursalID')
             //fechaRegistro: new Date()
         });
         setSelectedInventario(null);
@@ -79,6 +107,7 @@ export const Inventario = () => {
     };
 
     const handleCloseDialog = () => {
+        cleanForm();
         setOpenDialog(false);
     };
 
@@ -98,6 +127,8 @@ export const Inventario = () => {
             handleEdit();
         } else if (event.cellIndex === 1) {
             handleDelete();
+        } else if (event.cellIndex === 2) {
+            handleEnable();
         }
     };
 
@@ -106,6 +137,14 @@ export const Inventario = () => {
             ...formValues,
             [select]: target.value
         })
+
+        if (target.value === 'Exento') {
+            setFormValues({
+                ...formValues,
+                valorGravado: '',
+                [select]: target.value
+            })
+        }
     };
 
     const handleEdit = () => {
@@ -114,28 +153,36 @@ export const Inventario = () => {
 
     const handleDelete = () => {
         confirmDialog({
-            message: `¿Desea eliminar el registro? `,
-            header: 'Eliminar',
+            message: `¿Desea deshabilitar el registro? `,
+            header: 'Deshabilitar',
             icon: 'pi pi-info-circle',
             defaultFocus: 'reject',
             acceptClassName: 'p-button-danger',
-            accept: acceptDialog,
-            reject: rejectDialog
+            accept: acceptDialogDisable,
+            reject: rejectDialogDisable
         });
     };
 
-    const acceptDialog = () => {
+    const acceptDialogDisable = () => {
         if (textValidator(inventarioSeleccionado)) {
-            appointmentApi.delete(`inventario/${inventarioSeleccionado}`)
+            appointmentApi.put(`inventario/cambiarEstado/${inventarioSeleccionado}`, { estado: false })
                 .then((response) => {
                     if (response.status === 200) {
                         createToast(
                             'success',
                             'Confirmado',
-                            'El registro a sido eliminado'
+                            'El registro a sido deshabilitado'
                         );
-                        const inventarioFiltrado = listInventario.filter((inv) => (inv._id !== inventarioSeleccionado));
-                        setListInventario([...inventarioFiltrado]);
+
+                        setListInventario(
+                            listInventario.map(i =>
+                                i._id === inventarioSeleccionado ? {
+                                    ...i,
+                                    estado: response.data.estado
+                                } : i
+                            )
+                        );
+
                         console.log(response);
                         cleanForm();
                     } else {
@@ -153,7 +200,7 @@ export const Inventario = () => {
                     createToast(
                         'error',
                         'Error',
-                        'Ha ocurrido un error al intentar crear el registro'
+                        'Ha ocurrido un error al intentar deshabilitar el registro'
                     );
                     console.log(err);
                     handleCloseDialog();
@@ -168,7 +215,7 @@ export const Inventario = () => {
         }
     }
 
-    const rejectDialog = () => {
+    const rejectDialogDisable = () => {
         createToast(
             'warn',
             'Cancelado',
@@ -176,16 +223,93 @@ export const Inventario = () => {
         );
     }
 
-    const renderEditButton = () => {
-        return (
-            <EditIcon color='primary' fontSize='medium' />
-        );
+    const handleEnable = () => {
+        confirmDialog({
+            message: `¿Desea habilitar el registro? `,
+            header: 'Habilitar',
+            icon: 'pi pi-info-circle',
+            defaultFocus: 'reject',
+            acceptClassName: 'p-button-danger',
+            accept: acceptDialogEnable,
+            reject: rejectDialogEnable
+        });
     };
 
-    const renderDeleteButton = (value) => {
-        return (
-            <DeleteIcon color='error' fontSize='medium' />
+    const acceptDialogEnable = () => {
+        if (textValidator(inventarioSeleccionado)) {
+            appointmentApi.put(`inventario/cambiarEstado/${inventarioSeleccionado}`, { estado: true })
+                .then((response) => {
+                    if (response.status === 200) {
+                        createToast(
+                            'success',
+                            'Confirmado',
+                            'El registro a sido deshabilitado'
+                        );
+                        setListInventario(
+                            listInventario.map(i =>
+                                i._id === inventarioSeleccionado ? {
+                                    ...i,
+                                    estado: response.data.estado
+                                } : i
+                            )
+                        );
+                        console.log(response);
+                        cleanForm();
+                    } else {
+                        createToast(
+                            'error',
+                            'Error',
+                            response.statusText,
+                        );
+                        console.log(response.data);
+                        cleanForm();
+                        return;
+                    }
+                })
+                .catch((err) => {
+                    createToast(
+                        'error',
+                        'Error',
+                        'Ha ocurrido un error al intentar habilitar el registro'
+                    );
+                    console.log(err);
+                    handleCloseDialog();
+                    cleanForm();
+                });
+        } else {
+            createToast(
+                'warn',
+                'Acction requerida',
+                'No se selecciono el inventario correctamente'
+            );
+        }
+    }
+
+    const rejectDialogEnable = () => {
+        createToast(
+            'warn',
+            'Cancelado',
+            'Acción cancelada'
         );
+    }
+
+    const renderEditButton = (data) => {
+        if (data.estado === true) {
+            return <EditIcon color='primary' fontSize='medium' />
+        }
+    };
+
+    const renderChangeStatus = (data) => {
+        if (data.estado === false) {
+            return <DoneIcon color='success' fontSize='medium' />
+        }
+    };
+
+    const renderDeleteButton = (data) => {
+        if (data.estado !== false) {
+            return <CancelIcon color='error' fontSize='medium' />
+        }
+
     };
 
     const [filters] = useState({
@@ -206,9 +330,19 @@ export const Inventario = () => {
 
     const rowClass = (data) => {
         return {
-            'bg-red-100': data.existencia < 0
+            'bg-yellow-100': data.existencia <= 0,
+            'bg-red-100': data.estado === false,
         }
     };
+
+    const rendeEstado = (data) => {
+        if (data.estado === true) {
+            return <Tag severity="success" value="Activo"></Tag>
+        } else {
+            return <Tag severity="danger" value="Inactivo"></Tag>
+        }
+    }
+
     return (
         <>
             <h1>Informacion sobre Inventario </h1>
@@ -220,12 +354,11 @@ export const Inventario = () => {
 
             <div style={{ width: '95%' }}>
                 <DataTable value={listInventario}
-                    // showGridlines
-                    //stripedRows
+                    showGridlines
+                    stripedRows
                     size='small'
-                    sortMode="multiple"
                     paginator
-                    rows={5}
+                    rows={10}
                     rowsPerPageOptions={[5, 10, 25, 50]}
                     rowClassName={rowClass}
                     filters={filters}
@@ -241,6 +374,9 @@ export const Inventario = () => {
                         inventarioSeleccionado = inventario._id;
                         setFormValues({
                             descripcion: inventario.descripcion,
+                            esfera: inventario.esfera,
+                            cilindro: inventario.cilindro,
+                            adicion: inventario.adicion,
                             linea: inventario.linea,
                             precioVenta: inventario.precioVenta,
                             precioCompra: inventario.precioCompra,
@@ -249,11 +385,16 @@ export const Inventario = () => {
                             proveedor: inventario.proveedor,
                             telefono: inventario.telefono,
                             moda: inventario.moda,
+                            material: inventario.material,
+                            importe: inventario.importe,
+                            valorGravado: inventario.valorGravado,
                             diseno: inventario.diseno,
                             color: inventario.color,
+                            sucursales: inventario.sucursales,
                             //fechaRegistro: new Date(inventario.fechaRegistro)
                         });
-
+                        if (inventario.importe === 'Gravado') setdisabledGravado(false)
+                        else setdisabledGravado(true)
 
                     }}
                     scrollable
@@ -261,26 +402,32 @@ export const Inventario = () => {
                     resizableColumns                >
                     <Column body={renderEditButton}></Column>
                     <Column body={renderDeleteButton}></Column>
+                    <Column body={renderChangeStatus}></Column>
                     <Column field="descripcion" header="Descripcion" sortable filter></Column>
-                    <Column field="linea" header="Linea" filter></Column>
+                    <Column field="esfera" header="Esfera"></Column>
+                    <Column field="cilindro" header="Cilindro"></Column>
+                    <Column field="adicion" header="Adición"></Column>
+                    <Column field="linea" header="Linea" filter style={{ width: '40%' }}></Column>
                     <Column field="existencia" header="Existencia" sortable ></Column>
                     <Column field="precioVenta" header="Precio Venta" sortable body={precioVentaBodyTemplate}></Column>
                     <Column field="precioCompra" header="Precio Compra" sortable body={precioCompraBodyTemplate}></Column>
+                    <Column field="importe" header="Importe"></Column>
+                    <Column field="valorGravado" header="Gravado"></Column>
                     <Column field="moda" header="Moda" filter></Column>
+                    <Column field="material" header="Material"></Column>
                     <Column field="categoria" header="Categoria" filter></Column>
                     <Column field="color" header="Color"></Column>
                     <Column field="diseno" header="Diseño"></Column>
                     <Column field="proveedor" header="Proveedor" filter></Column>
                     <Column field="telefono" header="Telefono" ></Column>
+                    <Column field="estado" header="Estado" body={rendeEstado}></Column>
                 </DataTable>
             </div>
             <Dialog
                 open={openDialog}
                 disableEscapeKeyDown={true}
-                //maxWidth="sm"
-                style={{
-                    height: '500px'
-                }}
+                maxWidth="md"
+                fullWidth={true}
                 onClose={handleCloseDialog}
                 PaperProps={{
                     component: 'form',
@@ -298,13 +445,13 @@ export const Inventario = () => {
                                             'Confirmado',
                                             'El registro fue editado correctamente'
                                         );
-                                        handleCloseDialog();                                        
+                                        handleCloseDialog();
                                         setListInventario(
                                             listInventario.map((i) =>
-                                              i._id === selectedInventario ? { ...i, ...formValues } : i
+                                                i._id === selectedInventario ? { ...i, ...formValues } : i
                                             )
-                                          );
-                                        
+                                        );
+
                                         cleanForm();
                                     } else {
                                         createToast(
@@ -321,7 +468,7 @@ export const Inventario = () => {
                                     createToast(
                                         'error',
                                         'Error',
-                                        'Ha ocurrido un error al intentar crear el registro'
+                                        'Ha ocurrido un error'
                                     );
                                     console.log(err);
                                     handleCloseDialog();
@@ -356,7 +503,7 @@ export const Inventario = () => {
                                     createToast(
                                         'error',
                                         'Error',
-                                        'Ha ocurrido un error al intentar crear el registro'
+                                        'Ha ocurrido un error'
                                     );
                                     console.log(err);
                                     handleCloseDialog();
@@ -402,7 +549,61 @@ export const Inventario = () => {
                             })}
                         </Select>
                     </FormControl>
-                    <div className='container'>
+                    <div style={{
+                        display: 'flex',
+                        flexDirection: 'row'
+                    }}>
+                        <FormControl variant="standard" sx={{ m: 1, width: '50%' }}>
+                            <InputLabel id="Esfera">Esfera</InputLabel>
+                            <Select
+                                labelId="Esfera"
+                                id="Esfera"
+                                value={formValues.esfera}
+                                onChange={(event) => handleChangeText(event, 'esfera')}
+                                label="Esfera"
+                            >
+                                {listGraduaciones.map(op => (
+                                    <MenuItem key={op} value={op}>{op}</MenuItem>
+                                )
+                                )}
+                            </Select>
+                        </FormControl>
+                        <FormControl variant="standard" sx={{ m: 1, width: '50%' }}>
+                            <InputLabel id="cilindro">Cilindro</InputLabel>
+                            <Select
+                                labelId="cilindro"
+                                id="cilindro"
+                                value={formValues.cilindro}
+                                onChange={(event) => handleChangeText(event, 'cilindro')}
+                                label="Cilindro"
+                            >
+                                {listGraduaciones.map(op => (
+                                    <MenuItem key={op} value={op}>{op}</MenuItem>
+                                )
+                                )}
+                            </Select>
+                        </FormControl>
+                        <FormControl variant="standard" sx={{ m: 1, width: '50%' }}>
+                            <InputLabel id="adicion">Adicion</InputLabel>
+                            <Select
+                                labelId="adicion"
+                                id="adicion"
+                                value={formValues.adicion}
+                                onChange={(event) => handleChangeText(event, 'adicion')}
+                                label="Adicion"
+                            >
+                                {listAdicion.map(op => (
+                                    <MenuItem key={op} value={op}>{op}</MenuItem>
+                                )
+                                )}
+                            </Select>
+                        </FormControl>
+                    </div>
+                    <div style={{
+                        display: 'flex',
+                        flexDirection: 'row',
+                        gap: '15px'
+                    }}>
                         <TextField
                             required
                             value={formValues.precioVenta}
@@ -458,18 +659,10 @@ export const Inventario = () => {
                             required
                             value={formValues.existencia}
                             onChange={(event) => {
-                                if (event.target.value <= 0) {
-                                    createToastForm(
-                                        'error',
-                                        'Error',
-                                        'No se puede ingresar una cantidad negativa de existencia'
-                                    );
-                                    setFormValues({ ...formValues, existencia: 0 });
-                                    return;
-                                }
-                                else {
-                                    handleChangeText(event, 'existencia');
-                                }
+                                setFormValues({
+                                    ...formValues,
+                                    existencia: parseInt(event.target.value)
+                                })
                             }}
                             margin="dense"
                             id="existencia"
@@ -480,6 +673,44 @@ export const Inventario = () => {
                             variant="standard"
                             size="medium"
                         />
+                        <FormControl variant="standard" sx={{ m: 1, minWidth: 120 }}>
+                            <InputLabel id="importe">Importe</InputLabel>
+                            <Select
+                                labelId="importe"
+                                id="importe"
+                                value={formValues.importe}
+                                onChange={(event) => {
+                                    setdisabledGravado(event.target.value === 'Exento' ? true : false);
+                                    handleChangeText(event, 'importe')
+                                }}
+                                label="importe"
+                            >
+                                {importe.map(op => {
+                                    return (
+                                        <MenuItem key={op} value={op}>{op}</MenuItem>
+                                    )
+                                })}
+                            </Select>
+                        </FormControl>
+                        <FormControl variant="standard" sx={{ m: 1, minWidth: 120 }}>
+                            <InputLabel id="valorGravado">Valor Gravado</InputLabel>
+                            <Select
+                                disabled={disabledGravado}
+                                labelId="valorGravado"
+                                id="valorGravado"
+                                value={formValues.valorGravado}
+                                onChange={(event) => handleChangeText(event, 'valorGravado')}
+                                label="valorGravado"
+                            >
+                                {valorGravado.map(op => {
+                                    return (
+                                        <MenuItem key={op} value={op}>{op}</MenuItem>
+                                    )
+                                })}
+                            </Select>
+                        </FormControl>
+                    </div>
+                    <div className='container'>
                         <TextField
                             value={formValues.categoria}
                             onChange={(event) => handleChangeText(event, 'categoria')}
@@ -524,6 +755,18 @@ export const Inventario = () => {
                             id="moda"
                             name="moda"
                             label="Moda"
+                            type="text"
+                            fullWidth
+                            variant="standard"
+                            size="medium"
+                        />
+                        <TextField
+                            value={formValues.material}
+                            onChange={(event) => handleChangeText(event, 'material')}
+                            margin="dense"
+                            id="material"
+                            name="material"
+                            label="Material"
                             type="text"
                             fullWidth
                             variant="standard"
