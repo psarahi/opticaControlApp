@@ -11,7 +11,8 @@ import {
     Button, Chip, Dialog, DialogActions, DialogContent,
     DialogTitle, FormControl, InputLabel, MenuItem, Select, TextField
 }
-    from '@mui/material'; import { formatearFecha, formatearNumero } from '../../helpers/formato';
+    from '@mui/material';
+import { formatearFecha, formatearNumero } from '../../helpers/formato';
 
 import './DetalleVentasStyle.css';
 import { nuevaFactura } from '../../helpers/nuevaFactura';
@@ -60,6 +61,8 @@ export const DetalleVentas = () => {
 
         appointmentApi.get('detalleVentas/pacientes', '').then((response) => {
             setListPaciente(response.data);
+            console.log(response.data);
+            
         });
 
     }, [])
@@ -137,9 +140,10 @@ export const DetalleVentas = () => {
         setOpenDialog(false);
     };
 
+
     const onCellSelect = (e) => {
-        if (e.cellIndex === 1) {
-            appointmentApi.get(`detalleVentas/idPaciente/${e.rowData.paciente._id}`, '')
+        if (e.cellIndex === 3) {
+            appointmentApi.get(`detalleVentas/idPaciente/${e.rowData.idPaciente}`, '')
                 .then((response) => {
                     console.log(response.data);
                     setListDetalleVentas(response.data);
@@ -294,7 +298,9 @@ export const DetalleVentas = () => {
                         columnResizeMode="expand"
                         resizableColumns
                     >
-                        <Column field="paciente.nombre" header="Nombre" sortable filter></Column>
+                        <Column field="paciente" header="Nombre" sortable filter></Column>
+                        <Column field="acuenta" header="Acuenta" body={(data) => formatearNumero(data.acuenta)}></Column>
+                        <Column field="total" header="Total" body={(data) => formatearNumero(data.total)}></Column>
                         <Column body={renderVerVentas} bodyStyle={{ textAlign: 'center' }}></Column>
                     </DataTable>
                 </div >
@@ -349,7 +355,6 @@ export const DetalleVentas = () => {
                                                 <span style={{ fontWeight: 200 }}>{dayjs(detalle.fechaEntrega).format('YYYY-MM-DD')}</span>
                                             </p>
                                         </div>
-
                                         <p style={{ fontSize: '20px' }}><span style={{ fontWeight: 500 }}>Protección: </span>
                                             {
                                                 detalle.proteccion.map(p => {

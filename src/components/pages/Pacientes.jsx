@@ -35,6 +35,8 @@ import crescentMoon from '../../assets/crescent-moon.png';
 import sunny from '../../assets/sunny.png';
 import { nuevaFactura } from '../../helpers/nuevaFactura';
 
+
+
 const pacienteJson = {
   nombre: '',
   edad: '',
@@ -51,6 +53,8 @@ const pacienteJson = {
 
 const expedientes = {
   paciente: '',
+  tipoLente: '',
+  proteccion: null,
   optometrista: '',
   fecha: dayjs().format('YYYY-MM-DD'),
   antecedentes: '',
@@ -123,7 +127,7 @@ export const Pacientes = () => {
   const [formExpedientes, setformExpedientes] = useState(expedientes);
   const [formVenta, setformVenta] = useState(detalleVenta);
   const [listInventario, setListInventario] = useState([]);
-  const [listInventarioSeleccionado, setlistInventarioSeleccionado] = useState([]);
+  const [listInvExistente, setlistInvExistente] = useState([]);
   const [listInvPedido, setlistInvPedido] = useState([]);
   const [listExpedientePaciente, setlistExpedientePaciente] = useState([]);
   const [totalVenta, settotalVenta] = useState(0);
@@ -277,7 +281,7 @@ export const Pacientes = () => {
     setformExpedientes(expedientes);
     setlistExpedientePaciente([]);
     setPacienteDatos(pacienteJson);
-    setlistInventarioSeleccionado([]);
+    setlistInvExistente([]);
     setlistInvPedido([]);
     setformVenta(detalleVenta);
     settotalVenta(0);
@@ -294,7 +298,7 @@ export const Pacientes = () => {
     });
     const sucursal = localStorage.getItem('sucursalID');
 
-    appointmentApi.get(`inventario/bySucursal/${sucursal}`, '').then((response) => {
+    appointmentApi.get(`inventario/activos/${sucursal}`, '').then((response) => {
       setListInventario(response.data);
     });
     appointmentApi.get(`facturas/rangoActivo/${sucursal}`, '').then((response) => {
@@ -438,7 +442,7 @@ export const Pacientes = () => {
   const onCellSelectedInventario = (event) => {
     const precioVenta = event.rowData.precioVenta;
     if (event.cellIndex === 0) {
-      const existeInv = listInventarioSeleccionado.filter(
+      const existeInv = listInvExistente.filter(
         (item) => item.inventario === event.rowData._id
       );
       const existePedido = listInvPedido.filter(
@@ -447,8 +451,8 @@ export const Pacientes = () => {
 
       if (existeInv.length > 0 || existePedido.length > 0) {
         if (existeInv.length > 0 && existeInv[0].cantidad <= event.rowData.existencia) {
-          setlistInventarioSeleccionado(
-            listInventarioSeleccionado.map((i) =>
+          setlistInvExistente(
+            listInvExistente.map((i) =>
               i.inventario === event.rowData._id ? { ...i, cantidad: i.cantidad + 1 } : i
             )
           );
@@ -511,8 +515,8 @@ export const Pacientes = () => {
               i._id === event.rowData._id ? { ...i, existencia: i.existencia - 1 } : i
             )
           );
-          setlistInventarioSeleccionado([
-            ...listInventarioSeleccionado,
+          setlistInvExistente([
+            ...listInvExistente,
             {
               descripcion: event.rowData.descripcion,
               esfera: event.rowData.esfera,
@@ -521,6 +525,8 @@ export const Pacientes = () => {
               linea: event.rowData.linea,
               inventario: event.rowData._id,
               cantidad: 1,
+              importe: event.rowData.importe,
+              valorGravado: event.rowData.valorGravado,
               existencia: event.rowData.existencia,
               precioVenta: event.rowData.precioVenta,
               // descuento: 0,
@@ -585,7 +591,7 @@ export const Pacientes = () => {
   };
 
   const recalcularTotal = () => {
-    let _inventario = [...listInventarioSeleccionado];
+    let _inventario = [...listInvExistente];
     let _invPedido = [...listInvPedido];
     let total = 0;
     // let descuento = 0;
@@ -615,12 +621,12 @@ export const Pacientes = () => {
   const onCellInvSeleccionado = (event) => {
     let precioVenta = event.rowData.precioVenta;
     if (event.cellIndex === 0) {
-      const seleccionado = listInventarioSeleccionado.filter(
+      const seleccionado = listInvExistente.filter(
         (item) => item.inventario === event.rowData.inventario
       );
       if (seleccionado[0].cantidad === 1) {
-        const inventarioFiltrado = listInventarioSeleccionado.filter((inv) => (inv.inventario !== event.rowData.inventario));
-        setlistInventarioSeleccionado([...inventarioFiltrado]);
+        const inventarioFiltrado = listInvExistente.filter((inv) => (inv.inventario !== event.rowData.inventario));
+        setlistInvExistente([...inventarioFiltrado]);
         restarTotales(precioVenta);
         setListInventario(
           listInventario.map((i) =>
@@ -631,8 +637,8 @@ export const Pacientes = () => {
 
       if (seleccionado[0].cantidad > 1) {
         // let descuento = 0;
-        setlistInventarioSeleccionado(
-          listInventarioSeleccionado.map((i) =>
+        setlistInvExistente(
+          listInvExistente.map((i) =>
             i.inventario === event.rowData.inventario ? { ...i, cantidad: i.cantidad - 1 } : i
           )
         );
@@ -895,6 +901,9 @@ export const Pacientes = () => {
 
   const [filtersInventario] = useState({
     descripcion: { value: '', matchMode: FilterMatchMode.STARTS_WITH },
+    esfera: { value: '', matchMode: FilterMatchMode.STARTS_WITH },
+    cilindro: { value: '', matchMode: FilterMatchMode.STARTS_WITH },
+    adicion: { value: '', matchMode: FilterMatchMode.STARTS_WITH },
     categoria: { value: '', matchMode: FilterMatchMode.STARTS_WITH },
     moda: { value: '', matchMode: FilterMatchMode.STARTS_WITH },
     proveedor: { value: '', matchMode: FilterMatchMode.STARTS_WITH },
@@ -906,12 +915,12 @@ export const Pacientes = () => {
   };
 
   const onRowEditComplete = (e) => {
-    let _inventario = [...listInventarioSeleccionado];
+    let _inventario = [...listInvExistente];
     let { newData, index } = e;
 
     _inventario[index] = newData;
 
-    setlistInventarioSeleccionado(_inventario);
+    setlistInvExistente(_inventario);
     calcularTotal(_inventario);
   };
 
@@ -934,7 +943,7 @@ export const Pacientes = () => {
       return;
     }
 
-    if (listInventarioSeleccionado.length <= 0 && listInvPedido.length <= 0) {
+    if (listInvExistente.length <= 0 && listInvPedido.length <= 0) {
       createToastFormVenta(
         'warn',
         'Acction requerida',
@@ -981,9 +990,14 @@ export const Pacientes = () => {
       numFacRec = parseInt(numReciboActual[0].numRecibo) + 1;
     }
 
+    console.log(listInvExistente);
+    console.log(listInvPedido);
+
+
+
     let detalleInv = [];
     let proteccionList = (textValidator(formVenta.proteccion)) ? formVenta.proteccion.map(p => p.label) : '';
-    listInventarioSeleccionado.forEach(inv => {
+    listInvExistente.forEach(inv => {
       detalleInv.push({
         inventario: inv.inventario,
         cantidad: inv.cantidad,
@@ -1025,7 +1039,7 @@ export const Pacientes = () => {
     appointmentApi.post('detalleVentas', datosSave)
       .then((response) => {
         if (response.status === 201) {
-          appointmentApi.put('inventario/actualizarInventario', { detalleInventario: listInventarioSeleccionado })
+          appointmentApi.put('inventario/actualizarInventario', { detalleInventario: listInvExistente })
             .then((response) => {
               if (response.status === 202) {
                 if (op === 'factura' && parseFloat(acuenta) === parseFloat(totalVenta)) {
@@ -1514,6 +1528,41 @@ export const Pacientes = () => {
               })}
             </Select>
           </FormControl>
+          <div>
+            <p>Protección</p>
+            <SelectReact
+              options={proteccion}
+              value={formExpedientes.proteccion}
+              name='Proteccion'
+              multi={true}
+              style={{ width: '300px' }}
+              labelField="label"
+              valueField="value"
+              onChange={(e) => {
+                setformVenta({
+                  ...formVenta,
+                  proteccion: e
+                });
+                // setvalue(e)
+              }
+              }
+            />
+          </div>
+          <FormControl variant="standard" sx={{ m: 1, minWidth: 120 }}>
+            <InputLabel id="tipoLente">Tipo de Lente</InputLabel>
+            <Select
+              labelId="tipoLente"
+              id="tipoLente"
+              value={formExpedientes.tipoLente}
+              onChange={(event) => handleChangeTextVenta(event, 'tipoLente')}
+              label="Adicion"
+            >
+              {tipoLente.map(op => (
+                <MenuItem key={op} value={op}>{op}</MenuItem>
+              )
+              )}
+            </Select>
+          </FormControl>
           <TextField
             value={formExpedientes.antecedentes}
             onChange={(event) => handleChangeTextExpediente(event, 'antecedentes')}
@@ -1943,6 +1992,23 @@ export const Pacientes = () => {
                       <span className='campo'>Optometrista: </span>
                       <span className='valor'>{ex.optometrista.nombre}</span>
                     </p>
+                    <div style={{
+                      display: 'flex',
+                      flexDirection: 'row',
+                      justifyContent:'space-between', 
+                    }}>
+                    <p className='parrafoReceta' style={{margin: '0px 0px 0px 9px'}}>
+                      <span className='campo'>Tipo de Lente: </span>
+                      <span className='valor'>{ex.tipoLente}</span>
+                    </p>
+                    <p className='parrafoReceta' style={{margin: '0px 0px 0px 0px'}}><span className='campo'>Protección: </span>
+                      {
+                        ex.proteccion.map(p => {
+                          return <Chip label={p} key={p} sx={{ margin: '3px' }} size="small" color="primary" />
+                        })
+                      }
+                    </p>
+                    </div>
                     <p className='parrafoReceta'>
                       <span className='campo'>Antecedentes: </span>
                       <span className='valor'>{ex.antecedentes}</span>
@@ -2193,10 +2259,10 @@ export const Pacientes = () => {
           >
             <Column body={renderAddButton}></Column>
             <Column field="descripcion" header="Descripcion" sortable filter></Column>
-            <Column field="esfera" header="Esfera"></Column>
-            <Column field="cilindro" header="Cilindro"></Column>
-            <Column field="adicion" header="Adición"></Column>
-            <Column field="linea" header="Linea" filter></Column>
+            <Column field="esfera" header="Esfera" filter style={{ minWidth: '9rem' }}></Column>
+            <Column field="cilindro" header="Cilindro" filter style={{ minWidth: '9rem' }}></Column>
+            <Column field="adicion" header="Adición" filter style={{ minWidth: '9rem' }}></Column>
+            <Column field="linea" header="Linea" filter style={{ minWidth: '9rem' }}></Column>
             <Column field="existencia" header="Existencia" sortable ></Column>
             <Column field="precioVenta" header="Precio Venta" sortable body={(data) => precioBodyTemplate(data.precioVenta)}></Column>
             <Column field="moda" header="Moda" filter></Column>
@@ -2206,10 +2272,10 @@ export const Pacientes = () => {
           </DataTable>
           <br />
           {
-            listInventarioSeleccionado.length > 0 &&
+            listInvExistente.length > 0 &&
             <>
               <p className='titulo'>Inventario seleccionado</p>
-              <DataTable value={listInventarioSeleccionado}
+              <DataTable value={listInvExistente}
                 showGridlines
                 stripedRows
                 size='small'

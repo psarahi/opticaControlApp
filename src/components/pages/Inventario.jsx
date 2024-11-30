@@ -314,6 +314,9 @@ export const Inventario = () => {
 
     const [filters] = useState({
         descripcion: { value: '', matchMode: FilterMatchMode.STARTS_WITH },
+        esfera: { value: '', matchMode: FilterMatchMode.STARTS_WITH },
+        cilindro: { value: '', matchMode: FilterMatchMode.STARTS_WITH },
+        adicion: { value: '', matchMode: FilterMatchMode.STARTS_WITH },
         categoria: { value: '', matchMode: FilterMatchMode.STARTS_WITH },
         moda: { value: '', matchMode: FilterMatchMode.STARTS_WITH },
         proveedor: { value: '', matchMode: FilterMatchMode.STARTS_WITH },
@@ -404,21 +407,21 @@ export const Inventario = () => {
                     <Column body={renderDeleteButton}></Column>
                     <Column body={renderChangeStatus}></Column>
                     <Column field="descripcion" header="Descripcion" sortable filter></Column>
-                    <Column field="esfera" header="Esfera"></Column>
-                    <Column field="cilindro" header="Cilindro"></Column>
-                    <Column field="adicion" header="Adición"></Column>
-                    <Column field="linea" header="Linea" filter style={{ width: '40%' }}></Column>
+                    <Column field="esfera" header="Esfera" filter style={{ minWidth: '9rem' }}></Column>
+                    <Column field="cilindro" header="Cilindro" filter style={{ minWidth: '9rem' }}></Column>
+                    <Column field="adicion" header="Adición" filter style={{ minWidth: '9rem' }}></Column>
+                    <Column field="linea" header="Linea" filter style={{ minWidth: '9rem' }}></Column>
                     <Column field="existencia" header="Existencia" sortable ></Column>
                     <Column field="precioVenta" header="Precio Venta" sortable body={precioVentaBodyTemplate}></Column>
                     <Column field="precioCompra" header="Precio Compra" sortable body={precioCompraBodyTemplate}></Column>
                     <Column field="importe" header="Importe"></Column>
                     <Column field="valorGravado" header="Gravado"></Column>
-                    <Column field="moda" header="Moda" filter></Column>
+                    <Column field="moda" header="Moda" filter style={{ minWidth: '9rem' }}></Column>
                     <Column field="material" header="Material"></Column>
-                    <Column field="categoria" header="Categoria" filter></Column>
+                    <Column field="categoria" header="Categoria" filter style={{ minWidth: '9rem' }}></Column>
                     <Column field="color" header="Color"></Column>
                     <Column field="diseno" header="Diseño"></Column>
-                    <Column field="proveedor" header="Proveedor" filter></Column>
+                    <Column field="proveedor" header="Proveedor" filter style={{ minWidth: '9rem' }}></Column>
                     <Column field="telefono" header="Telefono" ></Column>
                     <Column field="estado" header="Estado" body={rendeEstado}></Column>
                 </DataTable>
