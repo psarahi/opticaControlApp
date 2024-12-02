@@ -8,7 +8,7 @@ import { textValidator } from '../helpers/validator';
 import { Toast } from 'primereact/toast';
 
 import { appointmentApi } from '../services/appointmentApi';
-//document.body.style.zoom = '100%';
+document.body.style.zoom = '100%';
 
 export const LoginPage = () => {
   const navigate = useNavigate();

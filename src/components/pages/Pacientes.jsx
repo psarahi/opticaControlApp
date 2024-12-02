@@ -18,7 +18,8 @@ import AddShoppingCartIcon from '@mui/icons-material/AddShoppingCart';
 import {
   Button, Chip, Dialog, DialogActions, DialogContent,
   DialogContentText, DialogTitle, FormControl, FormControlLabel, FormLabel, InputLabel,
-  MenuItem, Radio, RadioGroup, TextField, Select
+  MenuItem, Radio, RadioGroup, TextField, Select,
+  Switch
 } from '@mui/material';
 
 import { Select as SelectReact } from "react-dropdown-select";
@@ -138,6 +139,8 @@ export const Pacientes = () => {
   const [cantPagos, setcantPagos] = useState(0);
   const [montoPagos, setmontoPagos] = useState(0);
   const [acuenta, setacuenta] = useState(0);
+  const [rtnenable, setrtnenable] = useState(false);
+  const [datosRtn, setDatosRtn] = useState({ rtn: '', nombre: '' });
   const [listRangoFactura, setlistRangoFactura] = useState([]);
   const [numReciboActual, setnumReciboActual] = useState(0);
   const [detallePagos, setdetallePagos] = useState({
@@ -990,10 +993,17 @@ export const Pacientes = () => {
       numFacRec = parseInt(numReciboActual[0].numRecibo) + 1;
     }
 
-    console.log(listInvExistente);
-    console.log(listInvPedido);
+    const facturaDatos = {
+      cliente: pacienteDatos.nombre,
+      inventario: [...listInvExistente, ...listInvPedido],
+      total: totalVenta,
+      totalDescuento: totalDescuento,
+      acuenta: acuenta,
+      montoPagos: montoPagos,
+      cantPagos: cantPagos,
+    }
 
-
+    console.log(facturaDatos);
 
     let detalleInv = [];
     let proteccionList = (textValidator(formVenta.proteccion)) ? formVenta.proteccion.map(p => p.label) : '';
@@ -1014,6 +1024,15 @@ export const Pacientes = () => {
       })
     }
 
+    if (rtnenable && (!textValidator(datosRtn.nombre || !textValidator(datosRtn.rtn)))) {
+      createToastFormVenta(
+        'warn',
+        'Acction requerida',
+        'Por favor ingrese los datos para el RTN'
+      );
+      return;
+    }
+
     let datosSave = {
       tipoVenta: formVenta.tipoVenta,
       tipoLente: formVenta.tipoLente,
@@ -1021,6 +1040,8 @@ export const Pacientes = () => {
       material: formVenta.material, //Falta
       moda: formVenta.moda, // Falta
       paciente: selectedPaciente,
+      rtn: datosRtn.rtn,
+      nombreRtn: datosRtn.nombre,
       sucursales: localStorage.getItem('sucursalID'),
       detalleInventario: detalleInv, // Falta
       fecha: formVenta.fecha,
@@ -1036,51 +1057,51 @@ export const Pacientes = () => {
 
     console.log(datosSave);
 
-    appointmentApi.post('detalleVentas', datosSave)
-      .then((response) => {
-        if (response.status === 201) {
-          appointmentApi.put('inventario/actualizarInventario', { detalleInventario: listInvExistente })
-            .then((response) => {
-              if (response.status === 202) {
-                if (op === 'factura' && parseFloat(acuenta) === parseFloat(totalVenta)) {
-                  appointmentApi.put(`facturas/${listRangoFactura[0]._id}`, { ultimaUtilizada: numFacRec }).then();
-                } else {
-                  appointmentApi.put(`correlativo/${numReciboActual[0]._id}`, { numRecibo: numFacRec }).then();
-                }
-                createToast(
-                  'success',
-                  'Confirmado',
-                  'El inventario ha sido actualizado'
-                );
-              }
-            });
-          createToast(
-            'success',
-            'Confirmado',
-            'La factura a sido generada'
-          );
-          cleanForm();
-          handleCloseDialogVenta();
-        } else {
-          createToast(
-            'error',
-            'Error',
-            response.statusText,
-          );
-          console.log(response.data);
-          cleanForm();
-          handleCloseDialogVenta();
-          return;
-        }
-      })
-      .catch((err) => {
-        createToast(
-          'error',
-          'Error',
-          'Ha ocurrido un error'
-        );
-        handleCloseDialogVenta();
-      })
+    // appointmentApi.post('detalleVentas', datosSave)
+    //   .then((response) => {
+    //     if (response.status === 201) {
+    //       appointmentApi.put('inventario/actualizarInventario', { detalleInventario: listInvExistente })
+    //         .then((response) => {
+    //           if (response.status === 202) {
+    //             if (op === 'factura' && parseFloat(acuenta) === parseFloat(totalVenta)) {
+    //               appointmentApi.put(`facturas/${listRangoFactura[0]._id}`, { ultimaUtilizada: numFacRec }).then();
+    //             } else {
+    //               appointmentApi.put(`correlativo/${numReciboActual[0]._id}`, { numRecibo: numFacRec }).then();
+    //             }
+    //             createToast(
+    //               'success',
+    //               'Confirmado',
+    //               'El inventario ha sido actualizado'
+    //             );
+    //           }
+    //         });
+    //       createToast(
+    //         'success',
+    //         'Confirmado',
+    //         'La factura a sido generada'
+    //       );
+    //       cleanForm();
+    //       handleCloseDialogVenta();
+    //     } else {
+    //       createToast(
+    //         'error',
+    //         'Error',
+    //         response.statusText,
+    //       );
+    //       console.log(response.data);
+    //       cleanForm();
+    //       handleCloseDialogVenta();
+    //       return;
+    //     }
+    //   })
+    //   .catch((err) => {
+    //     createToast(
+    //       'error',
+    //       'Error',
+    //       'Ha ocurrido un error'
+    //     );
+    //     handleCloseDialogVenta();
+    //   })
 
   };
 
@@ -1960,142 +1981,146 @@ export const Pacientes = () => {
         >
           <div className="card">
             {
-              listExpedientePaciente.length <= 0 &&
+              listExpedientePaciente &&
+              <TabView scrollable>
+                {listExpedientePaciente.map(ex => {
+                  return (
+                    <TabPanel key={ex._id} header={formatearFecha(ex.fecha)}>
+                      <Button variant='contained'
+                        id={ex._id}
+                        onClick={(e) => {
+                          setexpedienteId(e.target.id);
+                          const expediente = {
+                            paciente: ex.paciente._id,
+                            optometrista: ex.optometrista._id,
+                            fecha: ex.fecha,
+                            antecedentes: ex.antecedentes,
+                            enfermedadBase: ex.enfermedadBase,
+                            observaciones: ex.observaciones,
+                            pruebasValoraciones: ex.pruebasValoraciones,
+                            recetaOjoDerecho: ex.recetaOjoDerecho,
+                            recetaOjoIzquierdo: ex.recetaOjoIzquierdo
+                          };
+                          setformExpedientes(expediente);
+
+                          handleCloseDialogReceta();
+                          setOpenDialogAddExpediente(true);
+                        }}
+                      >Editar expediente</Button>
+                      <p className='parrafoReceta'>
+                        <span className='campo'>Optometrista: </span>
+                        <span className='valor'>{ex.optometrista.nombre}</span>
+                      </p>
+                      <div style={{
+                        display: 'flex',
+                        flexDirection: 'row',
+                        justifyContent: 'space-between',
+                      }}>
+                        <p className='parrafoReceta' style={{ margin: '0px 0px 0px 9px' }}>
+                          <span className='campo'>Tipo de Lente: </span>
+                          <span className='valor'>{ex.tipoLente}</span>
+                        </p>
+                        <p className='parrafoReceta' style={{ margin: '0px 0px 0px 0px' }}><span className='campo'>Protección: </span>
+                          {
+                            ex.proteccion &&
+                            ex.proteccion.map(p => {
+                              return <Chip label={p} key={p} sx={{ margin: '3px' }} size="small" color="primary" />
+                            })
+                          }
+                        </p>
+                      </div>
+                      <p className='parrafoReceta'>
+                        <span className='campo'>Antecedentes: </span>
+                        <span className='valor'>{ex.antecedentes}</span>
+                      </p>
+                      <p className='parrafoReceta'>
+                        <span className='campo'>Observaciones: </span>
+                        <span className='valor'>{ex.observaciones}</span>
+                      </p>
+                      <p className='parrafoReceta'>
+                        <span className='campo'>Enfermedades de base: </span>
+                        <span className='valor'>{ex.enfermedadBase}</span>
+                      </p>
+                      <p className='parrafoReceta'>
+                        <span className='campo'>Pruebas y valoraciones: </span>
+                        <span className='valor'>{ex.pruebasValoraciones}</span>
+                      </p>
+                      <br />
+                      <p className='titulo'>Historial</p>
+                      <p className='subtitulo'>Ojo Derecho</p>
+                      <div className='containerReceta'>
+                        <div className='cajasReceta'>
+                          <p className='campo'>Esfera</p>
+                          <p className='valor'>{ex.recetaOjoDerecho.esfera}</p>
+                        </div>
+                        <div className='cajasReceta'>
+                          <p className='campo'>Cilindro</p>
+                          <p className='valor'>{ex.recetaOjoDerecho.cilindro}</p>
+                        </div>
+                        <div className='cajasReceta'>
+                          <p className='campo'>Eje</p>
+                          <p className='valor'>{ex.recetaOjoDerecho.eje}</p>
+                        </div>
+                        <div className='cajasReceta'>
+                          <p className='campo'>Agudeza Visual</p>
+                          <p className='valor'>{ex.recetaOjoDerecho.agudezaVisual}</p>
+                        </div>
+                        <div className='cajasReceta'>
+                          <p className='campo'>Dist. Pupilar</p>
+                          <p className='valor'>{ex.recetaOjoDerecho.distanciaPupilar}</p>
+                        </div>
+                        <div className='cajasReceta'>
+                          <p className='campo'>Adición</p>
+                          <p className='valor'>{ex.recetaOjoDerecho.adicion}</p>
+                        </div>
+                        <div className='cajasReceta'>
+                          <p className='campo'>Def. Refracción</p>
+                          <p className='valor'>{ex.recetaOjoDerecho.defRefraccion}</p>
+                        </div>
+                      </div>
+                      <br />
+                      <p className='subtitulo'>Ojo Izquierdo</p>
+                      <div className='containerReceta'>
+                        <div className='cajasReceta'>
+                          <p className='campo'>Esfera</p>
+                          <p className='valor'>{ex.recetaOjoIzquierdo.esfera}</p>
+                        </div>
+                        <div className='cajasReceta'>
+                          <p className='campo'>Cilindro</p>
+                          <p className='valor'>{ex.recetaOjoIzquierdo.cilindro}</p>
+                        </div>
+                        <div className='cajasReceta'>
+                          <p className='campo'>Eje</p>
+                          <p className='valor'>{ex.recetaOjoIzquierdo.eje}</p>
+                        </div>
+                        <div className='cajasReceta'>
+                          <p className='campo'>Agudeza Visual</p>
+                          <p className='valor'>{ex.recetaOjoIzquierdo.agudezaVisual}</p>
+                        </div>
+                        <div className='cajasReceta'>
+                          <p className='campo'>Dist. Pupilar</p>
+                          <p className='valor'>{ex.recetaOjoIzquierdo.distanciaPupilar}</p>
+                        </div>
+                        <div className='cajasReceta'>
+                          <p className='campo'>Adición</p>
+                          <p className='valor'>{ex.recetaOjoIzquierdo.adicion}</p>
+                        </div>
+                        <div className='cajasReceta'>
+                          <p className='campo'>Def. Refracción</p>
+                          <p className='valor'>{ex.recetaOjoIzquierdo.defRefraccion}</p>
+                        </div>
+                      </div>
+                    </TabPanel>
+                  )
+                })
+                }
+              </TabView>
+            }
+
+            {
+              listExpedientePaciente.length === 0 &&
               <h2 style={{ color: '#cc0404' }}>No hay expedientes disponibles para este paciente</h2>
             }
-            <TabView scrollable>
-              {listExpedientePaciente.map(ex => {
-                return (
-                  <TabPanel key={ex._id} header={formatearFecha(ex.fecha)}>
-                    <Button variant='contained'
-                      id={ex._id}
-                      onClick={(e) => {
-                        setexpedienteId(e.target.id);
-                        const expediente = {
-                          paciente: ex.paciente._id,
-                          optometrista: ex.optometrista._id,
-                          fecha: ex.fecha,
-                          antecedentes: ex.antecedentes,
-                          enfermedadBase: ex.enfermedadBase,
-                          observaciones: ex.observaciones,
-                          pruebasValoraciones: ex.pruebasValoraciones,
-                          recetaOjoDerecho: ex.recetaOjoDerecho,
-                          recetaOjoIzquierdo: ex.recetaOjoIzquierdo
-                        };
-                        setformExpedientes(expediente);
-
-                        handleCloseDialogReceta();
-                        setOpenDialogAddExpediente(true);
-                      }}
-                    >Editar expediente</Button>
-                    <p className='parrafoReceta'>
-                      <span className='campo'>Optometrista: </span>
-                      <span className='valor'>{ex.optometrista.nombre}</span>
-                    </p>
-                    <div style={{
-                      display: 'flex',
-                      flexDirection: 'row',
-                      justifyContent:'space-between', 
-                    }}>
-                    <p className='parrafoReceta' style={{margin: '0px 0px 0px 9px'}}>
-                      <span className='campo'>Tipo de Lente: </span>
-                      <span className='valor'>{ex.tipoLente}</span>
-                    </p>
-                    <p className='parrafoReceta' style={{margin: '0px 0px 0px 0px'}}><span className='campo'>Protección: </span>
-                      {
-                        ex.proteccion.map(p => {
-                          return <Chip label={p} key={p} sx={{ margin: '3px' }} size="small" color="primary" />
-                        })
-                      }
-                    </p>
-                    </div>
-                    <p className='parrafoReceta'>
-                      <span className='campo'>Antecedentes: </span>
-                      <span className='valor'>{ex.antecedentes}</span>
-                    </p>
-                    <p className='parrafoReceta'>
-                      <span className='campo'>Observaciones: </span>
-                      <span className='valor'>{ex.observaciones}</span>
-                    </p>
-                    <p className='parrafoReceta'>
-                      <span className='campo'>Enfermedades de base: </span>
-                      <span className='valor'>{ex.enfermedadBase}</span>
-                    </p>
-                    <p className='parrafoReceta'>
-                      <span className='campo'>Pruebas y valoraciones: </span>
-                      <span className='valor'>{ex.pruebasValoraciones}</span>
-                    </p>
-                    <br />
-                    <p className='titulo'>Historial</p>
-                    <p className='subtitulo'>Ojo Derecho</p>
-                    <div className='containerReceta'>
-                      <div className='cajasReceta'>
-                        <p className='campo'>Esfera</p>
-                        <p className='valor'>{ex.recetaOjoDerecho.esfera}</p>
-                      </div>
-                      <div className='cajasReceta'>
-                        <p className='campo'>Cilindro</p>
-                        <p className='valor'>{ex.recetaOjoDerecho.cilindro}</p>
-                      </div>
-                      <div className='cajasReceta'>
-                        <p className='campo'>Eje</p>
-                        <p className='valor'>{ex.recetaOjoDerecho.eje}</p>
-                      </div>
-                      <div className='cajasReceta'>
-                        <p className='campo'>Agudeza Visual</p>
-                        <p className='valor'>{ex.recetaOjoDerecho.agudezaVisual}</p>
-                      </div>
-                      <div className='cajasReceta'>
-                        <p className='campo'>Dist. Pupilar</p>
-                        <p className='valor'>{ex.recetaOjoDerecho.distanciaPupilar}</p>
-                      </div>
-                      <div className='cajasReceta'>
-                        <p className='campo'>Adición</p>
-                        <p className='valor'>{ex.recetaOjoDerecho.adicion}</p>
-                      </div>
-                      <div className='cajasReceta'>
-                        <p className='campo'>Def. Refracción</p>
-                        <p className='valor'>{ex.recetaOjoDerecho.defRefraccion}</p>
-                      </div>
-                    </div>
-                    <br />
-                    <p className='subtitulo'>Ojo Izquierdo</p>
-                    <div className='containerReceta'>
-                      <div className='cajasReceta'>
-                        <p className='campo'>Esfera</p>
-                        <p className='valor'>{ex.recetaOjoIzquierdo.esfera}</p>
-                      </div>
-                      <div className='cajasReceta'>
-                        <p className='campo'>Cilindro</p>
-                        <p className='valor'>{ex.recetaOjoIzquierdo.cilindro}</p>
-                      </div>
-                      <div className='cajasReceta'>
-                        <p className='campo'>Eje</p>
-                        <p className='valor'>{ex.recetaOjoIzquierdo.eje}</p>
-                      </div>
-                      <div className='cajasReceta'>
-                        <p className='campo'>Agudeza Visual</p>
-                        <p className='valor'>{ex.recetaOjoIzquierdo.agudezaVisual}</p>
-                      </div>
-                      <div className='cajasReceta'>
-                        <p className='campo'>Dist. Pupilar</p>
-                        <p className='valor'>{ex.recetaOjoIzquierdo.distanciaPupilar}</p>
-                      </div>
-                      <div className='cajasReceta'>
-                        <p className='campo'>Adición</p>
-                        <p className='valor'>{ex.recetaOjoIzquierdo.adicion}</p>
-                      </div>
-                      <div className='cajasReceta'>
-                        <p className='campo'>Def. Refracción</p>
-                        <p className='valor'>{ex.recetaOjoIzquierdo.defRefraccion}</p>
-                      </div>
-                    </div>
-                  </TabPanel>
-                )
-              })
-              }
-
-            </TabView>
           </div>
         </DialogContent>
         <DialogActions>
@@ -2347,150 +2372,176 @@ export const Pacientes = () => {
               gap: '5px'
             }}>
               <div>
-                <TextField
-                  id="decuentosRebajas"
-                  label="Decuentos y Rebajas"
-                  type="number"
-                  variant="standard"
-                  sx={{ m: 1 }}
-                  value={descReb}
-                  onBlur={(e) => {
-                    if (parseFloat(e.target.value) === 0 || e.target.value === '') {
-                      setDescReb(0);
-                      recalcularTotal();
-                    } else {
-                      settotalDescuento(subtotalVenta - parseFloat(e.target.value, 2));
-                      settotalVenta(parseFloat(e.target.value, 2).toFixed(2));
-                      setDescReb(parseFloat(e.target.value, 2));
-                    }
-                  }}
-                  onChange={(event) => {
-                    if (parseFloat(event.target.value) < 0) {
-                      createToastFormVenta(
-                        'error',
-                        'Error',
-                        'La cantidad de pagos no puede ser negativa'
-                      );
-                      return;
-                    } else if (event.target.value > totalVenta) {
-                      createToastFormVenta(
-                        'error',
-                        'Error',
-                        'El descuento no puede ser mayor que el total'
-                      );
-                    }
-                    else {
-                      setDescReb(parseFloat(event.target.value, 2));
-                    }
-                  }}
-                  onClick={() => {
-                    if (totalVenta !== subtotalVenta) {
-                      recalcularTotal();
-                    }
-                  }
-                  }
-                  slotProps={{
-                    inputLabel: {
-                      shrink: true,
-                    },
-                  }}
-                />
-                <TextField
-                  id="cantPagos"
-                  label="Cantidad de Pagos"
-                  type="number"
-                  variant="standard"
-                  sx={{ m: 1 }}
-                  value={cantPagos}
-                  onChange={(event) => {
-                    if (event.target.value < 0) {
-                      createToastFormVenta(
-                        'error',
-                        'Error',
-                        'La cantidad de pagos no puede ser negativa'
-                      );
-                      return;
-                    } else {
-                      setcantPagos(event.target.value);
-                      setmontoPagos(parseFloat(totalVenta / event.target.value).toFixed(2));
-                      setacuenta(parseFloat(totalVenta / event.target.value).toFixed(2));
-                      setdetallePagos({
-                        ...detallePagos,
-                        monto: parseFloat(totalVenta / event.target.value).toFixed(2),
-                      })
-                    }
-                  }}
-                  slotProps={{
-                    inputLabel: {
-                      shrink: true,
-                    },
-                  }}
-                />
-                <TextField
-                  id="montoPagos"
-                  label="Monto de Pagos"
-                  type="number"
-                  disabled={true}
-                  variant="standard"
-                  sx={{ m: 1 }}
-                  value={montoPagos}
-                  slotProps={{
-                    inputLabel: {
-                      shrink: true,
-                    },
-                  }}
-                />
-              </div>
-              <div>
-                <FormControl variant="standard" sx={{ m: 1, minWidth: 120 }}>
-                  <InputLabel id="tipoPago">Forma de pago</InputLabel>
-                  <Select
-                    labelId="tipoPago"
-                    id="tipoPago"
-                    value={detallePagos.formaPago}
-                    onChange={(event) => {
-                      setdetallePagos({
-                        ...detallePagos,
-                        formaPago: event.target.value
-                      })
+                <div>
+                  <TextField
+                    id="decuentosRebajas"
+                    label="Decuentos y Rebajas"
+                    type="number"
+                    variant="standard"
+                    sx={{ m: 1 }}
+                    value={descReb}
+                    onBlur={(e) => {
+                      if (parseFloat(e.target.value) === 0 || e.target.value === '') {
+                        setDescReb(0);
+                        recalcularTotal();
+                      } else {
+                        settotalDescuento(subtotalVenta - parseFloat(e.target.value, 2));
+                        settotalVenta(parseFloat(e.target.value, 2).toFixed(2));
+                        setDescReb(parseFloat(e.target.value, 2));
+                      }
                     }}
-                    label="tipoPago"
-                  >
-                    {tipoPago.map(op => {
-                      return (
-                        <MenuItem key={op} value={op}>{op}</MenuItem>
-                      )
-                    })}
-                  </Select>
-                </FormControl>
-                <TextField
-                  id="acuenta"
-                  label="Acuenta"
-                  type="number"
-                  variant="standard"
-                  sx={{ m: 1 }}
-                  value={acuenta}
-                  onChange={(event) => {
-                    if (event.target.value > totalVenta) {
-                      createToastFormVenta(
-                        'error',
-                        'Error',
-                        'El monto a pagar no puede ser mayor que el total'
-                      );
-                    } else {
-                      setdetallePagos({
-                        ...detallePagos,
-                        monto: parseFloat(event.target.value, 2).toFixed(2),
-                      })
-                      setacuenta(parseFloat(event.target.value, 2).toFixed(2));
+                    onChange={(event) => {
+                      if (parseFloat(event.target.value) < 0) {
+                        createToastFormVenta(
+                          'error',
+                          'Error',
+                          'La cantidad de pagos no puede ser negativa'
+                        );
+                        return;
+                      } else if (event.target.value > totalVenta) {
+                        createToastFormVenta(
+                          'error',
+                          'Error',
+                          'El descuento no puede ser mayor que el total'
+                        );
+                      }
+                      else {
+                        setDescReb(parseFloat(event.target.value, 2));
+                      }
+                    }}
+                    onClick={() => {
+                      if (totalVenta !== subtotalVenta) {
+                        recalcularTotal();
+                      }
                     }
-                  }}
-                  slotProps={{
-                    inputLabel: {
-                      shrink: true,
-                    },
-                  }}
-                />
+                    }
+                    slotProps={{
+                      inputLabel: {
+                        shrink: true,
+                      },
+                    }}
+                  />
+                  <TextField
+                    id="cantPagos"
+                    label="Cantidad de Pagos"
+                    type="number"
+                    variant="standard"
+                    sx={{ m: 1 }}
+                    value={cantPagos}
+                    onChange={(event) => {
+                      if (event.target.value < 0) {
+                        createToastFormVenta(
+                          'error',
+                          'Error',
+                          'La cantidad de pagos no puede ser negativa'
+                        );
+                        return;
+                      } else {
+                        setcantPagos(event.target.value);
+                        setmontoPagos(parseFloat(totalVenta / event.target.value).toFixed(2));
+                        setacuenta(parseFloat(totalVenta / event.target.value).toFixed(2));
+                        setdetallePagos({
+                          ...detallePagos,
+                          monto: parseFloat(totalVenta / event.target.value).toFixed(2),
+                        })
+                      }
+                    }}
+                    slotProps={{
+                      inputLabel: {
+                        shrink: true,
+                      },
+                    }}
+                  />
+                  <TextField
+                    id="montoPagos"
+                    label="Monto de Pagos"
+                    type="number"
+                    disabled={true}
+                    variant="standard"
+                    sx={{ m: 1 }}
+                    value={montoPagos}
+                    slotProps={{
+                      inputLabel: {
+                        shrink: true,
+                      },
+                    }}
+                  />
+                  <FormControl variant="standard" sx={{ m: 1, minWidth: 120 }}>
+                    <InputLabel id="tipoPago">Forma de pago</InputLabel>
+                    <Select
+                      labelId="tipoPago"
+                      id="tipoPago"
+                      value={detallePagos.formaPago}
+                      onChange={(event) => {
+                        setdetallePagos({
+                          ...detallePagos,
+                          formaPago: event.target.value
+                        })
+                      }}
+                      label="tipoPago"
+                    >
+                      {tipoPago.map(op => {
+                        return (
+                          <MenuItem key={op} value={op}>{op}</MenuItem>
+                        )
+                      })}
+                    </Select>
+                  </FormControl>
+                  <TextField
+                    id="acuenta"
+                    label="Acuenta"
+                    type="number"
+                    variant="standard"
+                    sx={{ m: 1 }}
+                    value={acuenta}
+                    onChange={(event) => {
+                      if (event.target.value > totalVenta) {
+                        createToastFormVenta(
+                          'error',
+                          'Error',
+                          'El monto a pagar no puede ser mayor que el total'
+                        );
+                      } else {
+                        setdetallePagos({
+                          ...detallePagos,
+                          monto: parseFloat(event.target.value, 2).toFixed(2),
+                        })
+                        setacuenta(parseFloat(event.target.value, 2).toFixed(2));
+                      }
+                    }}
+                    slotProps={{
+                      inputLabel: {
+                        shrink: true,
+                      },
+                    }}
+                  />
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'center' }}>
+                  <FormControlLabel control={<Switch value={rtnenable}
+                    onChange={(e) => setrtnenable(e.target.checked)} />} label="RTN" />
+                  {
+                    rtnenable &&
+                    <>
+                      <TextField
+                        id="rtn"
+                        label="RTN"
+                        type="text"
+                        variant="standard"
+                        sx={{ m: 1 }}
+                        value={datosRtn.rtn}
+                      />
+                      <TextField
+                        id="rtNombre"
+                        label="Nombre RTN"
+                        type="text"
+                        variant="standard"
+                        sx={{ m: 1 }}
+                        value={datosRtn.nombre}
+                      />
+                    </>
+                  }
+
+                </div>
               </div>
             </div>
             <div >

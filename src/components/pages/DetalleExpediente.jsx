@@ -21,6 +21,7 @@ import qrWhatsApp from '../../assets/qrWhatsApp.jpeg';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 
+console.log(window.innerWidth, 'X', window.innerHeight );
 
 
 export const DetalleExpediente = () => {
