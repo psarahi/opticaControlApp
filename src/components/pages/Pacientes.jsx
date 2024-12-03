@@ -1057,51 +1057,51 @@ export const Pacientes = () => {
 
     console.log(datosSave);
 
-    // appointmentApi.post('detalleVentas', datosSave)
-    //   .then((response) => {
-    //     if (response.status === 201) {
-    //       appointmentApi.put('inventario/actualizarInventario', { detalleInventario: listInvExistente })
-    //         .then((response) => {
-    //           if (response.status === 202) {
-    //             if (op === 'factura' && parseFloat(acuenta) === parseFloat(totalVenta)) {
-    //               appointmentApi.put(`facturas/${listRangoFactura[0]._id}`, { ultimaUtilizada: numFacRec }).then();
-    //             } else {
-    //               appointmentApi.put(`correlativo/${numReciboActual[0]._id}`, { numRecibo: numFacRec }).then();
-    //             }
-    //             createToast(
-    //               'success',
-    //               'Confirmado',
-    //               'El inventario ha sido actualizado'
-    //             );
-    //           }
-    //         });
-    //       createToast(
-    //         'success',
-    //         'Confirmado',
-    //         'La factura a sido generada'
-    //       );
-    //       cleanForm();
-    //       handleCloseDialogVenta();
-    //     } else {
-    //       createToast(
-    //         'error',
-    //         'Error',
-    //         response.statusText,
-    //       );
-    //       console.log(response.data);
-    //       cleanForm();
-    //       handleCloseDialogVenta();
-    //       return;
-    //     }
-    //   })
-    //   .catch((err) => {
-    //     createToast(
-    //       'error',
-    //       'Error',
-    //       'Ha ocurrido un error'
-    //     );
-    //     handleCloseDialogVenta();
-    //   })
+    appointmentApi.post('detalleVentas', datosSave)
+      .then((response) => {
+        if (response.status === 201) {
+          appointmentApi.put('inventario/actualizarInventario', { detalleInventario: listInvExistente })
+            .then((response) => {
+              if (response.status === 202) {
+                if (op === 'factura' && parseFloat(acuenta) === parseFloat(totalVenta)) {
+                  appointmentApi.put(`facturas/${listRangoFactura[0]._id}`, { ultimaUtilizada: numFacRec }).then();
+                } else {
+                  appointmentApi.put(`correlativo/${numReciboActual[0]._id}`, { numRecibo: numFacRec }).then();
+                }
+                createToast(
+                  'success',
+                  'Confirmado',
+                  'El inventario ha sido actualizado'
+                );
+              }
+            });
+          createToast(
+            'success',
+            'Confirmado',
+            'La factura a sido generada'
+          );
+          cleanForm();
+          handleCloseDialogVenta();
+        } else {
+          createToast(
+            'error',
+            'Error',
+            response.statusText,
+          );
+          console.log(response.data);
+          cleanForm();
+          handleCloseDialogVenta();
+          return;
+        }
+      })
+      .catch((err) => {
+        createToast(
+          'error',
+          'Error',
+          'Ha ocurrido un error'
+        );
+        handleCloseDialogVenta();
+      })
 
   };
 
