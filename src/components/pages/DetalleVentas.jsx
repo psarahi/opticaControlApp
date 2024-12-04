@@ -31,7 +31,9 @@ export const DetalleVentas = () => {
     const [formdetallePagos, setFormDetallePagos] = useState({
         fecha: dayjs().format('YYYY-MM-DD'),
         formaPago: '',
-        monto: 0
+        monto: 0,
+        usuarios: localStorage.getItem('usuarioId')
+
     });
     const toast = useRef(null);
     const toastForm = useRef(null);
@@ -107,7 +109,8 @@ export const DetalleVentas = () => {
         setFormDetallePagos({
             fecha: dayjs().format('YYYY-MM-DD'),
             formaPago: '',
-            monto: 0
+            monto: 0,
+            usuarios: localStorage.getItem('usuarioId')
         });
         const sucursal = localStorage.getItem('sucursalID');
         appointmentApi.get(`facturas/facturaRecibo/${sucursal}`).then((response) => {
@@ -314,15 +317,31 @@ export const DetalleVentas = () => {
                             listDetalleVentas.map((detalle) => {
                                 return (
                                     <TabPanel
-                                        header={dayjs(detalle.fecha).add(6,'hour').format('YYYY-MM-DD')}
+                                        header={dayjs(detalle.fecha).add(6, 'hour').format('YYYY-MM-DD')}
                                         key={detalle._id}
 
                                     >
                                         <p style={{ fontSize: '30px' }}>{detalle.sucursales.nombre} - {detalle.tipoVenta} </p>
+                                        <div className='grid3Column'>
+                                            <p style={{ fontSize: '20px' }}>
+                                                <span style={{ fontWeight: 500 }}>Paciente: </span>
+                                                <span style={{ fontWeight: 200 }}>{detalle.paciente.nombre}</span>
+                                            </p>
+                                            {
+                                                textValidator(detalle.rtn) &&
+                                                <>
+                                                    <p style={{ fontSize: '20px' }}>
+                                                        <span style={{ fontWeight: 500 }}>RTN: </span>
+                                                        <span style={{ fontWeight: 200 }}>{detalle.rtn}</span>
+                                                    </p>
+                                                    <p style={{ fontSize: '20px' }}>
+                                                        <span style={{ fontWeight: 500 }}>Nombre: </span>
+                                                        <span style={{ fontWeight: 200 }}>{detalle.nombreRtn}</span>
+                                                    </p>
+                                                </>
+                                            }
+                                        </div>
                                         <p style={{ fontSize: '20px' }}>
-                                            <span style={{ fontWeight: 500 }}>Paciente: </span>
-                                            <span style={{ fontWeight: 200 }}>{detalle.paciente.nombre}</span>
-                                        </p><p style={{ fontSize: '20px' }}>
                                             <span style={{ fontWeight: 500 }}>Num. Factura/Recibo: </span>
                                             <span style={{ fontWeight: 200 }}>{detalle.numFacRec}</span>
                                         </p>
@@ -352,7 +371,7 @@ export const DetalleVentas = () => {
                                             }
                                             <p style={{ fontSize: '20px' }}>
                                                 <span style={{ fontWeight: 500 }}>Fecha entrega: </span>
-                                                <span style={{ fontWeight: 200 }}>{dayjs(detalle.fechaEntrega).format('YYYY-MM-DD')}</span>
+                                                <span style={{ fontWeight: 200 }}>{dayjs(detalle.fechaEntrega).add(6, 'hour').format('YYYY-MM-DD')}</span>
                                             </p>
                                         </div>
                                         <p style={{ fontSize: '20px' }}><span style={{ fontWeight: 500 }}>Protección: </span>
@@ -397,9 +416,10 @@ export const DetalleVentas = () => {
                                                     columnResizeMode="expand"
                                                     resizableColumns
                                                 >
-                                                    <Column field="fecha" header="Fecha" body={(data) => fechaBodyTemplate(data.fecha)} ></Column>
+                                                    <Column field="fecha" header="Fecha" body={(data) => dayjs(data.fecha).add(6, 'hour').format('YYYY-MM-DD')} ></Column>
                                                     <Column field="formaPago" header="Forma Pago" ></Column>
                                                     <Column field="monto" header="Monto" ></Column>
+                                                    <Column field="usuarios.usuario" header="Recibido" ></Column>
                                                 </DataTable>
                                             </div>
                                             <div style={{

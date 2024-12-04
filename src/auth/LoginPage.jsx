@@ -9,14 +9,14 @@ import { Toast } from 'primereact/toast';
 
 import { appointmentApi } from '../services/appointmentApi';
 
-document.body.style.zoom = '100%';
-
 export const LoginPage = () => {
   const navigate = useNavigate();
   const [sucursales, setsucursales] = useState([]);
   const [sucursal, setsucursal] = useState('');
 
   useEffect(() => {
+    document.body.style.zoom = '100%';
+
     appointmentApi.get('sucursal', '')
       .then((response) => {
         if (response.status === 200) {
@@ -83,9 +83,12 @@ export const LoginPage = () => {
     }
     appointmentApi.post(`usuario/login`, formValues)
       .then(async (response) => {
+        console.log(response);
+
         if (response.status === 201) {
           localStorage.setItem('token', await response.data.token);
           localStorage.setItem('nombre', await response.data.nombre);
+          localStorage.setItem('usuarioId', await response.data.uid);
           localStorage.setItem('sucursalID', sucursal);
           const sucrsalFilter = sucursales.filter(s => s._id === sucursal);
           localStorage.setItem('sucursalNombre', sucrsalFilter[0].nombre);
@@ -117,7 +120,7 @@ export const LoginPage = () => {
       <Toast ref={toast} />
       <div
         style={{
-          height: '110vh',
+          height: '100vh',
           backgroundColor: '#94d0ff6e',
           position: 'relative',
           margin: '0%'

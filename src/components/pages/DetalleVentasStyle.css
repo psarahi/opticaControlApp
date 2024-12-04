@@ -13,3 +13,11 @@
     display: flex;
     flex-direction: column;
   }
+
+  .grid3Column {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: 1fr;
+    gap: 0px 20px;
+    grid-template-areas: ". . .";
+}

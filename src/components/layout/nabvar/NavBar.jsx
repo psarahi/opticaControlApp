@@ -167,7 +167,7 @@ export const NavBar = () => {
           <ListItemIcon sx={{ color: 'error.main' }}>
             <LogoutIcon />
           </ListItemIcon>
-          <ListItemText primary='Logout' />
+          <ListItemText primary='Cerrar sesión' />
         </ListItemButton>
       </ListItem>
     </div>
@@ -210,7 +210,7 @@ export const NavBar = () => {
                 color='error'
                 onClick={logout}
                 endIcon={<LogoutIcon />} >
-                Logout
+                Cerrar sesión
               </Button>
             </Box>
           </Grid>

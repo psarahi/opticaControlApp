@@ -99,7 +99,8 @@ const detalleVenta = {
   detallePagos: [{
     fecha: dayjs().format('YYYY-MM-DD'),
     formaPago: '',
-    monto: 0
+    monto: 0,
+    usuarios: localStorage.getItem('usuarioId')
   }],
   descuentoTotal: '',
   cantPagos: 0,
@@ -135,6 +136,7 @@ export const Pacientes = () => {
   const [expedienteId, setexpedienteId] = useState('');
   const [subtotalVenta, setsubtotalVenta] = useState(0);
   const [descReb, setDescReb] = useState(0);
+  const [usuario, setusuario] = useState('');
   const [totalDescuento, settotalDescuento] = useState(0);
   const [cantPagos, setcantPagos] = useState(0);
   const [montoPagos, setmontoPagos] = useState(0);
@@ -146,7 +148,8 @@ export const Pacientes = () => {
   const [detallePagos, setdetallePagos] = useState({
     fecha: dayjs().format('YYYY-MM-DD'),
     formaPago: '',
-    monto: 0
+    monto: 0,
+    usuarios: localStorage.getItem('usuarioId')
   });
 
   const tipoVenta = [
@@ -197,8 +200,7 @@ export const Pacientes = () => {
   ];
 
   useEffect(() => {
-    bienvenida();
-
+    // bienvenida();
     appointmentApi.get('paciente', '').then((response) => {
       setListPaciente(response.data);
     });
@@ -217,32 +219,32 @@ export const Pacientes = () => {
 
   }, [])
 
-  const bienvenida = () => {
-    let saludo = '';
-    let imagen = '';
-    const hour = new Date().getHours();
+  // const bienvenida = () => {
+  //   let saludo = '';
+  //   let imagen = '';
+  //   const hour = new Date().getHours();
 
-    if (hour <= 12) {
-      saludo = 'Buen día';
-      imagen = sunny;
-    }
-    if (hour > 12 && hour < 18) {
-      saludo = 'Buenas tardes';
-      imagen = afternoon;
-    }
-    if (hour > 17) {
-      saludo = 'Buenas noches';
-      imagen = crescentMoon;
-    }
+  //   if (hour <= 12) {
+  //     saludo = 'Buen día';
+  //     imagen = sunny;
+  //   }
+  //   if (hour > 12 && hour < 18) {
+  //     saludo = 'Buenas tardes';
+  //     imagen = afternoon;
+  //   }
+  //   if (hour > 17) {
+  //     saludo = 'Buenas noches';
+  //     imagen = crescentMoon;
+  //   }
 
-    const nombre = `${localStorage.getItem('nombre')}`;
-    createToastSaludo(
-      'success',
-      saludo,
-      nombre,
-      imagen
-    );
-  };
+  //   const nombre = `${localStorage.getItem('nombre')}`;
+  //   createToastSaludo(
+  //     'success',
+  //     saludo,
+  //     nombre,
+  //     imagen
+  //   );
+  // };
 
   const createToastSaludo = (severity, summary, detail, imagen) => {
     toast.current.show({
@@ -297,8 +299,11 @@ export const Pacientes = () => {
     setdetallePagos({
       fecha: dayjs().format('YYYY-MM-DD'),
       formaPago: '',
-      monto: 0
+      monto: 0,
+      usuarios: localStorage.getItem('usuarioId')
     });
+    setDatosRtn([]);
+    setrtnenable(false);
     const sucursal = localStorage.getItem('sucursalID');
 
     appointmentApi.get(`inventario/activos/${sucursal}`, '').then((response) => {
@@ -553,7 +558,8 @@ export const Pacientes = () => {
     setdetallePagos({
       fecha: dayjs().format('YYYY-MM-DD'),
       formaPago: '',
-      monto: 0
+      monto: 0,
+      usuarios: localStorage.getItem('usuarioId')
     });
   }
 
@@ -568,7 +574,8 @@ export const Pacientes = () => {
     setdetallePagos({
       fecha: dayjs().format('YYYY-MM-DD'),
       formaPago: '',
-      monto: 0
+      monto: 0,
+      usuarios: localStorage.getItem('usuarioId')
     });
   }
 
@@ -589,7 +596,8 @@ export const Pacientes = () => {
     setdetallePagos({
       fecha: dayjs().format('YYYY-MM-DD'),
       formaPago: '',
-      monto: 0
+      monto: 0,
+      usuarios: localStorage.getItem('usuarioId')
     });
   };
 
@@ -617,7 +625,8 @@ export const Pacientes = () => {
     setdetallePagos({
       fecha: dayjs().format('YYYY-MM-DD'),
       formaPago: '',
-      monto: 0
+      monto: 0,
+      usuarios: localStorage.getItem('usuarioId')
     });
   };
 
@@ -982,7 +991,6 @@ export const Pacientes = () => {
       return;
     }
     let numFacRec = '';
-    debugger;
     if (op === 'factura' && parseFloat(acuenta) === parseFloat(totalVenta)) {
       if (listRangoFactura[0].ultimaUtilizada === '') {
         numFacRec = listRangoFactura[0].desde;
@@ -995,6 +1003,8 @@ export const Pacientes = () => {
 
     const facturaDatos = {
       cliente: pacienteDatos.nombre,
+      rtn: datosRtn.rtn,
+      nombreRtn: datosRtn.nombre,
       inventario: [...listInvExistente, ...listInvPedido],
       total: totalVenta,
       totalDescuento: totalDescuento,
@@ -2300,6 +2310,8 @@ export const Pacientes = () => {
             <Column field="cilindro" header="Cilindro" filter style={{ minWidth: '9rem' }}></Column>
             <Column field="adicion" header="Adición" filter style={{ minWidth: '9rem' }}></Column>
             <Column field="linea" header="Linea" filter style={{ minWidth: '9rem' }}></Column>
+            <Column field="importe" header="Importe"></Column>
+            <Column field="valorGravado" header="Gravado"></Column>
             <Column field="existencia" header="Existencia" sortable ></Column>
             <Column field="precioVenta" header="Precio Venta" sortable body={(data) => precioBodyTemplate(data.precioVenta)}></Column>
             <Column field="moda" header="Moda" filter></Column>
@@ -2334,6 +2346,8 @@ export const Pacientes = () => {
                 <Column field="cilindro" header="Cilindro"></Column>
                 <Column field="adicion" header="Adición"></Column>
                 <Column field="linea" header="Linea"></Column>
+                <Column field="importe" header="Importe"></Column>
+                <Column field="valorGravado" header="Gravado"></Column>
                 <Column field="cantidad" header="Cantidad"></Column>
                 <Column field="precioVenta" header="Precio Venta" body={(data) => precioBodyTemplate(data.precioVenta)}></Column>
                 {/* <Column field="descuento" header="Descuento" editor={(options) => textEditor(options)}></Column> */}
@@ -2541,7 +2555,7 @@ export const Pacientes = () => {
                         variant="standard"
                         sx={{ m: 1 }}
                         value={datosRtn.rtn}
-                        onChange={(e) => setDatosRtn({ datosRtn, rtn: e.target.value })}
+                        onChange={(e) => setDatosRtn({ ...datosRtn, rtn: e.target.value })}
                       />
                       <TextField
                         id="rtNombre"
@@ -2550,7 +2564,7 @@ export const Pacientes = () => {
                         variant="standard"
                         sx={{ m: 1 }}
                         value={datosRtn.nombre}
-                        onChange={(e) => setDatosRtn({ datosRtn, nombre: e.target.value })}
+                        onChange={(e) => setDatosRtn({ ...datosRtn, nombre: e.target.value })}
                       />
                     </>
                   }
