@@ -28,7 +28,7 @@
     grid-auto-flow: row;
     grid-template-areas:
         ". . . . . . .";
-        align-items: center;
+    align-items: center;
 }
 
 .cajasReceta {
@@ -70,6 +70,14 @@ p {
     display: flex;
     flex-direction: row;
     justify-content: center;
-    align-items: center; 
+    align-items: center;
     gap: 20px 20px;
+}
+
+.grid3Column {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: 1fr;
+    gap: 0px 20px;
+    grid-template-areas: ". . .";
 }

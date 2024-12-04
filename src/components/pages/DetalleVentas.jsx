@@ -62,7 +62,7 @@ export const DetalleVentas = () => {
         appointmentApi.get('detalleVentas/pacientes', '').then((response) => {
             setListPaciente(response.data);
             console.log(response.data);
-            
+
         });
 
     }, [])
@@ -185,7 +185,7 @@ export const DetalleVentas = () => {
             createToastForm(
                 'warn',
                 'Acction requerida',
-                'No '
+                'No se recebio pago'
             );
             return;
         }
@@ -314,7 +314,7 @@ export const DetalleVentas = () => {
                             listDetalleVentas.map((detalle) => {
                                 return (
                                     <TabPanel
-                                        header={dayjs(detalle.fecha).format('YYYY-MM-DD')}
+                                        header={dayjs(detalle.fecha).add(6,'hour').format('YYYY-MM-DD')}
                                         key={detalle._id}
 
                                     >
@@ -552,17 +552,10 @@ export const DetalleVentas = () => {
                                         'Error',
                                         'El monto a pagar no puede ser mayor que el total'
                                     );
-                                } else if (parseFloat(event.target.value) <= 0) {
-                                    createToastForm(
-                                        'error',
-                                        'Error',
-                                        'No se recibio ningún pago'
-                                    );
-                                }
-                                else {
+                                } else {
                                     setFormDetallePagos({
                                         ...formdetallePagos,
-                                        monto: parseFloat(event.target.value).toFixed(2)
+                                        monto: parseFloat(event.target.value, 2)
                                     })
                                 }
 

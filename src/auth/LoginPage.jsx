@@ -8,6 +8,7 @@ import { textValidator } from '../helpers/validator';
 import { Toast } from 'primereact/toast';
 
 import { appointmentApi } from '../services/appointmentApi';
+
 document.body.style.zoom = '100%';
 
 export const LoginPage = () => {
@@ -116,7 +117,7 @@ export const LoginPage = () => {
       <Toast ref={toast} />
       <div
         style={{
-          height: '100vh',
+          height: '110vh',
           backgroundColor: '#94d0ff6e',
           position: 'relative',
           margin: '0%'

@@ -937,7 +937,7 @@ export const Pacientes = () => {
 
   const generarFactura = (op) => {
 
-    if (!textValidator(formVenta)) {
+    if (!textValidator(formVenta.tipoVenta)) {
       createToastFormVenta(
         'warn',
         'Acction requerida',
@@ -1057,51 +1057,51 @@ export const Pacientes = () => {
 
     console.log(datosSave);
 
-    appointmentApi.post('detalleVentas', datosSave)
-      .then((response) => {
-        if (response.status === 201) {
-          appointmentApi.put('inventario/actualizarInventario', { detalleInventario: listInvExistente })
-            .then((response) => {
-              if (response.status === 202) {
-                if (op === 'factura' && parseFloat(acuenta) === parseFloat(totalVenta)) {
-                  appointmentApi.put(`facturas/${listRangoFactura[0]._id}`, { ultimaUtilizada: numFacRec }).then();
-                } else {
-                  appointmentApi.put(`correlativo/${numReciboActual[0]._id}`, { numRecibo: numFacRec }).then();
-                }
-                createToast(
-                  'success',
-                  'Confirmado',
-                  'El inventario ha sido actualizado'
-                );
-              }
-            });
-          createToast(
-            'success',
-            'Confirmado',
-            'La factura a sido generada'
-          );
-          cleanForm();
-          handleCloseDialogVenta();
-        } else {
-          createToast(
-            'error',
-            'Error',
-            response.statusText,
-          );
-          console.log(response.data);
-          cleanForm();
-          handleCloseDialogVenta();
-          return;
-        }
-      })
-      .catch((err) => {
-        createToast(
-          'error',
-          'Error',
-          'Ha ocurrido un error'
-        );
-        handleCloseDialogVenta();
-      })
+    // appointmentApi.post('detalleVentas', datosSave)
+    //   .then((response) => {
+    //     if (response.status === 201) {
+    //       appointmentApi.put('inventario/actualizarInventario', { detalleInventario: listInvExistente })
+    //         .then((response) => {
+    //           if (response.status === 202) {
+    //             if (op === 'factura' && parseFloat(acuenta) === parseFloat(totalVenta)) {
+    //               appointmentApi.put(`facturas/${listRangoFactura[0]._id}`, { ultimaUtilizada: numFacRec }).then();
+    //             } else {
+    //               appointmentApi.put(`correlativo/${numReciboActual[0]._id}`, { numRecibo: numFacRec }).then();
+    //             }
+    //             createToast(
+    //               'success',
+    //               'Confirmado',
+    //               'El inventario ha sido actualizado'
+    //             );
+    //           }
+    //         });
+    //       createToast(
+    //         'success',
+    //         'Confirmado',
+    //         'La factura a sido generada'
+    //       );
+    //       cleanForm();
+    //       handleCloseDialogVenta();
+    //     } else {
+    //       createToast(
+    //         'error',
+    //         'Error',
+    //         response.statusText,
+    //       );
+    //       console.log(response.data);
+    //       cleanForm();
+    //       handleCloseDialogVenta();
+    //       return;
+    //     }
+    //   })
+    //   .catch((err) => {
+    //     createToast(
+    //       'error',
+    //       'Error',
+    //       'Ha ocurrido un error'
+    //     );
+    //     handleCloseDialogVenta();
+    //   })
 
   };
 
@@ -1449,8 +1449,24 @@ export const Pacientes = () => {
           onSubmit: (event) => {
             event.preventDefault();
 
+            let proteccionList = (textValidator(formExpedientes.proteccion)) ? formExpedientes.proteccion.map(p => p.label) : '';
+
+            const datosExpedientes = {
+              paciente: formExpedientes.paciente,
+              optometrista: formExpedientes.optometrista,
+              proteccion: proteccionList,
+              tipoLente: formExpedientes.tipoLente,
+              antecedentes: formExpedientes.antecedentes,
+              enfermedadBase: formExpedientes.enfermedadBase,
+              observaciones: formExpedientes.observaciones,
+              pruebasValoraciones: formExpedientes.pruebasValoraciones,
+              recetaOjoDerecho: formExpedientes.recetaOjoDerecho,
+              recetaOjoIzquierdo: formExpedientes.recetaOjoIzquierdo
+            }
+            console.log(datosExpedientes);
+
             if (textValidator(expedienteId)) {
-              appointmentApi.put(`expediente/${expedienteId}`, formExpedientes)
+              appointmentApi.put(`expediente/${expedienteId}`, datosExpedientes)
                 .then((response) => {
                   if (response.status === 202) {
                     createToast(
@@ -1490,7 +1506,7 @@ export const Pacientes = () => {
                 );
                 return;
               }
-              appointmentApi.post('expediente', formExpedientes)
+              appointmentApi.post('expediente', datosExpedientes)
                 .then((response) => {
                   if (response.status === 201) {
                     createToast(
@@ -1531,59 +1547,59 @@ export const Pacientes = () => {
           <DialogContentText>
             Por favor rellene los campos
           </DialogContentText>
-          <FormControl variant="standard" sx={{ width: '50%' }}>
-            <InputLabel id="optometrista">Optometrista</InputLabel>
-            <Select
-              required={true}
-              labelId="optometrista"
-              id="optometrista"
-              sx={{ width: '50%' }}
-              value={formExpedientes.optometrista}
-              onChange={(event) => handleChangeTextExpediente(event, 'optometrista')}
-              label="Optometrista"
-            >
-              {listoptometrista.map(op => {
-                return (
-                  <MenuItem key={op._id} value={op._id}>{op.nombre}</MenuItem>
+          <div className='grid3Column'>
+            <FormControl variant="standard" sx={{ m: 1, minWidth: 120 }}>
+              <InputLabel id="optometrista">Optometrista</InputLabel>
+              <Select
+                required={true}
+                labelId="optometrista"
+                id="optometrista"
+                value={formExpedientes.optometrista}
+                onChange={(event) => handleChangeTextExpediente(event, 'optometrista')}
+                label="Optometrista"
+              >
+                {listoptometrista.map(op => {
+                  return (
+                    <MenuItem key={op._id} value={op._id}>{op.nombre}</MenuItem>
+                  )
+                })}
+              </Select>
+            </FormControl>
+            <div>
+              <p>Protección</p>
+              <SelectReact
+                options={proteccion}
+                value={formExpedientes.proteccion}
+                name='Proteccion'
+                multi={true}
+                labelField="label"
+                valueField="value"
+                onChange={(e) => {
+                  setformExpedientes({
+                    ...formExpedientes,
+                    proteccion: e
+                  });
+                  // setvalue(e)
+                }
+                }
+              />
+            </div>
+            <FormControl variant="standard" sx={{ m: 1, minWidth: 120 }}>
+              <InputLabel id="tipoLente">Tipo de Lente</InputLabel>
+              <Select
+                labelId="tipoLente"
+                id="tipoLente"
+                value={formExpedientes.tipoLente}
+                onChange={(event) => handleChangeTextExpediente(event, 'tipoLente')}
+                label="Adicion"
+              >
+                {tipoLente.map(op => (
+                  <MenuItem key={op} value={op}>{op}</MenuItem>
                 )
-              })}
-            </Select>
-          </FormControl>
-          <div>
-            <p>Protección</p>
-            <SelectReact
-              options={proteccion}
-              value={formExpedientes.proteccion}
-              name='Proteccion'
-              multi={true}
-              style={{ width: '300px' }}
-              labelField="label"
-              valueField="value"
-              onChange={(e) => {
-                setformVenta({
-                  ...formVenta,
-                  proteccion: e
-                });
-                // setvalue(e)
-              }
-              }
-            />
+                )}
+              </Select>
+            </FormControl>
           </div>
-          <FormControl variant="standard" sx={{ m: 1, minWidth: 120 }}>
-            <InputLabel id="tipoLente">Tipo de Lente</InputLabel>
-            <Select
-              labelId="tipoLente"
-              id="tipoLente"
-              value={formExpedientes.tipoLente}
-              onChange={(event) => handleChangeTextVenta(event, 'tipoLente')}
-              label="Adicion"
-            >
-              {tipoLente.map(op => (
-                <MenuItem key={op} value={op}>{op}</MenuItem>
-              )
-              )}
-            </Select>
-          </FormControl>
           <TextField
             value={formExpedientes.antecedentes}
             onChange={(event) => handleChangeTextExpediente(event, 'antecedentes')}
@@ -2007,15 +2023,11 @@ export const Pacientes = () => {
                           setOpenDialogAddExpediente(true);
                         }}
                       >Editar expediente</Button>
-                      <p className='parrafoReceta'>
-                        <span className='campo'>Optometrista: </span>
-                        <span className='valor'>{ex.optometrista.nombre}</span>
-                      </p>
-                      <div style={{
-                        display: 'flex',
-                        flexDirection: 'row',
-                        justifyContent: 'space-between',
-                      }}>
+                      <div className='grid3Column'>
+                        <p className='parrafoReceta'>
+                          <span className='campo'>Optometrista: </span>
+                          <span className='valor'>{ex.optometrista.nombre}</span>
+                        </p>
                         <p className='parrafoReceta' style={{ margin: '0px 0px 0px 9px' }}>
                           <span className='campo'>Tipo de Lente: </span>
                           <span className='valor'>{ex.tipoLente}</span>
@@ -2299,7 +2311,7 @@ export const Pacientes = () => {
           {
             listInvExistente.length > 0 &&
             <>
-              <p className='titulo'>Inventario seleccionado</p>
+              <p className='titulo'>Inventario existente</p>
               <DataTable value={listInvExistente}
                 showGridlines
                 stripedRows
@@ -2506,7 +2518,7 @@ export const Pacientes = () => {
                           ...detallePagos,
                           monto: parseFloat(event.target.value, 2).toFixed(2),
                         })
-                        setacuenta(parseFloat(event.target.value, 2).toFixed(2));
+                        setacuenta(parseFloat(event.target.value, 2));
                       }
                     }}
                     slotProps={{
