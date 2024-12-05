@@ -566,7 +566,7 @@ export const DetalleVentas = () => {
                             sx={{ m: 1 }}
                             value={formdetallePagos.monto}
                             onChange={(event) => {
-                                if ((parseFloat(event.target.value) + parseFloat(ventaView.acuenta)) > ventaView.total) {
+                                if ((parseFloat(event.target.value) + parseFloat(ventaView.acuenta)) > parseFloat(ventaView.total)) {
                                     createToastForm(
                                         'error',
                                         'Error',

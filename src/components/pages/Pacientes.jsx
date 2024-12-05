@@ -1003,13 +1003,16 @@ export const Pacientes = () => {
 
     const facturaDatos = {
       cliente: pacienteDatos.nombre,
+      sucursales: localStorage.getItem('sucursalID'),
       rtn: datosRtn.rtn,
       nombreRtn: datosRtn.nombre,
+      numFacRec: numFacRec,
       inventario: [...listInvExistente, ...listInvPedido],
-      total: totalVenta,
-      totalDescuento: totalDescuento,
-      acuenta: acuenta,
-      montoPagos: montoPagos,
+      formaPago: detallePagos.formaPago,
+      total: parseFloat(totalVenta).toFixed(2),
+      totalDescuento: parseFloat(totalDescuento).toFixed(2),
+      acuenta: parseFloat(acuenta).toFixed(2),
+      montoPagos: parseFloat(montoPagos).toFixed(2),
       cantPagos: cantPagos,
     }
 
@@ -1067,6 +1070,15 @@ export const Pacientes = () => {
 
     console.log(datosSave);
 
+    // appointmentApi.put(`facturas/imprimirFactura`, facturaDatos)
+    // .then(() => {
+    //   createToast(
+    //     'success',
+    //     'Confirmado',
+    //     'La factura a sido generada'
+    //   );
+    // });
+
     appointmentApi.post('detalleVentas', datosSave)
       .then((response) => {
         if (response.status === 201) {
@@ -1083,13 +1095,18 @@ export const Pacientes = () => {
                   'Confirmado',
                   'El inventario ha sido actualizado'
                 );
+                appointmentApi.put(`facturas/imprimirFactura`, facturaDatos)
+                  .then(() => {
+                    createToast(
+                      'success',
+                      'Confirmado',
+                      'La factura a sido generada'
+                    );
+                  });
+
               }
             });
-          createToast(
-            'success',
-            'Confirmado',
-            'La factura a sido generada'
-          );
+
           cleanForm();
           handleCloseDialogVenta();
         } else {
@@ -2521,7 +2538,7 @@ export const Pacientes = () => {
                     sx={{ m: 1 }}
                     value={acuenta}
                     onChange={(event) => {
-                      if (event.target.value > totalVenta) {
+                      if (parseFloat(event.target.value) > totalVenta) {
                         createToastFormVenta(
                           'error',
                           'Error',
