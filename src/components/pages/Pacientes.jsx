@@ -1095,14 +1095,14 @@ export const Pacientes = () => {
                   'Confirmado',
                   'El inventario ha sido actualizado'
                 );
-                appointmentApi.put(`facturas/imprimirFactura`, facturaDatos)
-                  .then(() => {
-                    createToast(
-                      'success',
-                      'Confirmado',
-                      'La factura a sido generada'
-                    );
-                  });
+                // appointmentApi.put(`facturas/imprimirFactura`, facturaDatos)
+                //   .then(() => {
+                //     createToast(
+                //       'success',
+                //       'Confirmado',
+                //       'La factura a sido generada'
+                //     );
+                //   });
 
               }
             });
