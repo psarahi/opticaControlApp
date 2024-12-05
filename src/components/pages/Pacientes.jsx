@@ -309,12 +309,27 @@ export const Pacientes = () => {
     appointmentApi.get(`inventario/activos/${sucursal}`, '').then((response) => {
       setListInventario(response.data);
     });
-    appointmentApi.get(`facturas/rangoActivo/${sucursal}`, '').then((response) => {
-      setlistRangoFactura(response.data);
+
+    appointmentApi.get(`facturas/facturaRecibo/${sucursal}`).then((response) => {
+      console.log(response);
+      if (response.data.factura.length > 1) {
+        createToast(
+          'error',
+          'Error',
+          'Solo puede tener un rango de facturas activo'
+        );
+      } else if (response.data.factura[0].ultimaUtilizada === response.data.factura[0].hasta) {
+        createToast(
+          'error',
+          'Error',
+          'No tiene facturas disponibles'
+        );
+      }
+      console.log(response.data.correlativo[0]);
+      console.log(response.data.factura);
+      setlistRangoFactura(response.data.factura);
+      setnumReciboActual(response.data.correlativo[0]);
     });
-    appointmentApi.get(`correlativo/bySucursal/${sucursal}`, '').then((response) => {
-      setnumReciboActual(response.data);
-    })
   };
 
   const handleOpenDialogPost = () => {
@@ -998,7 +1013,7 @@ export const Pacientes = () => {
         numFacRec = nuevaFactura(listRangoFactura[0].ultimaUtilizada);
       }
     } else {
-      numFacRec = parseInt(numReciboActual[0].numRecibo) + 1;
+      numFacRec = parseInt(numReciboActual.numRecibo) + 1;
     }
 
     const facturaDatos = {
@@ -1088,7 +1103,7 @@ export const Pacientes = () => {
                 if (op === 'factura' && parseFloat(acuenta) === parseFloat(totalVenta)) {
                   appointmentApi.put(`facturas/${listRangoFactura[0]._id}`, { ultimaUtilizada: numFacRec }).then();
                 } else {
-                  appointmentApi.put(`correlativo/${numReciboActual[0]._id}`, { numRecibo: numFacRec }).then();
+                  appointmentApi.put(`correlativo/${numReciboActual._id}`, { numRecibo: numFacRec }).then();
                 }
                 createToast(
                   'success',
