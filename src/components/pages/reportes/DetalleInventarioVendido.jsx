@@ -50,21 +50,8 @@ export const DetalleInventarioVendido = () => {
 
         appointmentApi.get(`detalleVentas/detalleInventario/${localStorage.getItem('sucursalID')}/${inicio}/${fin}`)
             .then((response) => {
-                if (response.status === 200) {
                     console.log(response);
                     setdetalleVentas(response.data);
-
-                    cleanFechas();
-                } else {
-                    createToast(
-                        'error',
-                        'Error',
-                        response.statusText,
-                    );
-                    console.log(response.data);
-                    cleanFechas();
-                    return;
-                }
             })
             .catch((err) => {
                 createToast(
