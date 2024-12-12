@@ -21,3 +21,11 @@
     gap: 0px 20px;
     grid-template-areas: ". . .";
 }
+
+.divColumn {
+  display: flex;
+  flex-direction: row;
+  /* flex-wrap: wrap; */
+  gap: 10px 20px
+
+}

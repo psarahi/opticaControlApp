@@ -466,19 +466,23 @@ export const DetalleVentas = () => {
                                                                 );
                                                             } else {
                                                                 appointmentApi.put(`detalleVentas/${selectedVentaId}`,
-                                                                    { entregado: true, trabajoHecho: true })
-                                                                    .then(() => {
+                                                                    { entregado: true, trabajoHecho: true, fechaEntrega: dayjs().format('YYYY-MM-DD') })
+                                                                    .then((response) => {
+                                                                        console.log(response);
+
                                                                         setventaView({
                                                                             ...ventaView,
                                                                             entregado: true,
-                                                                            trabajoHecho: true
+                                                                            trabajoHecho: true,
+                                                                            fechaEntrega: response.data.fechaEntrega
                                                                         })
                                                                         setListDetalleVentas(
                                                                             listDetalleVentas.map((i) =>
                                                                                 i._id === selectedVentaId ? {
                                                                                     ...i,
                                                                                     entregado: true,
-                                                                                    trabajoHecho: true
+                                                                                    trabajoHecho: true,
+                                                                                    fechaEntrega: response.data.fechaEntrega
                                                                                 } : i
                                                                             )
                                                                         )
@@ -612,12 +616,7 @@ export const DetalleVentas = () => {
                                             <span style={{ fontWeight: 200 }}>{detalle.numFacRec}</span>
                                         </p>
                                         {/* <p><span>Sucursal: </span> <span>{detalle.sucursales.nombre}</span></p> */}
-                                        <div style={{
-                                            display: 'flex',
-                                            flexDirection: 'row',
-                                            flexWap: 'wrap',
-                                            gap: '10px 20px',
-                                        }}>
+                                        <div className='divColumn'>
                                             <p style={{ fontSize: '20px' }}>
                                                 <span style={{ fontWeight: 500 }}>Tipo de lente: </span>
                                                 <span style={{ fontWeight: 200 }}>{detalle.tipoLente}</span>
@@ -635,10 +634,19 @@ export const DetalleVentas = () => {
                                                     </p>
                                                 </>
                                             }
+                                        </div>
+                                        <div className='divColumn'>
                                             <p style={{ fontSize: '20px' }}>
-                                                <span style={{ fontWeight: 500 }}>Fecha entrega: </span>
-                                                <span style={{ fontWeight: 200 }}>{dayjs(detalle.fechaEntrega).add(6, 'hour').format('YYYY-MM-DD')}</span>
+                                                <span style={{ fontWeight: 500 }}>Entrega programada: </span>
+                                                <span style={{ fontWeight: 200 }}>{dayjs(detalle.entregaProgramada).add(6, 'hour').format('YYYY-MM-DD')}</span>
                                             </p>
+                                            {
+                                                detalle.entregado &&
+                                                <p style={{ fontSize: '20px' }}>
+                                                    <span style={{ fontWeight: 500 }}>Entrega: </span>
+                                                    <span style={{ fontWeight: 200 }}>{dayjs(detalle.fechaEntrega).add(6, 'hour').format('YYYY-MM-DD')}</span>
+                                                </p>
+                                            }
                                         </div>
                                         <p style={{ fontSize: '20px' }}><span style={{ fontWeight: 500 }}>Protección: </span>
                                             {
@@ -676,11 +684,7 @@ export const DetalleVentas = () => {
                                             {/* <Column header="Vendido a" body={(data) => precioVendido(data)}></Column> */}
                                         </DataTable>
                                         <h3>Detalle pagos</h3>
-                                        <div style={{
-                                            display: 'flex',
-                                            flexDirection: 'row',
-                                            gap: '30px',
-                                        }}>
+                                        <div className='divColumn'>
                                             <div style={{ width: '50%' }}>
                                                 <DataTable value={detalle.detallePagos}
                                                     size='small'
@@ -768,11 +772,7 @@ export const DetalleVentas = () => {
                 <DialogContent>
                     <Toast ref={toastForm} />
 
-                    <div style={{
-                        display: 'flex',
-                        flexDirection: 'row',
-                        gap: '30px'
-                    }}>
+                    <div className='divColumn'>
                         <div>
                             <p style={{ color: '#696969' }}>Fecha *</p>
                             <TextField
@@ -848,11 +848,7 @@ export const DetalleVentas = () => {
                     <br />
                 </DialogContent>
                 <DialogActions>
-                    <div style={{
-                        display: 'flex',
-                        flexDirection: 'row',
-                        gap: '10px'
-                    }}>
+                    <div className='divColumn'>
                         <Button onClick={handleCloseDialog} >Cancelar</Button>
                         <Button variant='contained' onClick={() => generarFactura('recibo')}>Generar recibo</Button>
                         <Button variant='contained' onClick={() => generarFactura('factura')} type="submit">Generar factura</Button>

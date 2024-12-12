@@ -18,7 +18,7 @@ import {
 
 import { appointmentApi } from '../../services/appointmentApi';
 import { textValidator } from '../../helpers/validator';
-import { sumarHoras } from '../../helpers/formato';
+import { formatearFecha } from '../../helpers/formato';
 
 export const RangoFacturas = () => {
     const facturaJSON = {
@@ -107,7 +107,7 @@ export const RangoFacturas = () => {
         setFormFactura({
             desde: event.rowData.desde,
             hasta: event.rowData.hasta,
-            fechaLimiteEmision: sumarHoras(event.rowData.fechaLimiteEmision, 6),
+            fechaLimiteEmision: formatearFecha(event.rowData.fechaLimiteEmision),
             sucursales: event.rowData.sucursales,
             ultimaUtilizada: event.rowData.ultimaUtilizada,
             estado: event.rowData.estado
@@ -273,10 +273,6 @@ export const RangoFacturas = () => {
         })
     };
 
-    const fechaBodyTemplate = (fecha) => {
-        return sumarHoras(fecha, 6);
-    };
-
     return (
         <>
             <h1>Informacion sobre Inventario </h1>
@@ -310,7 +306,7 @@ export const RangoFacturas = () => {
                     <Column field="desde" header="Desde"></Column>
                     <Column field="hasta" header="Hasta"></Column>
                     <Column field="ultimaUtilizada" header="Ultima utilizada"></Column>
-                    <Column field="fechaLimiteEmision" header="Fecha Limite" body={(data) => fechaBodyTemplate(data.fechaLimiteEmision)}></Column>
+                    <Column field="fechaLimiteEmision" header="Fecha Limite" body={(data) => formatearFecha(data.fechaLimiteEmision)}></Column>
                     <Column field="estado" header="Estado" body={rendeEstado}></Column>
                 </DataTable>
             </div>

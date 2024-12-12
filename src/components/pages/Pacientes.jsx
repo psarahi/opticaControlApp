@@ -95,6 +95,7 @@ const detalleVenta = {
     // descuento: 0,
   }],
   fecha: dayjs().format('YYYY-MM-DD'),
+  entregaProgramada: dayjs().format('YYYY-MM-DD'),
   fechaEntrega: dayjs().format('YYYY-MM-DD'),
   detallePagos: [{
     fecha: dayjs().format('YYYY-MM-DD'),
@@ -948,10 +949,6 @@ export const Pacientes = () => {
     linea: { value: '', matchMode: FilterMatchMode.STARTS_WITH }
   });
 
-  const fechaBodyTemplate = (fecha) => {
-    return formatearFecha(fecha);
-  };
-
   const onRowEditComplete = (e) => {
     let _inventario = [...listInvExistente];
     let { newData, index } = e;
@@ -1086,7 +1083,7 @@ export const Pacientes = () => {
       sucursales: localStorage.getItem('sucursalID'),
       detalleInventario: detalleInv, // Falta
       fecha: formVenta.fecha,
-      fechaEntrega: formVenta.fechaEntrega,
+      entregaProgramada: formVenta.entregaProgramada,
       detallePagos: detallePagos,
       descuentoTotal: totalDescuento,
       cantPagos: cantPagos,
@@ -1224,9 +1221,9 @@ export const Pacientes = () => {
           <Column field="telefono" header="Telefono" filter bodyStyle={{ textAlign: 'center' }}></Column>
           <Column field="direccion" header="Direccion" filter></Column>
           <Column field="sucursales.nombre" header="Sucursal" filter></Column>
-          <Column field="fechaRegistro" header="Registro" body={(data) => fechaBodyTemplate(data.fechaRegistro)}></Column>
-          <Column field="ultimaCita" header="Ultima cita" body={(data) => fechaBodyTemplate(data.ultimaCita)}></Column>
-          <Column field="citaProxima" header="Cita Proxima" body={(data) => fechaBodyTemplate(data.citaProxima)}></Column>
+          <Column field="fechaRegistro" header="Registro" body={(data) => formatearFecha(data.fechaRegistro)}></Column>
+          <Column field="ultimaCita" header="Ultima cita" body={(data) => formatearFecha(data.ultimaCita)}></Column>
+          <Column field="citaProxima" header="Cita Proxima" body={(data) => formatearFecha(data.citaProxima)}></Column>
         </DataTable>
       </div >
       {/* Formulario para guardar Paciente*/}
@@ -2248,10 +2245,10 @@ export const Pacientes = () => {
           <br />
           <div className='infoLentes'>
             <div>
-              <p style={{ color: '#696969' }}>Fecha entrega *</p>
+              <p style={{ color: '#696969' }}>Entrega programada *</p>
               <TextField
                 required
-                value={formVenta.fechaEntrega}
+                value={formVenta.entregaProgramada}
                 onChange={(event) => {
                   if (validarFechaProxima(event.target.value)) {
                     createToastFormVenta(
@@ -2261,19 +2258,19 @@ export const Pacientes = () => {
                     );
                     setformVenta({
                       ...formVenta,
-                      fechaEntrega: dayjs().format('YYYY-MM-DD')
+                      entregaProgramada: dayjs().format('YYYY-MM-DD')
                     })
                     return;
                   } else {
                     setformVenta({
                       ...formVenta,
-                      fechaEntrega: event.target.value
+                      entregaProgramada: event.target.value
                     })
                   }
                 }}
                 margin='dense'
-                id='fechaEntrega'
-                name='fechaEntrega'
+                id='entregaProgramada'
+                name='entregaProgramada'
                 type='date'
                 format='yyyy-MM-dd'
                 variant='standard'
