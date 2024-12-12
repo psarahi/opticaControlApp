@@ -6,7 +6,6 @@ import { DataTable, Column, Tooltip, Button as ButtonPrime } from 'primereact';
 import { Button, TextField } from '@mui/material';
 import './DetalleInventarioVendidoStyle.css'
 import { appointmentApi } from '../../../services/appointmentApi';
-import { sumarHoras } from '../../../helpers/formato';
 export const DetalleInventarioVendido = () => {
     const [fechas, setfechas] = useState({
         fechaInicial: dayjs().format('YYYY-MM-DD'),
@@ -84,10 +83,6 @@ export const DetalleInventarioVendido = () => {
             fechaInicial: dayjs().format('YYYY-MM-DD'),
             fechaFinal: dayjs().format('YYYY-MM-DD')
         })
-    };
-
-    const fechaBodyTemplate = (date) => {
-        return sumarHoras(date, 6);
     };
 
     const exportPdf = (data, nameFile) => {
@@ -245,7 +240,7 @@ export const DetalleInventarioVendido = () => {
                     <Column field="cilindro" header="Cilindro"></Column>
                     <Column field="adicion" header="Adición"></Column>
                     <Column field="tipoVenta" header="Tipo venta" ></Column>
-                    <Column field="fecha" header="Fecha Venta" body={(data) => fechaBodyTemplate(data.fecha)}></Column>
+                    <Column field="fecha" header="Fecha Venta" body={(data) => dayjs(data.fecha).format('YYYY-MM-DD')}></Column>
                     <Column field="cantidad" header="Cantidad"></Column>
                     <Column field="linea" header="Linea"></Column>
                     <Column field="importe" header="Importe"></Column>
@@ -280,7 +275,7 @@ export const DetalleInventarioVendido = () => {
                     <Column field="cilindro" header="Cilindro"></Column>
                     <Column field="adicion" header="Adición"></Column>
                     <Column field="tipoVenta" header="Tipo venta" ></Column>
-                    <Column field="fecha" header="Fecha Venta" body={(data) => fechaBodyTemplate(data.fecha)}></Column>
+                    <Column field="fecha" header="Fecha Venta" body={(data) => dayjs(data.fecha).format('YYYY-MM-DD')}></Column>
                     <Column field="cantidad" header="Cantidad"></Column>
                     <Column field="linea" header="Linea"></Column>
                     <Column field="importe" header="Importe"></Column>

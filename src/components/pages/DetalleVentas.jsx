@@ -1,9 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 
 import { Toast, DataTable, Column, FilterMatchMode, TabView, TabPanel } from 'primereact';
-import AssignmentIcon from '@mui/icons-material/Assignment';
 import dayjs from 'dayjs';
-import { appointmentApi } from '../../services/appointmentApi';
 
 import 'react-date-picker/dist/DatePicker.css';
 import 'react-calendar/dist/Calendar.css';
@@ -12,21 +10,27 @@ import {
     DialogTitle, FormControl, InputLabel, MenuItem, Select, TextField
 }
     from '@mui/material';
-import { formatearFecha, formatearNumero } from '../../helpers/formato';
+import PrintIcon from '@mui/icons-material/Print';
+import AssignmentIcon from '@mui/icons-material/Assignment';
+import CheckIcon from '@mui/icons-material/Check';
+import ConstructionIcon from '@mui/icons-material/Construction';
+import CloseIcon from '@mui/icons-material/Close';
 
+import { formatearFecha, formatearNumero } from '../../helpers/formato';
 import './DetalleVentasStyle.css';
 import { nuevaFactura } from '../../helpers/nuevaFactura';
 import { textValidator } from '../../helpers/validator';
-
+import { appointmentApi } from '../../services/appointmentApi';
 
 export const DetalleVentas = () => {
     const [listPaciente, setListPaciente] = useState([]);
     const [activeIndex, setActiveIndex] = useState(0);
     const [listDetalleVentas, setListDetalleVentas] = useState([]);
     const [openDialog, setOpenDialog] = useState(false);
-    const [selectedVenta, setselectedVenta] = useState('');
+    const [selectedVentaId, setselectedVentaId] = useState('');
     const [correlativo, setCorrelativo] = useState([]);
     const [facturas, setfacturas] = useState([]);
+    const [disabledVenta, setdisabledVenta] = useState(false);
     const [ventaView, setventaView] = useState();
     const [formdetallePagos, setFormDetallePagos] = useState({
         fecha: dayjs().format('YYYY-MM-DD'),
@@ -39,9 +43,13 @@ export const DetalleVentas = () => {
     const toastForm = useRef(null);
 
     useEffect(() => {
+        if (window.innerWidth < 1900) {
+            document.body.style.zoom = '80%'
+        } else {
+            document.body.style.zoom = '100%'
+        }
         const sucursal = localStorage.getItem('sucursalID');
         appointmentApi.get(`facturas/facturaRecibo/${sucursal}`).then((response) => {
-            console.log(response);
             if (response.data.factura.length > 1) {
                 createToast(
                     'error',
@@ -55,16 +63,12 @@ export const DetalleVentas = () => {
                     'No tiene facturas disponibles'
                 );
             }
-            console.log(response.data.correlativo[0]);
-            console.log(response.data.factura[0]);
             setfacturas(response.data.factura);
             setCorrelativo(response.data.correlativo[0]);
         });
 
         appointmentApi.get('detalleVentas/pacientes', '').then((response) => {
             setListPaciente(response.data);
-            console.log(response.data);
-
         });
 
     }, [])
@@ -114,7 +118,6 @@ export const DetalleVentas = () => {
         });
         const sucursal = localStorage.getItem('sucursalID');
         appointmentApi.get(`facturas/facturaRecibo/${sucursal}`).then((response) => {
-            console.log(response);
             if (response.data.factura.length > 1) {
                 createToast(
                     'error',
@@ -128,8 +131,6 @@ export const DetalleVentas = () => {
                     'No tiene facturas disponibles'
                 );
             }
-            console.log(response.data.correlativo[0]);
-            console.log(response.data.factura[0]);
             setfacturas(response.data.factura);
             setCorrelativo(response.data.correlativo[0]);
         });
@@ -148,9 +149,11 @@ export const DetalleVentas = () => {
         if (e.cellIndex === 3) {
             appointmentApi.get(`detalleVentas/idPaciente/${e.rowData.idPaciente}`, '')
                 .then((response) => {
-                    console.log(response.data);
+                    setActiveIndex(0)
                     setListDetalleVentas(response.data);
+                    setdisabledVenta(response.data[0].estado);
                     setventaView(response.data[0]);
+                    setselectedVentaId(response.data[0]._id);
                 });
         }
     }
@@ -161,10 +164,6 @@ export const DetalleVentas = () => {
         );
     };
 
-    const precioBodyTemplate = (precio) => {
-        return formatearNumero(precio);
-    };
-
     const precioVendido = (data) => {
         return (
             data.inventario.precioVenta - data.descuento
@@ -173,6 +172,41 @@ export const DetalleVentas = () => {
 
     const fechaBodyTemplate = (fecha) => {
         return formatearFecha(fecha);
+    };
+
+    const obtenerDatosFactura = (numFacRec) => {
+        let detalleInv = []
+
+        ventaView.detalleInventario.forEach((i) => {
+            detalleInv.push(
+                {
+                    cantidad: Math.abs(i.cantidad),
+                    descripcion: i.inventario.descripcion,
+                    importe: i.inventario.importe,
+                    valorGravado: i.inventario.valorGravado,
+                    precioVenta: i.inventario.precioVenta
+                }
+            )
+        })
+
+        const facturaDatos = {
+            cliente: ventaView.paciente.nombre,
+            sucursales: localStorage.getItem('sucursalID'),
+            rtn: ventaView.rtn,
+            nombreRtn: ventaView.nombreRtn,
+            numFacRec: numFacRec,
+            vendedor: localStorage.getItem('nombre'),
+            inventario: detalleInv,
+            formaPago: !textValidator(formdetallePagos.formaPago) ? ventaView.detallePagos[ventaView.detallePagos.length - 1].formaPago : formdetallePagos.formaPago,
+            monto: formdetallePagos.monto === 0 ? ventaView.detallePagos[ventaView.detallePagos.length - 1].monto : formdetallePagos.monto,
+            total: parseFloat(ventaView.total, 2),
+            fecha: formdetallePagos.monto === 0 ? ventaView.detallePagos[ventaView.detallePagos.length - 1].fecha : formdetallePagos.fecha,
+            totalDescuento: parseFloat(ventaView.descuentoTotal, 2),
+            acuenta: parseFloat(ventaView.acuenta + formdetallePagos.monto, 2),
+            montoPagos: parseFloat(ventaView.total / ventaView.cantPagos, 2),
+        }
+
+        return facturaDatos;
     };
 
     const generarFactura = (op) => {
@@ -193,7 +227,6 @@ export const DetalleVentas = () => {
             return;
         }
         let numFacRec = '';
-        debugger;
         if (op === 'factura' && (parseFloat(formdetallePagos.monto) + parseFloat(ventaView.acuenta)) === parseFloat(ventaView.total)) {
             if (facturas[0].ultimaUtilizada === '') {
                 numFacRec = facturas[0].desde;
@@ -203,11 +236,27 @@ export const DetalleVentas = () => {
         } else {
             numFacRec = parseInt(correlativo.numRecibo) + 1;
         }
-        console.log(facturas[0]._id, correlativo._id);
+        const facturaDatos = obtenerDatosFactura(numFacRec);
+        console.log(facturaDatos);
 
-        appointmentApi.put(`detalleVentas/detallePago/${selectedVenta}`, { detallePago: formdetallePagos, numFacRec: numFacRec })
+        // appointmentApi.put(`facturas/imprimirRecibo`, facturaDatos)
+        //     .then(() => {
+        //         createToast(
+        //             'success',
+        //             'Confirmado',
+        //             'La factura a sido generada'
+        //         );
+        //     })
+        //     .catch((error) => {
+        //         createToast(
+        //             'error',
+        //             'Error',
+        //             'Hubo un error al generar la factura, favor revise la impresora'
+        //         );
+        //     });
+
+        appointmentApi.put(`detalleVentas/detallePago/${selectedVentaId}`, { detallePago: formdetallePagos, numFacRec: numFacRec })
             .then((response) => {
-                debugger
                 if (response.status === 202) {
                     createToast(
                         'success',
@@ -215,14 +264,46 @@ export const DetalleVentas = () => {
                         'El pago fue registrdo correctamente'
                     );
                     if (op === 'factura' && (parseFloat(formdetallePagos.monto) + parseFloat(ventaView.acuenta)) === parseFloat(ventaView.total)) {
-                        appointmentApi.put(`facturas/${facturas[0]._id}`, { ultimaUtilizada: numFacRec }).then();
+                        appointmentApi.put(`facturas/${facturas[0]._id}`, { ultimaUtilizada: numFacRec }).then(() => {
+                            // appointmentApi.put(`facturas/imprimirFactura`, facturaDatos)
+                            //     .then(() => {
+                            //         createToast(
+                            //             'success',
+                            //             'Confirmado',
+                            //             'La factura a sido generada'
+                            //         );
+                            //     })
+                            //     .catch((error) => {
+                            //         createToast(
+                            //             'error',
+                            //             'Error',
+                            //             'Hubo un error al generar la factura, favor revise la impresora'
+                            //         );
+                            //     });
+                        });
                     } else {
-                        appointmentApi.put(`correlativo/${correlativo._id}`, { numRecibo: numFacRec }).then();
+                        appointmentApi.put(`correlativo/${correlativo._id}`, { numRecibo: numFacRec }).then(() => {
+                            // appointmentApi.put(`facturas/imprimirRecibo`, facturaDatos)
+                            //     .then(() => {
+                            //         createToast(
+                            //             'success',
+                            //             'Confirmado',
+                            //             'El recibo a sido generado'
+                            //         );
+                            //     })
+                            //     .catch((error) => {
+                            //         createToast(
+                            //             'error',
+                            //             'Error',
+                            //             'Hubo un error al generar el recibo, favor revise la impresora'
+                            //         );
+                            //     });
+                        });
                     }
 
                     setListDetalleVentas(
                         listDetalleVentas.map((i) =>
-                            i._id === selectedVenta ? {
+                            i._id === selectedVentaId ? {
                                 ...i,
                                 detallePagos: [...response.data.detallePagos],
                                 acuenta: response.data.acuenta,
@@ -237,8 +318,6 @@ export const DetalleVentas = () => {
                         numFacRec: response.data.numFacRec,
                     }
                     )
-
-                    console.log(response);
                     cleanForm();
                     handleCloseDialog();
                 } else {
@@ -266,11 +345,10 @@ export const DetalleVentas = () => {
     };
 
     const handleTabChange = (e) => {
-        console.log(e);
         setActiveIndex(e.index);
         setventaView(listDetalleVentas[e.index]);
-        console.log(listDetalleVentas[e.index]);
-
+        setselectedVentaId(listDetalleVentas[e.index]._id);
+        setdisabledVenta(listDetalleVentas[e.index].estado);
     };
 
     return (
@@ -321,6 +399,194 @@ export const DetalleVentas = () => {
                                         key={detalle._id}
 
                                     >
+                                        {
+                                            !disabledVenta &&
+                                            <div style={{ border: '#b30200 3px solid' }}>
+                                                <h1 style={{ color: "#b30000", textAlign: 'center' }}>Venta cancelada</h1>
+                                            </div>
+                                        }
+                                        {
+                                            disabledVenta &&
+                                            <div style={{
+                                                display: 'flex',
+                                                flexDirection: 'row',
+                                                gap: '10px'
+                                            }}>
+                                                {
+                                                    !detalle.trabajoHecho &&
+                                                    <Button
+                                                        variant='outlined'
+                                                        color="success"
+                                                        startIcon={<ConstructionIcon />}
+                                                        onClick={(e) => {
+                                                            appointmentApi.put(`detalleVentas/${selectedVentaId}`, { trabajoHecho: true })
+                                                                .then(() => {
+                                                                    setventaView({
+                                                                        ...ventaView,
+                                                                        trabajoHecho: true
+                                                                    })
+                                                                    setListDetalleVentas(
+                                                                        listDetalleVentas.map((i) =>
+                                                                            i._id === selectedVentaId ? {
+                                                                                ...i,
+                                                                                trabajoHecho: true
+                                                                            } : i
+                                                                        )
+                                                                    )
+
+                                                                    createToast(
+                                                                        'success',
+                                                                        'Confirmado',
+                                                                        'Trabajo hecho'
+                                                                    );
+                                                                })
+                                                                .catch((error) => {
+                                                                    console.log(error);
+                                                                    createToast(
+                                                                        'error',
+                                                                        'Error',
+                                                                        'Ocurrio un error'
+                                                                    );
+                                                                });
+                                                        }}
+                                                    >Trabajo hecho</Button>
+                                                }
+                                                {
+                                                    !detalle.entregado &&
+                                                    <Button
+                                                        variant='outlined'
+                                                        color="primary"
+                                                        startIcon={<CheckIcon />}
+                                                        onClick={(e) => {
+                                                            if (detalle.acuenta !== detalle.total) {
+                                                                createToast(
+                                                                    'warn',
+                                                                    'Acción requerida',
+                                                                    'La venta aún requiere pago'
+                                                                );
+                                                            } else {
+                                                                appointmentApi.put(`detalleVentas/${selectedVentaId}`,
+                                                                    { entregado: true, trabajoHecho: true })
+                                                                    .then(() => {
+                                                                        setventaView({
+                                                                            ...ventaView,
+                                                                            entregado: true,
+                                                                            trabajoHecho: true
+                                                                        })
+                                                                        setListDetalleVentas(
+                                                                            listDetalleVentas.map((i) =>
+                                                                                i._id === selectedVentaId ? {
+                                                                                    ...i,
+                                                                                    entregado: true,
+                                                                                    trabajoHecho: true
+                                                                                } : i
+                                                                            )
+                                                                        )
+                                                                        createToast(
+                                                                            'success',
+                                                                            'Confirmado',
+                                                                            'Articulo entregado'
+                                                                        );
+                                                                    })
+                                                                    .catch((error) => {
+                                                                        console.log(error);
+                                                                        createToast(
+                                                                            'error',
+                                                                            'Error',
+                                                                            'Ocurrio un error'
+                                                                        );
+                                                                    });
+                                                            }
+                                                        }}
+                                                    >Entregado</Button>
+                                                }
+                                                {
+                                                    !detalle.entregado &&
+                                                    <Button
+                                                        variant='outlined'
+                                                        id={detalle._id}
+                                                        color="error"
+                                                        startIcon={<CloseIcon />}
+                                                        onClick={(e) => {
+                                                            appointmentApi.put(`detalleVentas/cancelarVenta/${selectedVentaId}`, {})
+                                                                .then(() => {
+                                                                    setventaView({
+                                                                        ...ventaView,
+                                                                        estado: false,
+                                                                    })
+                                                                    setListDetalleVentas(
+                                                                        listDetalleVentas.map((i) =>
+                                                                            i._id === selectedVentaId ? {
+                                                                                ...i,
+                                                                                estado: false,
+                                                                            } : i
+                                                                        )
+                                                                    )
+                                                                    setdisabledVenta(false);
+                                                                    createToast(
+                                                                        'warn',
+                                                                        'Confirmado',
+                                                                        'Venta cancelada'
+                                                                    );
+                                                                })
+                                                                .catch((error) => {
+                                                                    console.log(error);
+                                                                    createToast(
+                                                                        'error',
+                                                                        'Error',
+                                                                        'Ocurrio un error'
+                                                                    );
+                                                                });
+                                                        }}
+                                                    >Cancelar venta</Button>
+                                                }
+                                                <Button
+                                                    variant='contained'
+                                                    color="secondary"
+                                                    startIcon={<PrintIcon />}
+                                                    onClick={(e) => {
+                                                        const facturaDatos = obtenerDatosFactura(ventaView.numFacRec);
+                                                        console.log(facturaDatos);
+
+                                                        // if (facturaDatos.numFacRec.length === 19) {
+                                                        //     appointmentApi.put(`facturas/imprimirFactura`, facturaDatos)
+                                                        //         .then(() => {
+                                                        //             createToast(
+                                                        //                 'success',
+                                                        //                 'Confirmado',
+                                                        //                 'La factura a sido generada'
+                                                        //             );
+                                                        //         })
+                                                        //         .catch((error) => {
+                                                        // console.log(error);
+                                                        //             createToast(
+                                                        //                 'error',
+                                                        //                 'Error',
+                                                        //                 'Hubo un error al generar la factura, favor revise la impresora'
+                                                        //             );
+                                                        //         });
+                                                        // } else {
+                                                        //     appointmentApi.put(`facturas/imprimirRecibo`, facturaDatos)
+                                                        //         .then(() => {
+                                                        //             createToast(
+                                                        //                 'success',
+                                                        //                 'Confirmado',
+                                                        //                 'El recibo a sido generado'
+                                                        //             );
+                                                        //         })
+                                                        //         .catch((error) => {
+                                                        // console.log(error);
+                                                        //             createToast(
+                                                        //                 'error',
+                                                        //                 'Error',
+                                                        //                 'Hubo un error al generar el recibo, favor revise la impresora'
+                                                        //             );
+                                                        //         });
+                                                        // }
+                                                    }}
+                                                >FACTURA/RECIBO</Button>
+                                            </div>
+                                        }
                                         <p style={{ fontSize: '30px' }}>{detalle.sucursales.nombre} - {detalle.tipoVenta} </p>
                                         <div className='grid3Column'>
                                             <p style={{ fontSize: '20px' }}>
@@ -381,6 +647,14 @@ export const DetalleVentas = () => {
                                                 })
                                             }
                                         </p>
+                                        {
+                                            detalle.entregado &&
+                                            <Chip label="Entregado" sx={{ margin: '3px' }} size="large" color="success" />
+                                        }
+                                        {
+                                            detalle.trabajoHecho &&
+                                            <Chip label="Trabajo hecho" sx={{ margin: '3px' }} size="large" color="success" />
+                                        }
                                         <h3> Detalle </h3>
                                         <DataTable value={detalle.detalleInventario}
                                             size='small'
@@ -396,8 +670,8 @@ export const DetalleVentas = () => {
                                             <Column field="inventario.adicion" header="Adición"></Column>
                                             <Column field="cantidad" header="Cantidad" ></Column>
                                             <Column field="inventario.moda" header="Moda" ></Column>
-                                            <Column field="inventario.precioVenta" header="Precio Venta" body={(data) => precioBodyTemplate(data.inventario.precioVenta)}></Column>
-                                            <Column field="inventario.precioCompra" header="Precio Compra" body={(data) => precioBodyTemplate(data.inventario.precioCompra)}></Column>
+                                            <Column field="inventario.precioVenta" header="Precio Venta" body={(data) => formatearNumero(data.inventario.precioVenta)}></Column>
+                                            <Column field="inventario.precioCompra" header="Precio Compra" body={(data) => formatearNumero(data.inventario.precioCompra)}></Column>
                                             {/* <Column field="descuento" header="Descuento" body={(data) => precioBodyTemplate(data.descuento)}></Column> */}
                                             {/* <Column header="Vendido a" body={(data) => precioVendido(data)}></Column> */}
                                         </DataTable>
@@ -418,7 +692,7 @@ export const DetalleVentas = () => {
                                                 >
                                                     <Column field="fecha" header="Fecha" body={(data) => dayjs(data.fecha).add(6, 'hour').format('YYYY-MM-DD')} ></Column>
                                                     <Column field="formaPago" header="Forma Pago" ></Column>
-                                                    <Column field="monto" header="Monto" ></Column>
+                                                    <Column field="monto" header="Monto" body={(data) => formatearNumero(data.monto)}></Column>
                                                     <Column field="usuarios.usuario" header="Recibido" ></Column>
                                                 </DataTable>
                                             </div>
@@ -430,12 +704,12 @@ export const DetalleVentas = () => {
                                             }}>
                                                 <div>
                                                     <p style={{ fontSize: '20px' }}>
-                                                        <span style={{ fontWeight: 500 }}>Subtotal: </span>
-                                                        <span style={{ fontWeight: 200 }}>L. {parseFloat(detalle.descuentoTotal + detalle.total).toFixed(2)}</span>
+                                                        <span style={{ fontWeight: 500 }}>Pagado un: </span>
+                                                        <span style={{ fontWeight: 200 }}>{(detalle.acuenta / detalle.total) * 100} %</span>
                                                     </p>
                                                     <p style={{ fontSize: '20px' }}>
                                                         <span style={{ fontWeight: 500 }}>Acuenta: </span>
-                                                        <span style={{ fontWeight: 200 }}>L. {parseFloat(detalle.acuenta).toFixed(2)}</span>
+                                                        <span style={{ fontWeight: 200 }}>L. {formatearNumero(detalle.acuenta)}</span>
                                                     </p>
                                                     <p style={{ fontSize: '20px' }}>
                                                         <span style={{ fontWeight: 500 }}>Cant. pagos: </span>
@@ -443,48 +717,31 @@ export const DetalleVentas = () => {
                                                     </p>
                                                     <p style={{ fontSize: '20px' }}>
                                                         <span style={{ fontWeight: 500 }}>Descuento total: </span>
-                                                        <span style={{ fontWeight: 200 }}>L. {parseFloat(detalle.descuentoTotal).toFixed(2)}</span>
+                                                        <span style={{ fontWeight: 200 }}>L. {formatearNumero(detalle.descuentoTotal)}</span>
                                                     </p>
                                                     {
-                                                        (parseFloat(detalle.acuenta - detalle.total).toFixed(2) < 0) &&
+                                                        (parseFloat(detalle.acuenta - detalle.total) < 0) &&
                                                         <p style={{ fontSize: '20px', color: '#b00000' }}>
                                                             <span style={{ fontWeight: 500 }}>Credito: </span>
-                                                            <span style={{ fontWeight: 200 }}>L. {parseFloat(detalle.acuenta - detalle.total).toFixed(2)}</span>
+                                                            <span style={{ fontWeight: 200 }}>L. {formatearNumero(detalle.acuenta - detalle.total)}</span>
                                                         </p>
                                                     }
                                                     <p style={{ fontSize: '20px' }}>
                                                         <span style={{ fontWeight: 500 }}>Total: </span>
-                                                        <span style={{ fontWeight: 200 }}>L. {parseFloat(detalle.total).toFixed(2)}</span>
+                                                        <span style={{ fontWeight: 200 }}>L. {formatearNumero(detalle.total)}</span>
                                                     </p>
                                                 </div>
                                                 {
-                                                    (detalle.total !== detalle.acuenta) &&
+                                                    disabledVenta &&
+                                                    (detalle.acuenta !== detalle.total) &&
                                                     <div>
-
                                                         <Button variant='contained'
                                                             id={detalle._id}
                                                             onClick={(e) => {
-                                                                console.log(ventaView);
-
                                                                 let warnig = revisarRangoFacturas();
                                                                 if (!warnig) {
                                                                     return
                                                                 }
-                                                                else if ((ventaView.cantPagos - ventaView.detallePagos.length) === 1) {
-                                                                    setFormDetallePagos({
-                                                                        ...formdetallePagos,
-                                                                        monto: parseFloat(ventaView.total - ventaView.acuenta).toFixed(2)
-                                                                    })
-                                                                }
-                                                                else {
-                                                                    setFormDetallePagos(
-                                                                        {
-                                                                            ...formdetallePagos,
-                                                                            monto: parseFloat(detalle.total / detalle.cantPagos).toFixed(2)
-                                                                        }
-                                                                    )
-                                                                }
-                                                                setselectedVenta(e.target.id);
                                                                 handleOpenDialog();
                                                             }}
                                                         >Agregar pago</Button>

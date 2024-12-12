@@ -10,6 +10,9 @@ export const BlueTheme = createTheme({
         },
         error: {
             main: '#cc0404'
+        },
+        success: {
+            main: '#4c8e00'
         }
     }, 
     drawer: {

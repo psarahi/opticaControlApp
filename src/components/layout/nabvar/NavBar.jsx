@@ -18,6 +18,7 @@ import DescriptionIcon from '@mui/icons-material/Description';
 import SettingsIcon from '@mui/icons-material/Settings';
 import FolderIcon from '@mui/icons-material/Folder';
 import PointOfSaleIcon from '@mui/icons-material/PointOfSale';
+import NumbersIcon from '@mui/icons-material/Numbers';
 
 const drawerWidth = 240;
 
@@ -130,6 +131,16 @@ export const NavBar = () => {
               </ListItemIcon>
               <ListItemText primary="Inventario" />
             </ListItemButton>
+            <ListItemButton
+              sx={{ pl: 4 }}
+              component={NavLink}
+              to='/ventasReporte'
+            >
+              <ListItemIcon>
+                <DescriptionIcon />
+              </ListItemIcon>
+              <ListItemText primary="Ventas" />
+            </ListItemButton>
           </List>
         </Collapse>
         <Divider />
@@ -148,7 +159,7 @@ export const NavBar = () => {
               to='/rangoFactura'
             >
               <ListItemIcon>
-                <DescriptionIcon />
+                <NumbersIcon />
               </ListItemIcon>
               <ListItemText primary="Facturas" />
             </ListItemButton>

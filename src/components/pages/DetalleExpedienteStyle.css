@@ -1,17 +1,17 @@
-@media screen and (min-width: 2000px) {
+@media screen and (min-width: 1900px) {
     .texto{
-        font-size: 10px;
+        font-size: 16px;
     }
 
     .textoPequeño{
-        font-size: 10px;
+        font-size: 13px;
     }
 }
 
 .texto{
-    font-size: 16px;
+    font-size: 11px;
 }
 
 .textoPequeño{
-    font-size: 13px;
+    font-size: 10px;
 }

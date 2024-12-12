@@ -21,17 +21,20 @@ import qrWhatsApp from '../../assets/qrWhatsApp.jpeg';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 
-console.log(window.innerWidth, 'X', window.innerHeight );
-
-
+console.log(window.innerWidth, 'X', window.innerHeight);
 export const DetalleExpediente = () => {
     const [listPaciente, setListPaciente] = useState([]);
     const [activeIndex, setActiveIndex] = useState(0);
     const [listDetalleExpediente, setListDetalleExpediente] = useState([]);
     const toast = useRef(null);
-    
+
 
     useEffect(() => {
+        if (window.innerWidth < 1900) {
+            document.body.style.zoom = '90%'
+        } else {
+            document.body.style.zoom = '100%'
+        }
         appointmentApi.get('expediente/pacientes', '').then((response) => {
             setListPaciente(response.data);
         });
@@ -144,7 +147,7 @@ export const DetalleExpediente = () => {
                                                 gridTemplateAreas: ". ."
                                             }}>
                                                 <div>
-                                                    <img src={logoOptica} alt='Logo'/>
+                                                    <img src={logoOptica} alt='Logo' />
                                                     <p className='texto'>
                                                         <span style={{ fontWeight: 500 }}>Paciente: </span>
                                                         <span style={{ fontWeight: 200 }}>{detalle.paciente.nombre}</span>
@@ -167,7 +170,7 @@ export const DetalleExpediente = () => {
                                                     flexDirection: 'row',
                                                     alignItems: 'center',
                                                 }}>
-                                                    <img src={qrWhatsApp} style={{ width: '100%' }} alt='qr'/>
+                                                    <img src={qrWhatsApp} style={{ width: '100%' }} alt='qr' />
                                                 </div>
                                             </div>
                                             <h4 style={{ textAlign: 'center', margin: '0%' }}>Diagnóstico Visual</h4>
@@ -183,7 +186,7 @@ export const DetalleExpediente = () => {
                                                     alignItems: 'center'
                                                 }}>
                                                     <h4 style={{ margin: '0%' }}>Ojo Derecho</h4>
-                                                    <img src={transportador} style={{ width: '50%' }} alt='transportador'/>
+                                                    <img src={transportador} style={{ width: '50%' }} alt='transportador' />
                                                     <p className='textoPequeño'>{detalle.recetaOjoDerecho.agudezaVisual}</p>
                                                     <p className='textoPequeño'>Dip. {detalle.recetaOjoDerecho.distanciaPupilar}</p>
                                                     <p className='textoPequeño'>{detalle.recetaOjoDerecho.esfera} {detalle.recetaOjoDerecho.cilindro} {detalle.recetaOjoDerecho.eje} {detalle.recetaOjoDerecho.adicion}</p>
@@ -194,7 +197,7 @@ export const DetalleExpediente = () => {
                                                     alignItems: 'center'
                                                 }}>
                                                     <h4 style={{ margin: '0%' }}>Ojo Izquierdo</h4>
-                                                    <img src={transportador} style={{ width: '50%' }} alt='transportador'/>
+                                                    <img src={transportador} style={{ width: '50%' }} alt='transportador' />
                                                     <p className='textoPequeño'>A. V. {detalle.recetaOjoIzquierdo.agudezaVisual}</p>
                                                     <p className='textoPequeño'>Dip. {detalle.recetaOjoIzquierdo.distanciaPupilar}</p>
                                                     <p className='textoPequeño'>{detalle.recetaOjoIzquierdo.esfera} {detalle.recetaOjoIzquierdo.cilindro} {detalle.recetaOjoIzquierdo.eje} {detalle.recetaOjoIzquierdo.adicion} </p>
@@ -250,7 +253,7 @@ export const DetalleExpediente = () => {
                                                 gridTemplateAreas: ". ."
                                             }}>
                                                 <div>
-                                                    <img src={logoOptica} alt='logo'/>
+                                                    <img src={logoOptica} alt='logo' />
                                                     <p className='texto'>
                                                         <span style={{ fontWeight: 500 }}>Paciente: </span>
                                                         <span style={{ fontWeight: 200 }}>{detalle.paciente.nombre}</span>
@@ -273,7 +276,7 @@ export const DetalleExpediente = () => {
                                                     flexDirection: 'row',
                                                     alignItems: 'center',
                                                 }}>
-                                                    <img src={qrWhatsApp} style={{ width: '100%' }} alt='qr'/>
+                                                    <img src={qrWhatsApp} style={{ width: '100%' }} alt='qr' />
                                                 </div>
                                             </div>
                                             <h4 style={{ textAlign: 'center', margin: '0%' }}>Diagnóstico Visual</h4>
@@ -289,7 +292,7 @@ export const DetalleExpediente = () => {
                                                     alignItems: 'center'
                                                 }}>
                                                     <h4 style={{ margin: '0%' }}>Ojo Derecho</h4>
-                                                    <img src={transportador} style={{ width: '50%' }} alt='transportador'/>
+                                                    <img src={transportador} style={{ width: '50%' }} alt='transportador' />
                                                     <p className='textoPequeño'>{detalle.recetaOjoDerecho.agudezaVisual}</p>
                                                     <p className='textoPequeño'>Dip. {detalle.recetaOjoDerecho.distanciaPupilar}</p>
                                                     <p className='textoPequeño'>{detalle.recetaOjoDerecho.esfera} {detalle.recetaOjoDerecho.cilindro} {detalle.recetaOjoDerecho.eje} {detalle.recetaOjoDerecho.adicion}</p>
@@ -300,7 +303,7 @@ export const DetalleExpediente = () => {
                                                     alignItems: 'center'
                                                 }}>
                                                     <h4 style={{ margin: '0%' }}>Ojo Izquierdo</h4>
-                                                    <img src={transportador} style={{ width: '50%' }} alt='transportador'/>
+                                                    <img src={transportador} style={{ width: '50%' }} alt='transportador' />
                                                     <p className='textoPequeño'>A. V. {detalle.recetaOjoIzquierdo.agudezaVisual}</p>
                                                     <p className='textoPequeño'>Dip. {detalle.recetaOjoIzquierdo.distanciaPupilar}</p>
                                                     <p className='textoPequeño'>{detalle.recetaOjoIzquierdo.esfera} {detalle.recetaOjoIzquierdo.cilindro} {detalle.recetaOjoIzquierdo.eje} {detalle.recetaOjoIzquierdo.adicion} </p>

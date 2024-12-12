@@ -7,7 +7,10 @@ import {
   DetalleExpediente
 } from '../pages/index';
 import { NavBar } from '../layout/nabvar/NavBar';
-import { DetalleInventarioVendido } from '../pages/reportes/DetalleInventarioVendido';
+import { 
+  VentasReporte,
+  DetalleInventarioVendido
+ } from '../pages/reportes/index';
 const drawerWidth = 240;
 
 export const ComponentesRoutes = () => {
@@ -24,6 +27,7 @@ export const ComponentesRoutes = () => {
           <Route path="/detalleExpediente" element={<DetalleExpediente />} />
           <Route path="/rangoFactura" element={<RangoFacturas />} />
           <Route path="/detalleInventario" element={<DetalleInventarioVendido />} />
+          <Route path="/ventasReporte" element={<VentasReporte />} />
           {/* <Route path="/reporte" element={<reporteRoutes />} /> */}
 
           <Route path="/*" element={<Pacientes />} />

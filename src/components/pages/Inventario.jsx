@@ -68,6 +68,11 @@ export const Inventario = () => {
     ];
 
     useEffect(() => {
+        if (window.innerWidth < 1900) {
+            document.body.style.zoom = '80%'
+        } else {
+            document.body.style.zoom = '100%'
+        }
         const sucursal = localStorage.getItem('sucursalID');
         appointmentApi.get(`inventario/bySucursal/${sucursal}`, '').then((response) => {
             setListInventario(response.data);

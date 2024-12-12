@@ -107,10 +107,12 @@ const detalleVenta = {
   montoPagos: 0,
   total: 0,
   acuenta: 0,
-  numFacRec: ''
+  numFacRec: '',
+  // entregado: false,
+  // trabajoHecho: false,
+  // estado: true,
 };
 
-//document.body.style.zoom = '90%';
 export const Pacientes = () => {
   let pacienteSeleccionado = '';
   const [openDialogPaciente, setOpenDialogPaciente] = useState(false);
@@ -200,6 +202,11 @@ export const Pacientes = () => {
   ];
 
   useEffect(() => {
+    if (window.innerWidth < 1900) {
+      document.body.style.zoom = '80%'
+    } else {
+      document.body.style.zoom = '100%'
+    }
     // bienvenida();
     appointmentApi.get('paciente', '').then((response) => {
       setListPaciente(response.data);
@@ -497,6 +504,8 @@ export const Pacientes = () => {
                 linea: event.rowData.linea,
                 inventario: event.rowData._id,
                 cantidad: 1,
+                importe: event.rowData.importe,
+                valorGravado: event.rowData.valorGravado,
                 existencia: event.rowData.existencia,
                 precioVenta: event.rowData.precioVenta,
                 // descuento: 0,
@@ -526,6 +535,8 @@ export const Pacientes = () => {
               linea: event.rowData.linea,
               inventario: event.rowData._id,
               cantidad: 1,
+              importe: event.rowData.importe,
+              valorGravado: event.rowData.valorGravado,
               existencia: event.rowData.existencia,
               precioVenta: event.rowData.precioVenta,
               // descuento: 0,
@@ -1022,13 +1033,15 @@ export const Pacientes = () => {
       rtn: datosRtn.rtn,
       nombreRtn: datosRtn.nombre,
       numFacRec: numFacRec,
+      vendedor: localStorage.getItem('nombre'),
       inventario: [...listInvExistente, ...listInvPedido],
       formaPago: detallePagos.formaPago,
-      total: parseFloat(totalVenta).toFixed(2),
-      totalDescuento: parseFloat(totalDescuento).toFixed(2),
-      acuenta: parseFloat(acuenta).toFixed(2),
-      montoPagos: parseFloat(montoPagos).toFixed(2),
-      cantPagos: cantPagos,
+      monto: parseFloat(detallePagos.monto, 2),
+      fecha: detallePagos.fecha,
+      total: parseFloat(totalVenta, 2),
+      totalDescuento: parseFloat(totalDescuento, 2),
+      acuenta: parseFloat(acuenta, 2),
+      montoPagos: parseFloat(montoPagos, 2),
     }
 
     console.log(facturaDatos);
@@ -1085,15 +1098,6 @@ export const Pacientes = () => {
 
     console.log(datosSave);
 
-    // appointmentApi.put(`facturas/imprimirFactura`, facturaDatos)
-    // .then(() => {
-    //   createToast(
-    //     'success',
-    //     'Confirmado',
-    //     'La factura a sido generada'
-    //   );
-    // });
-
     appointmentApi.post('detalleVentas', datosSave)
       .then((response) => {
         if (response.status === 201) {
@@ -1101,24 +1105,47 @@ export const Pacientes = () => {
             .then((response) => {
               if (response.status === 202) {
                 if (op === 'factura' && parseFloat(acuenta) === parseFloat(totalVenta)) {
-                  appointmentApi.put(`facturas/${listRangoFactura[0]._id}`, { ultimaUtilizada: numFacRec }).then();
+                  appointmentApi.put(`facturas/${listRangoFactura[0]._id}`, { ultimaUtilizada: numFacRec }).then(() => {
+                    // appointmentApi.put(`facturas/imprimirFactura`, facturaDatos)
+                    //   .then(() => {
+                    //     createToast(
+                    //       'success',
+                    //       'Confirmado',
+                    //       'La factura a sido generada'
+                    //     );
+                    //   })
+                    //   .catch((error) => {
+                    //     createToast(
+                    //       'error',
+                    //       'Error',
+                    //       'Hubo un error al generar la factura, favor revise la impresora'
+                    //     );
+                    //   });
+                  });
                 } else {
-                  appointmentApi.put(`correlativo/${numReciboActual._id}`, { numRecibo: numFacRec }).then();
+                  appointmentApi.put(`correlativo/${numReciboActual._id}`, { numRecibo: numFacRec }).then(() => {
+                    // appointmentApi.put(`facturas/imprimirRecibo`, facturaDatos)
+                    //   .then(() => {
+                    //     createToast(
+                    //       'success',
+                    //       'Confirmado',
+                    //       'El recibo a sido generado'
+                    //     );
+                    //   })
+                    //   .catch((error) => {
+                    //     createToast(
+                    //       'error',
+                    //       'Error',
+                    //       'Hubo un error al generar el recibo, favor revise la impresora'
+                    //     );
+                    //   });
+                  });
                 }
                 createToast(
                   'success',
                   'Confirmado',
                   'El inventario ha sido actualizado'
                 );
-                // appointmentApi.put(`facturas/imprimirFactura`, facturaDatos)
-                //   .then(() => {
-                //     createToast(
-                //       'success',
-                //       'Confirmado',
-                //       'La factura a sido generada'
-                //     );
-                //   });
-
               }
             });
 
@@ -2606,15 +2633,15 @@ export const Pacientes = () => {
             <div >
               <p style={{ fontSize: '25px' }}>
                 <span style={{ fontWeight: 200 }}>Sub Total: </span>
-                <span>{parseFloat(subtotalVenta).toFixed(2)}</span>
+                <span>{formatearNumero(subtotalVenta)}</span>
               </p>
               <p style={{ fontSize: '25px' }}>
                 <span style={{ fontWeight: 200 }}>Descuento: </span>
-                <span>{parseFloat(totalDescuento).toFixed(2)}</span>
+                <span>{formatearNumero(totalDescuento)}</span>
               </p>
               <p style={{ fontSize: '25px' }}>
                 <span style={{ fontWeight: 200 }}>Total: </span>
-                <span>{parseFloat(totalVenta).toFixed(2)}</span>
+                <span>{formatearNumero(totalVenta)}</span>
               </p>
             </div>
           </div>
