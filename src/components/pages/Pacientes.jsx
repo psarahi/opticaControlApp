@@ -319,7 +319,6 @@ export const Pacientes = () => {
     });
 
     appointmentApi.get(`facturas/facturaRecibo/${sucursal}`).then((response) => {
-      console.log(response);
       if (response.data.factura.length > 1) {
         createToast(
           'error',
@@ -333,8 +332,6 @@ export const Pacientes = () => {
           'No tiene facturas disponibles'
         );
       }
-      console.log(response.data.correlativo[0]);
-      console.log(response.data.factura);
       setlistRangoFactura(response.data.factura);
       setnumReciboActual(response.data.correlativo[0]);
     });

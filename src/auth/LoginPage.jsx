@@ -22,7 +22,6 @@ export const LoginPage = () => {
         if (response.status === 200) {
           setsucursales(response.data);
         }
-        console.log(response);
       })
       .catch((err) => {
         createToast(
@@ -83,8 +82,6 @@ export const LoginPage = () => {
     }
     appointmentApi.post(`usuario/login`, formValues)
       .then(async (response) => {
-        console.log(response);
-
         if (response.status === 201) {
           localStorage.setItem('token', await response.data.token);
           localStorage.setItem('nombre', await response.data.nombre);

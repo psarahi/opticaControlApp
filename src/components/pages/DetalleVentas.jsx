@@ -149,6 +149,8 @@ export const DetalleVentas = () => {
         if (e.cellIndex === 3) {
             appointmentApi.get(`detalleVentas/idPaciente/${e.rowData.idPaciente}`, '')
                 .then((response) => {
+                    console.log(response.data);
+                    
                     setActiveIndex(0)
                     setListDetalleVentas(response.data);
                     setdisabledVenta(response.data[0].estado);
@@ -656,12 +658,12 @@ export const DetalleVentas = () => {
                                                     <span style={{ fontWeight: 200 }}>{dayjs(detalle.fechaEntrega).add(6, 'hour').format('YYYY-MM-DD')}</span>
                                                 </p>
                                             }
-                                        </div>
+                                        </div>          
                                         {
                                             detalle.trabajoHecho &&
                                             <p style={{ fontSize: '20px' }}>
                                                 <span style={{ fontWeight: 500 }}>Trabajo realizado: </span>
-                                                <span style={{ fontWeight: 200 }}>{dayjs(detalle.trabajoRealizado).add(6, 'hour').format('YYYY-MM-DD')}</span>
+                                                <span style={{ fontWeight: 200 }}>{dayjs(detalle.fechaRealizado).add(6, 'hour').format('YYYY-MM-DD')}</span>
                                             </p>
                                         }
                                         {
