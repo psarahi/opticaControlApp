@@ -419,17 +419,19 @@ export const DetalleVentas = () => {
                                                         color="success"
                                                         startIcon={<ConstructionIcon />}
                                                         onClick={(e) => {
-                                                            appointmentApi.put(`detalleVentas/${selectedVentaId}`, { trabajoHecho: true })
-                                                                .then(() => {
+                                                            appointmentApi.put(`detalleVentas/${selectedVentaId}`, { trabajoHecho: true, fechaRealizado: dayjs().format('YYYY-MM-DD') })
+                                                                .then((response) => {
                                                                     setventaView({
                                                                         ...ventaView,
-                                                                        trabajoHecho: true
+                                                                        trabajoHecho: true,
+                                                                        fechaRealizado: response.data.fechaRealizado
                                                                     })
                                                                     setListDetalleVentas(
                                                                         listDetalleVentas.map((i) =>
                                                                             i._id === selectedVentaId ? {
                                                                                 ...i,
-                                                                                trabajoHecho: true
+                                                                                trabajoHecho: true,
+                                                                                fechaRealizado: response.data.fechaRealizado
                                                                             } : i
                                                                         )
                                                                     )
@@ -485,7 +487,7 @@ export const DetalleVentas = () => {
                                                                                     fechaEntrega: response.data.fechaEntrega
                                                                                 } : i
                                                                             )
-                                                                        )
+                                                                        );
                                                                         createToast(
                                                                             'success',
                                                                             'Confirmado',
@@ -621,6 +623,13 @@ export const DetalleVentas = () => {
                                                 <span style={{ fontWeight: 500 }}>Tipo de lente: </span>
                                                 <span style={{ fontWeight: 200 }}>{detalle.tipoLente}</span>
                                             </p>
+                                            <p style={{ fontSize: '20px' }}><span style={{ fontWeight: 500 }}>Protección: </span>
+                                                {
+                                                    detalle.proteccion.map(p => {
+                                                        return <Chip label={p} key={p} sx={{ margin: '3px' }} size="small" color="primary" />
+                                                    })
+                                                }
+                                            </p>
                                             {
                                                 (detalle.tipoVenta !== 'Compra total') &&
                                                 <>
@@ -648,13 +657,13 @@ export const DetalleVentas = () => {
                                                 </p>
                                             }
                                         </div>
-                                        <p style={{ fontSize: '20px' }}><span style={{ fontWeight: 500 }}>Protección: </span>
-                                            {
-                                                detalle.proteccion.map(p => {
-                                                    return <Chip label={p} key={p} sx={{ margin: '3px' }} size="small" color="primary" />
-                                                })
-                                            }
-                                        </p>
+                                        {
+                                            detalle.trabajoHecho &&
+                                            <p style={{ fontSize: '20px' }}>
+                                                <span style={{ fontWeight: 500 }}>Trabajo realizado: </span>
+                                                <span style={{ fontWeight: 200 }}>{dayjs(detalle.trabajoRealizado).add(6, 'hour').format('YYYY-MM-DD')}</span>
+                                            </p>
+                                        }
                                         {
                                             detalle.entregado &&
                                             <Chip label="Entregado" sx={{ margin: '3px' }} size="large" color="success" />

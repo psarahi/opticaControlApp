@@ -68,8 +68,8 @@ export const VentasReporte = () => {
 
     return (
         <>
-        <h1>En proceso...</h1>
-            {/* <h1 style={{ textAlign: 'center', color: '#002946' }}>Reporte de inventario vendido</h1>
+            <h1>En proceso...</h1>
+            <h1 style={{ textAlign: 'center', color: '#002946' }}>Reporte de inventario vendido</h1>
             <Toast ref={toast} />
             <div className="flex align-items-center justify-content-end gap-2">
             </div>
@@ -166,13 +166,13 @@ export const VentasReporte = () => {
                 <Column field="numFacRec" header="#Recibo/Factura"></Column>
                 <Column field="paciente.nombre" header="Paciente"></Column>
                 <Column field="fecha" header="Fecha Venta" body={(data) => dayjs(data.fecha).format('YYYY-MM-DD')}></Column>
-                 <Column field="cantPagos" header="Cant. Pagos"></Column>
-                 <Column header="Pagos realizados" body={(data)=> data.detallePagos.length}></Column>
+                <Column field="cantPagos" header="Cant. Pagos"></Column>
+                <Column header="Pagos realizados" body={(data) => data.detallePagos.length}></Column>
                 <Column field="descuentoTotal" header="Descuento" body={(data) => formatearNumero(data.descuentoTotal)}></Column>
                 <Column header="Credito" body={(data) => formatearNumero((data.total - data.acuenta))}></Column>
                 <Column field="acuenta" header="Acuenta" body={(data) => formatearNumero(data.acuenta)}></Column>
-                <Column field="total" header="Total" body={(data) => formatearNumero(data.total)}></Column> 
-            </DataTable> */}
+                <Column field="total" header="Total" body={(data) => formatearNumero(data.total)}></Column>
+            </DataTable>
         </>
     )
 }
