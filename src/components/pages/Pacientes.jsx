@@ -356,6 +356,7 @@ export const Pacientes = () => {
 
   const handleCloseDialogPaciente = () => {
     setOpenDialogPaciente(false);
+    cleanForm();
   };
 
   const handleCloseDialogReceta = () => {
@@ -403,6 +404,8 @@ export const Pacientes = () => {
     });
 
     setSelectedPaciente(paciente._id);
+    console.log(paciente);
+    
 
     setFormPaciente({
       nombre: paciente.nombre,
@@ -411,9 +414,9 @@ export const Pacientes = () => {
       telefono: paciente.telefono,
       email: paciente.email,
       direccion: paciente.direccion,
-      citaProxima: (textValidator(paciente.citaProxima)) ? dayjs(paciente.citaProxima) : null,
-      fechaRegistro: (textValidator(paciente.fechaRegistro)) ? dayjs(paciente.fechaRegistro) : null,
-      ultimaCita: (textValidator(paciente.ultimaCita)) ? dayjs(paciente.ultimaCita) : null,
+      citaProxima: (textValidator(paciente.citaProxima)) ? formatearFecha(paciente.citaProxima) : null,
+      fechaRegistro: (textValidator(paciente.fechaRegistro)) ? formatearFecha(paciente.fechaRegistro) : null,
+      ultimaCita: (textValidator(paciente.ultimaCita)) ? formatearFecha(paciente.ultimaCita) : null,
       sucursales: paciente.sucursales._id,
     })
 
@@ -1193,7 +1196,7 @@ export const Pacientes = () => {
           size='small'
           sortMode="multiple"
           paginator
-          rows={5}
+          rows={10}
           rowClassName={rowClass}
           rowsPerPageOptions={[5, 10, 25, 50]}
           filters={filters}
