@@ -4,7 +4,8 @@ import {
   Pacientes,
   DetalleVentas,
   RangoFacturas,
-  DetalleExpediente
+  DetalleExpediente,
+  ImportDatos
 } from '../pages/index';
 import { NavBar } from '../layout/nabvar/NavBar';
 import { 
@@ -28,6 +29,7 @@ export const ComponentesRoutes = () => {
           <Route path="/rangoFactura" element={<RangoFacturas />} />
           <Route path="/detalleInventario" element={<DetalleInventarioVendido />} />
           <Route path="/ventasReporte" element={<VentasReporte />} />
+          <Route path='/importDatos' element={<ImportDatos />}/>
           {/* <Route path="/reporte" element={<reporteRoutes />} /> */}
 
           <Route path="/*" element={<Pacientes />} />

@@ -19,6 +19,7 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import FolderIcon from '@mui/icons-material/Folder';
 import PointOfSaleIcon from '@mui/icons-material/PointOfSale';
 import NumbersIcon from '@mui/icons-material/Numbers';
+import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 
 const drawerWidth = 240;
 
@@ -162,6 +163,16 @@ export const NavBar = () => {
                 <NumbersIcon />
               </ListItemIcon>
               <ListItemText primary="Facturas" />
+            </ListItemButton>
+            <ListItemButton
+              sx={{ pl: 4 }}
+              component={NavLink}
+              to='/importDatos'
+            >
+              <ListItemIcon>
+                <CloudUploadIcon />
+              </ListItemIcon>
+              <ListItemText primary="Importar datos" />
             </ListItemButton>
           </List>
         </Collapse>

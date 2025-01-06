@@ -50,18 +50,20 @@ export const DetalleVentas = () => {
         }
         const sucursal = localStorage.getItem('sucursalID');
         appointmentApi.get(`facturas/facturaRecibo/${sucursal}`).then((response) => {
-            if (response.data.factura.length > 1) {
-                createToast(
-                    'error',
-                    'Error',
-                    'Solo puede tener un rango de facturas activo'
-                );
-            } else if (response.data.factura[0].ultimaUtilizada === response.data.factura[0].hasta) {
-                createToast(
-                    'error',
-                    'Error',
-                    'No tiene facturas disponibles'
-                );
+            if (response.data.factura.length > 0) {
+                if (response.data.factura.length > 1) {
+                    createToast(
+                        'error',
+                        'Error',
+                        'Solo puede tener un rango de facturas activo'
+                    );
+                } else if (response.data.factura[0].ultimaUtilizada === response.data.factura[0].hasta) {
+                    createToast(
+                        'error',
+                        'Error',
+                        'No tiene facturas disponibles'
+                    );
+                }
             }
             setfacturas(response.data.factura);
             setCorrelativo(response.data.correlativo[0]);
@@ -74,7 +76,14 @@ export const DetalleVentas = () => {
     }, [])
 
     const revisarRangoFacturas = () => {
-        if (facturas.length > 1) {
+        if (facturas.length < 1) {
+            createToast(
+                'error',
+                'Error',
+                'Debe ingresar un rango de facturas'
+            );
+            return false;
+        } else if (facturas.length > 1) {
             createToast(
                 'error',
                 'Error',
@@ -118,7 +127,13 @@ export const DetalleVentas = () => {
         });
         const sucursal = localStorage.getItem('sucursalID');
         appointmentApi.get(`facturas/facturaRecibo/${sucursal}`).then((response) => {
-            if (response.data.factura.length > 1) {
+            if (response.data.factura.length < 1) {
+                createToast(
+                    'error',
+                    'Error',
+                    'Debe ingresar un rango de facturas'
+                );
+            } else if (response.data.factura.length > 1) {
                 createToast(
                     'error',
                     'Error',
@@ -150,7 +165,7 @@ export const DetalleVentas = () => {
             appointmentApi.get(`detalleVentas/idPaciente/${e.rowData.idPaciente}`, '')
                 .then((response) => {
                     console.log(response.data);
-                    
+
                     setActiveIndex(0)
                     setListDetalleVentas(response.data);
                     setdisabledVenta(response.data[0].estado);
@@ -658,7 +673,7 @@ export const DetalleVentas = () => {
                                                     <span style={{ fontWeight: 200 }}>{dayjs(detalle.fechaEntrega).add(6, 'hour').format('YYYY-MM-DD')}</span>
                                                 </p>
                                             }
-                                        </div>          
+                                        </div>
                                         {
                                             detalle.trabajoHecho &&
                                             <p style={{ fontSize: '20px' }}>

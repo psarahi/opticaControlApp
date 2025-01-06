@@ -180,7 +180,11 @@ export const Pacientes = () => {
     },
     {
       value: 5,
-      label: 'Blue'
+      label: 'Foto Blue'
+    },
+    {
+      value: 6,
+      label: 'Foto Rosa'
     }
   ];
 
@@ -190,7 +194,7 @@ export const Pacientes = () => {
     'Flap top',
     'Progresivo',
     'Invisible',
-    'Cripto',
+    'Kripto',
     'L/C Cosmetico',
     'L/C Blando',
     'L/C Torico',
@@ -319,7 +323,14 @@ export const Pacientes = () => {
     });
 
     appointmentApi.get(`facturas/facturaRecibo/${sucursal}`).then((response) => {
-      if (response.data.factura.length > 1) {
+      console.log(response);
+      if (response.data.factura.length < 1) {
+        createToast(
+          'error',
+          'Error',
+          'Debe ingresar un rango de facturas activo'
+        );
+      } else if (response.data.factura.length > 1) {
         createToast(
           'error',
           'Error',
@@ -332,6 +343,7 @@ export const Pacientes = () => {
           'No tiene facturas disponibles'
         );
       }
+
       setlistRangoFactura(response.data.factura);
       setnumReciboActual(response.data.correlativo[0]);
     });
@@ -405,7 +417,7 @@ export const Pacientes = () => {
 
     setSelectedPaciente(paciente._id);
     console.log(paciente);
-    
+
 
     setFormPaciente({
       nombre: paciente.nombre,
@@ -441,7 +453,14 @@ export const Pacientes = () => {
     } else if (event.cellIndex === 2) {
       handleEnable();
     } else if (event.cellIndex === 3) {
-      if (listRangoFactura.length > 1) {
+      if (listRangoFactura.length < 1) {
+        createToast(
+          'error',
+          'Error',
+          'Debe ingresar un rango de facturas activo'
+        );
+        return
+      } else if (listRangoFactura.length > 1) {
         createToast(
           'error',
           'Error',
@@ -456,6 +475,7 @@ export const Pacientes = () => {
         );
         return
       }
+
       handleOpenDialogVenta();
     } else if (event.cellIndex === 4) {
       appointmentApi.get(`expediente/paciente/${event.rowData._id}`, '')
@@ -1221,9 +1241,9 @@ export const Pacientes = () => {
           <Column field="telefono" header="Telefono" filter bodyStyle={{ textAlign: 'center' }}></Column>
           <Column field="direccion" header="Direccion" filter></Column>
           <Column field="sucursales.nombre" header="Sucursal" filter></Column>
-          <Column field="fechaRegistro" header="Registro" body={(data) => formatearFecha(data.fechaRegistro)}></Column>
-          <Column field="ultimaCita" header="Ultima cita" body={(data) => formatearFecha(data.ultimaCita)}></Column>
-          <Column field="citaProxima" header="Cita Proxima" body={(data) => formatearFecha(data.citaProxima)}></Column>
+          <Column field="fechaRegistro" header="Registro" body={(data) => (textValidator(data.fechaRegistro)) ? formatearFecha(data.fechaRegistro) : '-'}></Column>
+          <Column field="ultimaCita" header="Ultima cita" body={(data) => (textValidator(data.ultimaCita)) ? formatearFecha(data.ultimaCita) : '-'}></Column>
+          <Column field="citaProxima" header="Cita Proxima" body={(data) => (textValidator(data.citaProxima)) ? formatearFecha(data.citaProxima) : '-'}></Column>
         </DataTable>
       </div >
       {/* Formulario para guardar Paciente*/}
