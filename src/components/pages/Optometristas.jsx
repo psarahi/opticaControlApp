@@ -21,7 +21,7 @@ export const Optometristas = () => {
 
   const optometristaJSON = {
     nombre: '',
-    sucursales: ''
+    sucursales: localStorage.getItem('sucursalID')
   }
   let idOptometrista = '';
   const [listOptometristas, setListOptometristas] = useState([]);
@@ -58,44 +58,30 @@ export const Optometristas = () => {
   };
 
   const onCellSelect = (event) => {
-    console.log(event);
     idOptometrista = event.rowData._id;
-    console.log(idOptometrista);
     setOptometristasSelected(event.rowData._id);
 
     const sucursales = event.rowData.sucursales.nombre;
-    console.log(sucursales);
-    setFormOptometrista({
-      _id: event.rowData._id,
+    let test = {
       nombre: event.rowData.nombre,
-      sucursales: event.rowData.sucursales.nombre,
+      sucursales: event.rowData.sucursales._id,
+    }
+    console.log(test);
+    
+    setFormOptometrista({
+      nombre: event.rowData.nombre,
+      sucursales: event.rowData.sucursales._id,
     });
-    console.log(setFormOptometrista.nombre);
     if (event.cellIndex === 0) {
       handleEdit();
     } else if (event.cellIndex === 1) {
-      handleDisable();
-    } else if (event.cellIndex === 2) {
-      handleEnable();
+      handleDeleteOptometrista();
     }
   };
 
   const handleEdit = () => {
     handleOpenDialog();
   };
-
-  const handleDisable = () => {
-          confirmDialog({
-              message: `¿Desea deshabilitar el registro? `,
-              header: 'Deshabilitar',
-              icon: 'pi pi-info-circle',
-              defaultFocus: 'reject',
-              acceptClassName: 'p-button-danger',
-              accept: acceptDialogDisable,
-              reject: rejectDialogDisable
-          });
-      };
-  
 
   const handleCloseDialog = () => {
     cleanForm();
@@ -108,95 +94,31 @@ export const Optometristas = () => {
     idOptometrista = '';
   };
 
-  const acceptDialogDisable = () => {
-    if (textValidator(idOptometrista)) {
-      opticaControlApi.put(`optometrista/cambiarEstado/${idOptometrista}`, { estado: false })
-        .then((response) => {
-          if (response.status === 200) {
-            createToast(
-              'success',
-              'Confirmado',
-              'El registro a sido deshabilitado'
-            );
-
-            setListOptometristas(
-              listOptometristas.map(i =>
-                i._id === idOptometrista ? {
-                  ...i,
-                  estado: response.data.estado
-                } : i
-              )
-            );
-            console.log(response);
-            cleanForm();
-          } else {
-            createToast(
-              'error',
-              'Error',
-              response.statusText,
-            );
-            console.log(response.data);
-            cleanForm();
-            return;
-          }
-        })
-        .catch((err) => {
-          createToast(
-            'error',
-            'Error',
-            'Ha ocurrido un error al intentar deshabilitar el registro'
-          );
-          console.log(err);
-          handleCloseDialog();
-          cleanForm();
-        });
-    } else {
-      createToast(
-        'warn',
-        'Acction requerida',
-        'No se selecciono el inventario correctamente'
-      );
-    }
-  }
-
-  const rejectDialogDisable = () => {
-    createToast(
-      'warn',
-      'Cancelado',
-      'Acción cancelada'
-    );
-  }
-  const handleEnable = () => {
+  const handleDeleteOptometrista = () => {
     confirmDialog({
-      message: `¿Desea habilitar el registro? `,
-      header: 'Habilitar',
+      message: `¿Desea eliminar este registro? `,
+      header: 'Eliminar',
       icon: 'pi pi-info-circle',
       defaultFocus: 'reject',
       acceptClassName: 'p-button-danger',
-      accept: acceptDialogEnable,
-      reject: rejectDialogEnable
+      accept: deleteOptometrista,
+      reject: rejectDialogDelete
     });
   };
 
-  const acceptDialogEnable = () => {
+  const deleteOptometrista = () => {
     if (textValidator(idOptometrista)) {
-      opticaControlApi.put(`optometrista/cambiarEstado/${idOptometrista}`, { estado: true })
+      opticaControlApi.delete(`optometrista/${idOptometrista}`)
         .then((response) => {
           if (response.status === 200) {
             createToast(
               'success',
               'Confirmado',
-              'El registro a sido deshabilitado'
+              'El registro ha sido eliminado'
             );
             setListOptometristas(
-              listOptometristas.map(i =>
-                i._id === idOptometrista ? {
-                  ...i,
-                  estado: response.data.estado
-                } : i
-              )
+              listOptometristas.filter(i => i._id !== idOptometrista)
             );
-            console.log(response);
             cleanForm();
           } else {
             createToast(
@@ -204,16 +126,14 @@ export const Optometristas = () => {
               'Error',
               response.statusText,
             );
-            console.log(response.data);
             cleanForm();
-            return;
           }
         })
         .catch((err) => {
           createToast(
             'error',
             'Error',
-            'Ha ocurrido un error al intentar habilitar el registro'
+            'Ha ocurrido un error al intentar eliminar el registro'
           );
           console.log(err);
           handleCloseDialog();
@@ -222,13 +142,13 @@ export const Optometristas = () => {
     } else {
       createToast(
         'warn',
-        'Acction requerida',
-        'No se selecciono el inventario correctamente'
+        'Acción requerida',
+        'No se seleccionó el optometrista correctamente'
       );
     }
-  }
+}
 
-  const rejectDialogEnable = () => {
+  const rejectDialogDelete = () => {
     createToast(
       'warn',
       'Cancelado',
@@ -295,8 +215,6 @@ export const Optometristas = () => {
         >
           <Column body={renderEditButton} style={{ textAlign: 'center' }}></Column>
           <Column body={renderDeleteButton} style={{ textAlign: 'center' }}></Column>
-          <Column body={renderChangeStatus} style={{ textAlign: 'center' }}></Column>
-          <Column field="_id" header="ID"></Column>
           <Column field="nombre" header="Nombre"></Column>
           <Column field="sucursales.nombre" header="Sucursal"></Column>
         </DataTable>
@@ -312,7 +230,7 @@ export const Optometristas = () => {
           onSubmit: (event) => {
             event.preventDefault();
             console.log(formOptometrista);
-            if (!textValidator(formOptometrista.id) && !textValidator(formOptometrista.nombre) && !textValidator(formOptometrista.sucursales)) {
+            if (!textValidator(formOptometrista.nombre) && !textValidator(formOptometrista.sucursales)) {
               createToast(
                 'warn',
                 'Acción requerida',
@@ -321,11 +239,7 @@ export const Optometristas = () => {
               return;
             }
             if (textValidator(optometristasSelected)) {
-              const sucursal = localStorage.getItem('sucursalID');
-              opticaControlApi.put(`optometrista/${optometristasSelected}`, {
-                ...formOptometrista,
-                sucursal,
-              })
+              opticaControlApi.put(`optometrista/${optometristasSelected}`, formOptometrista)
                 .then((response) => {
                   if (response.status === 202) {
                     createToast(
@@ -336,7 +250,7 @@ export const Optometristas = () => {
                     handleCloseDialog();
                     setListOptometristas(
                       listOptometristas.map((i) =>
-                        i._id === optometristasSelected ? { ...i, ...formOptometrista } : i
+                        i._id === optometristasSelected ? { ...i, ...response.data } : i
                       )
                     );
                     cleanForm();
@@ -362,11 +276,7 @@ export const Optometristas = () => {
                   cleanForm();
                 });
             } else {
-              const sucursal = localStorage.getItem('sucursalID');
-              opticaControlApi.post('optometrista', {
-                ...formOptometrista,
-                sucursal,
-              })
+              opticaControlApi.post('optometrista', formOptometrista)
                 .then((response) => {
                   if (response.status === 201) {
                     createToast(
@@ -375,6 +285,8 @@ export const Optometristas = () => {
                       'El registro fue creado correctamente'
                     );
                     handleCloseDialog();
+                    console.log(response.data);
+                    
                     setListOptometristas([...listOptometristas, response.data]);
                     console.log(response);
                     cleanForm();
@@ -405,11 +317,6 @@ export const Optometristas = () => {
       >
         <DialogTitle>Datos del optometrista</DialogTitle>
         <DialogContent                 >
-          <p style={{
-            textAlign: 'center',
-            fontWeight: '100',
-            fontSize: '22px'
-          }}>Rango autorizado</p>
           <div style={{
             display: 'flex',
             flexDirection: 'row',
