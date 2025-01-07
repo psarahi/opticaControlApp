@@ -20,6 +20,7 @@ import FolderIcon from '@mui/icons-material/Folder';
 import PointOfSaleIcon from '@mui/icons-material/PointOfSale';
 import NumbersIcon from '@mui/icons-material/Numbers';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+import TrackChangesIcon from '@mui/icons-material/TrackChanges';
 
 const drawerWidth = 240;
 
@@ -173,6 +174,16 @@ export const NavBar = () => {
                 <CloudUploadIcon />
               </ListItemIcon>
               <ListItemText primary="Importar datos" />
+            </ListItemButton>
+            <ListItemButton
+              sx={{ pl: 4 }}
+              component={NavLink}
+              to='/optometristas'
+            >
+              <ListItemIcon>
+                <TrackChangesIcon />
+              </ListItemIcon>
+              <ListItemText primary="Optometristas" />
             </ListItemButton>
           </List>
         </Collapse>
