@@ -62,6 +62,10 @@ export const Optometristas = () => {
     setOptometristasSelected(event.rowData._id);
 
     const sucursales = event.rowData.sucursales.nombre;
+<<<<<<< HEAD
+=======
+    console.log(sucursales);
+>>>>>>> f111542cda2cfff4c45cc25583e94414a380d1e7
     let test = {
       nombre: event.rowData.nombre,
       sucursales: event.rowData.sucursales._id,
@@ -72,6 +76,10 @@ export const Optometristas = () => {
       nombre: event.rowData.nombre,
       sucursales: event.rowData.sucursales._id,
     });
+<<<<<<< HEAD
+=======
+    console.log(formOptometrista);
+>>>>>>> f111542cda2cfff4c45cc25583e94414a380d1e7
     if (event.cellIndex === 0) {
       handleEdit();
     } else if (event.cellIndex === 1) {
@@ -83,6 +91,22 @@ export const Optometristas = () => {
     handleOpenDialog();
   };
 
+<<<<<<< HEAD
+=======
+  const handleDisable = () => {
+    confirmDialog({
+      message: `¿Desea deshabilitar el registro? `,
+      header: 'Deshabilitar',
+      icon: 'pi pi-info-circle',
+      defaultFocus: 'reject',
+      acceptClassName: 'p-button-danger',
+      accept: acceptDialogDisable,
+      reject: rejectDialogDisable
+    });
+  };
+
+
+>>>>>>> f111542cda2cfff4c45cc25583e94414a380d1e7
   const handleCloseDialog = () => {
     cleanForm();
     setOpenDialog(false);
@@ -215,6 +239,10 @@ export const Optometristas = () => {
         >
           <Column body={renderEditButton} style={{ textAlign: 'center' }}></Column>
           <Column body={renderDeleteButton} style={{ textAlign: 'center' }}></Column>
+<<<<<<< HEAD
+=======
+          <Column body={renderChangeStatus} style={{ textAlign: 'center' }}></Column>
+>>>>>>> f111542cda2cfff4c45cc25583e94414a380d1e7
           <Column field="nombre" header="Nombre"></Column>
           <Column field="sucursales.nombre" header="Sucursal"></Column>
         </DataTable>
