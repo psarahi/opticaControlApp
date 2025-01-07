@@ -1,28 +1,45 @@
 import { React, useEffect, useState, useRef } from 'react'
 import { DataTable, Column } from 'primereact';
 import { Toast } from 'primereact/toast';
+import { ConfirmDialog, confirmDialog } from 'primereact/confirmdialog';
 
-import { Button } from '@mui/material';
+import {
+  Button, Dialog, DialogActions, DialogContent,
+  DialogTitle, TextField
+} from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import CancelIcon from '@mui/icons-material/Cancel';
 import DoneIcon from '@mui/icons-material/Done';
 
 import { opticaControlApi } from '../../services/opticaControlApi';
+import { textValidator } from '../../helpers/validator';
+import { formatearFecha } from '../../helpers/formato';
 
 export const Optometristas = () => {
 
+
+  const optometristaJSON = {
+    _id: '',
+    nombre: '',
+    sucursales: ''
+  }
   let idOptometrista = '';
   const [listOptometristas, setListOptometristas] = useState([]);
   const [optometristasSelected, setOptometristasSelected] = useState(null);
+  const [formOptometrista, setFormOptometrista] = useState(false);
   const [openDialog, setOpenDialog] = useState(false);
-  const toast = useRef(null);
 
   useEffect(() => {
+    const sucursal = localStorage.getItem('sucursalID');
     const fetchOptometristas = async () => {
       try {
-        const response = await opticaControlApi.get('optometrista');
-        setListOptometristas(response.data); 
+        const response = await opticaControlApi.get('optometrista', {
+          params: {
+            sucursalID: sucursal
+          }
+        });
+        setListOptometristas(response.data);
       } catch (error) {
         console.error('Error fetching optometristas:', error);
         toast.current?.show({ severity: 'error', summary: 'Error', detail: 'No se pudieron cargar los datos', life: 3000 });
@@ -31,10 +48,207 @@ export const Optometristas = () => {
 
     fetchOptometristas();
   }, []);
+  const toast = useRef(null);
+
+  const createToast = (severity, summary, detail) => {
+    toast.current.show({ severity: severity, summary: summary, detail: detail, life: 6000 });
+  };
 
   const handleOpenDialog = () => {
     setOpenDialog(true);
   };
+
+  const onCellSelect = (event) => {
+    console.log(event);
+    idOptometrista = event.rowData._id;
+    console.log(idOptometrista);
+    setOptometristasSelected(event.rowData._id);
+
+    const sucursales = event.rowData.sucursales.nombre;
+    console.log(sucursales);
+    setFormOptometrista({
+      _id: event.rowData._id,
+      nombre: event.rowData.nombre,
+      sucursales: event.rowData.sucursales.nombre,
+    });
+    console.log(setFormOptometrista.nombre);
+    if (event.cellIndex === 0) {
+      handleEdit();
+    } else if (event.cellIndex === 1) {
+      handleDisable();
+    } else if (event.cellIndex === 2) {
+      handleEnable();
+    }
+  };
+
+  const handleEdit = () => {
+    handleOpenDialog();
+  };
+
+  const handleCloseDialog = () => {
+    cleanForm();
+    setOpenDialog(false);
+  };
+
+  const cleanForm = () => {
+    setFormOptometrista(optometristaJSON);
+    setOptometristasSelected('');
+    idOptometrista = '';
+  };
+
+  const handleDisable = () => {
+    confirmDialog({
+      message: `¿Desea deshabilitar el registro? `,
+      header: 'Deshabilitar',
+      icon: 'pi pi-info-circle',
+      defaultFocus: 'reject',
+      acceptClassName: 'p-button-danger',
+      accept: acceptDialogDisable,
+      reject: rejectDialogDisable
+    });
+  };
+
+  const acceptDialogDisable = () => {
+    if (textValidator(idOptometrista)) {
+      opticaControlApi.put(`optometrista/cambiarEstado/${idOptometrista}`, { estado: false })
+        .then((response) => {
+          if (response.status === 200) {
+            createToast(
+              'success',
+              'Confirmado',
+              'El registro a sido deshabilitado'
+            );
+
+            setListOptometristas(
+              listOptometristas.map(i =>
+                i._id === idOptometrista ? {
+                  ...i,
+                  estado: response.data.estado
+                } : i
+              )
+            );
+            console.log(response);
+            cleanForm();
+          } else {
+            createToast(
+              'error',
+              'Error',
+              response.statusText,
+            );
+            console.log(response.data);
+            cleanForm();
+            return;
+          }
+        })
+        .catch((err) => {
+          createToast(
+            'error',
+            'Error',
+            'Ha ocurrido un error al intentar deshabilitar el registro'
+          );
+          console.log(err);
+          handleCloseDialog();
+          cleanForm();
+        });
+    } else {
+      createToast(
+        'warn',
+        'Acction requerida',
+        'No se selecciono el inventario correctamente'
+      );
+    }
+  }
+
+  const rejectDialogDisable = () => {
+    createToast(
+      'warn',
+      'Cancelado',
+      'Acción cancelada'
+    );
+  }
+  const handleEnable = () => {
+    confirmDialog({
+      message: `¿Desea habilitar el registro? `,
+      header: 'Habilitar',
+      icon: 'pi pi-info-circle',
+      defaultFocus: 'reject',
+      acceptClassName: 'p-button-danger',
+      accept: acceptDialogEnable,
+      reject: rejectDialogEnable
+    });
+  };
+
+  const acceptDialogEnable = () => {
+    if (textValidator(idOptometrista)) {
+      opticaControlApi.put(`facturas/cambiarEstado/${idOptometrista}`, { estado: true })
+        .then((response) => {
+          if (response.status === 200) {
+            createToast(
+              'success',
+              'Confirmado',
+              'El registro a sido deshabilitado'
+            );
+            setListOptometristas(
+              listOptometristas.map(i =>
+                i._id === idOptometrista ? {
+                  ...i,
+                  estado: response.data.estado
+                } : i
+              )
+            );
+            console.log(response);
+            cleanForm();
+          } else {
+            createToast(
+              'error',
+              'Error',
+              response.statusText,
+            );
+            console.log(response.data);
+            cleanForm();
+            return;
+          }
+        })
+        .catch((err) => {
+          createToast(
+            'error',
+            'Error',
+            'Ha ocurrido un error al intentar habilitar el registro'
+          );
+          console.log(err);
+          handleCloseDialog();
+          cleanForm();
+        });
+    } else {
+      createToast(
+        'warn',
+        'Acction requerida',
+        'No se selecciono el inventario correctamente'
+      );
+    }
+  }
+
+  const rejectDialogEnable = () => {
+    createToast(
+      'warn',
+      'Cancelado',
+      'Acción cancelada'
+    );
+  }
+
+  const handleChangeText = ({ target }, select) => {
+    setFormOptometrista({
+      ...formOptometrista,
+      [select]: target.value
+    })
+  };
+  const rowClass = (data) => {
+    return {
+      'bg-green-100': data.estado === true,
+      'bg-red-100': data.estado === false,
+    }
+  };
+
 
   const renderEditButton = (data) => {
     if (data.estado !== true) {
@@ -53,6 +267,7 @@ export const Optometristas = () => {
       return <CancelIcon color='error' fontSize='medium' />
     }
   };
+
   return (
     <>
       <h1>Optometristas</h1>
@@ -70,6 +285,13 @@ export const Optometristas = () => {
           rows={10}
           rowsPerPageOptions={[5, 10, 15]}
           selection={optometristasSelected}
+          rowClassName={rowClass}
+          selectionMode="single"
+          cellSelection
+          onCellSelect={onCellSelect}
+          scrollable
+          columnResizeMode="expand"
+          resizableColumns
         >
           <Column body={renderEditButton} style={{ textAlign: 'center' }}></Column>
           <Column body={renderDeleteButton} style={{ textAlign: 'center' }}></Column>
@@ -79,6 +301,161 @@ export const Optometristas = () => {
           <Column field="sucursales.nombre" header="Sucursal"></Column>
         </DataTable>
       </div>
+      <Dialog
+        open={openDialog}
+        disableEscapeKeyDown={true}
+        maxWidth="sm"
+        fullWidth={true}
+        onClose={handleCloseDialog}
+        PaperProps={{
+          component: 'form',
+          onSubmit: (event) => {
+            event.preventDefault();
+            console.log(formOptometrista);
+            if (!textValidator(formOptometrista.id) && !textValidator(formOptometrista.nombre) && !textValidator(formOptometrista.sucursales)) {
+              createToast(
+                'warn',
+                'Acción requerida',
+                'Favor ingrese los datos necesarios'
+              );
+              return;
+            }
+            if (textValidator(optometristasSelected)) {
+              opticaControlApi.put(`facturas/${optometristasSelected}`, formOptometrista)
+                .then((response) => {
+                  if (response.status === 202) {
+                    createToast(
+                      'success',
+                      'Confirmado',
+                      'El registro fue editado correctamente'
+                    );
+                    handleCloseDialog();
+                    setListOptometristas(
+                      listOptometristas.map((i) =>
+                        i._id === optometristasSelected ? { ...i, ...formOptometrista } : i
+                      )
+                    );
+                    cleanForm();
+                  } else {
+                    createToast(
+                      'error',
+                      'Error',
+                      response.statusText,
+                    );
+                    console.log(response.data);
+                    cleanForm();
+                    return;
+                  }
+                })
+                .catch((err) => {
+                  createToast(
+                    'error',
+                    'Error',
+                    'Ha ocurrido un error'
+                  );
+                  console.log(err);
+                  handleCloseDialog();
+                  cleanForm();
+                });
+            } else {
+              opticaControlApi.post('facturas', formOptometrista)
+                .then((response) => {
+                  if (response.status === 201) {
+                    createToast(
+                      'success',
+                      'Confirmado',
+                      'El registro fue creado correctamente'
+                    );
+                    handleCloseDialog();
+                    setListOptometristas([...listOptometristas, response.data]);
+                    console.log(response);
+                    cleanForm();
+                  } else {
+                    createToast(
+                      'error',
+                      'Error',
+                      response.statusText,
+                    );
+                    console.log(response.data);
+                    cleanForm();
+                    return;
+                  }
+                })
+                .catch((err) => {
+                  createToast(
+                    'error',
+                    'Error',
+                    'Ha ocurrido un error'
+                  );
+                  console.log(err);
+                  handleCloseDialog();
+                  cleanForm();
+                });
+            }
+          },
+        }}
+      >
+        <DialogTitle>Datos del optometrista</DialogTitle>
+        <DialogContent                 >
+          <p style={{
+            textAlign: 'center',
+            fontWeight: '100',
+            fontSize: '22px'
+          }}>Rango autorizado</p>
+          <div style={{
+            display: 'flex',
+            flexDirection: 'row',
+            gap: '30px',
+            marginBottom: '2%'
+          }}>
+            <TextField
+              required
+              value={formOptometrista._id}
+              onChange={(event) => handleChangeText(event, '_id')}
+              margin="dense"
+              id="_id"
+              name="_id"
+              label="ID"
+              sx={{ width: "70%" }}
+              variant="standard"
+              size="medium"
+            />
+            <TextField
+              required
+              value={formOptometrista.nombre}
+              onChange={(event) => handleChangeText(event, 'nombre')}
+              margin="dense"
+              id="nombre"
+              name="nombre"
+              label="Nombre"
+              sx={{ width: "70%" }}
+              variant="standard"
+              size="medium"
+            />
+          </div>
+          <div>
+            <p style={{ color: '#696969' }}>Sucursal</p>
+            <TextField
+              required
+              value={formOptometrista.sucursales}
+              onChange={(event) => handleChangeText(event, 'sucursales')}
+              margin="dense"
+              id="sucursales"
+              name="sucursales"
+              sx={{ width: "30%" }}
+              variant="standard"
+              size="medium"
+            />
+          </div>
+          <br />
+          <br />
+
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDialog} >Cancelar</Button>
+          <Button variant='contained' type="submit">Guardar</Button>
+        </DialogActions>
+      </Dialog>
     </>
   )
 }

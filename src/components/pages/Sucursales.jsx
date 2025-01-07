@@ -20,7 +20,13 @@ export const Sucursales = () => {
     useEffect(() => {
         const fetchSucursales = async () => {
             try {
-                const response = await opticaControlApi.get('sucursal');
+                const sucursal = localStorage.getItem('sucursalID');
+                const response = await opticaControlApi.get('sucursal',{
+                    params: {
+                        sucursalId: sucursal
+                    }
+                }
+                );
                 console.log(response.data);
                 setListSucursales(response.data);
             } catch (error) {
