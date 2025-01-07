@@ -5,5 +5,6 @@ export * from './Inventario';
 export * from './DetalleVentas';
 export * from './RangoFacturas'
 export * from './DetalleExpediente'
-export * from './ImportDatos'
-export * from './Optometristas'
+export * from './ImportDatos';
+export * from './Optometristas';
+export * from './Sucursales';

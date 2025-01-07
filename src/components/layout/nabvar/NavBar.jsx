@@ -21,6 +21,7 @@ import PointOfSaleIcon from '@mui/icons-material/PointOfSale';
 import NumbersIcon from '@mui/icons-material/Numbers';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import TrackChangesIcon from '@mui/icons-material/TrackChanges';
+import LocalConvenienceStoreIcon from '@mui/icons-material/LocalConvenienceStore';
 
 const drawerWidth = 240;
 
@@ -184,6 +185,16 @@ export const NavBar = () => {
                 <TrackChangesIcon />
               </ListItemIcon>
               <ListItemText primary="Optometristas" />
+            </ListItemButton>
+            <ListItemButton
+              sx={{ pl: 4 }}
+              component={NavLink}
+              to='/sucursales'
+            >
+              <ListItemIcon>
+                <LocalConvenienceStoreIcon />
+              </ListItemIcon>
+              <ListItemText primary="Sucursales" />
             </ListItemButton>
           </List>
         </Collapse>
