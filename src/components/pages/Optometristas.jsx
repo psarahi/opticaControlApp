@@ -20,14 +20,13 @@ export const Optometristas = () => {
 
 
   const optometristaJSON = {
-    _id: '',
     nombre: '',
     sucursales: ''
   }
   let idOptometrista = '';
   const [listOptometristas, setListOptometristas] = useState([]);
   const [optometristasSelected, setOptometristasSelected] = useState(null);
-  const [formOptometrista, setFormOptometrista] = useState(false);
+  const [formOptometrista, setFormOptometrista] = useState(optometristaJSON);
   const [openDialog, setOpenDialog] = useState(false);
 
   useEffect(() => {
@@ -85,6 +84,19 @@ export const Optometristas = () => {
     handleOpenDialog();
   };
 
+  const handleDisable = () => {
+          confirmDialog({
+              message: `¿Desea deshabilitar el registro? `,
+              header: 'Deshabilitar',
+              icon: 'pi pi-info-circle',
+              defaultFocus: 'reject',
+              acceptClassName: 'p-button-danger',
+              accept: acceptDialogDisable,
+              reject: rejectDialogDisable
+          });
+      };
+  
+
   const handleCloseDialog = () => {
     cleanForm();
     setOpenDialog(false);
@@ -94,18 +106,6 @@ export const Optometristas = () => {
     setFormOptometrista(optometristaJSON);
     setOptometristasSelected('');
     idOptometrista = '';
-  };
-
-  const handleDisable = () => {
-    confirmDialog({
-      message: `¿Desea deshabilitar el registro? `,
-      header: 'Deshabilitar',
-      icon: 'pi pi-info-circle',
-      defaultFocus: 'reject',
-      acceptClassName: 'p-button-danger',
-      accept: acceptDialogDisable,
-      reject: rejectDialogDisable
-    });
   };
 
   const acceptDialogDisable = () => {
@@ -180,7 +180,7 @@ export const Optometristas = () => {
 
   const acceptDialogEnable = () => {
     if (textValidator(idOptometrista)) {
-      opticaControlApi.put(`facturas/cambiarEstado/${idOptometrista}`, { estado: true })
+      opticaControlApi.put(`optometrista/cambiarEstado/${idOptometrista}`, { estado: true })
         .then((response) => {
           if (response.status === 200) {
             createToast(
@@ -275,7 +275,7 @@ export const Optometristas = () => {
       <br />
       <br />
       <Toast ref={toast} />
-      {/* <ConfirmDialog /> */}
+      <ConfirmDialog />
       <div style={{ width: '65%' }}>
         <DataTable value={listOptometristas} tableStyle={{ minWidth: '50rem' }}
           showGridlines
@@ -321,7 +321,11 @@ export const Optometristas = () => {
               return;
             }
             if (textValidator(optometristasSelected)) {
-              opticaControlApi.put(`facturas/${optometristasSelected}`, formOptometrista)
+              const sucursal = localStorage.getItem('sucursalID');
+              opticaControlApi.put(`optometrista/${optometristasSelected}`, {
+                ...formOptometrista,
+                sucursal,
+              })
                 .then((response) => {
                   if (response.status === 202) {
                     createToast(
@@ -358,7 +362,11 @@ export const Optometristas = () => {
                   cleanForm();
                 });
             } else {
-              opticaControlApi.post('facturas', formOptometrista)
+              const sucursal = localStorage.getItem('sucursalID');
+              opticaControlApi.post('optometrista', {
+                ...formOptometrista,
+                sucursal,
+              })
                 .then((response) => {
                   if (response.status === 201) {
                     createToast(
@@ -410,18 +418,6 @@ export const Optometristas = () => {
           }}>
             <TextField
               required
-              value={formOptometrista._id}
-              onChange={(event) => handleChangeText(event, '_id')}
-              margin="dense"
-              id="_id"
-              name="_id"
-              label="ID"
-              sx={{ width: "70%" }}
-              variant="standard"
-              size="medium"
-            />
-            <TextField
-              required
               value={formOptometrista.nombre}
               onChange={(event) => handleChangeText(event, 'nombre')}
               margin="dense"
@@ -434,18 +430,6 @@ export const Optometristas = () => {
             />
           </div>
           <div>
-            <p style={{ color: '#696969' }}>Sucursal</p>
-            <TextField
-              required
-              value={formOptometrista.sucursales}
-              onChange={(event) => handleChangeText(event, 'sucursales')}
-              margin="dense"
-              id="sucursales"
-              name="sucursales"
-              sx={{ width: "30%" }}
-              variant="standard"
-              size="medium"
-            />
           </div>
           <br />
           <br />

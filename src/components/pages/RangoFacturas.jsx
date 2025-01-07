@@ -103,7 +103,7 @@ export const RangoFacturas = () => {
         idFactura = event.rowData._id;
         console.log(idFactura);
         setfacturaSelected(event.rowData._id);
-        
+
         setFormFactura({
             desde: event.rowData.desde,
             hasta: event.rowData.hasta,
@@ -328,7 +328,7 @@ export const RangoFacturas = () => {
                                 'Favor ingrese los datos necesarios'
                             );
                             return;
-                        }                        
+                        }
                         if (textValidator(facturaSelected)) {
                             opticaControlApi.put(`facturas/${facturaSelected}`, formFactura)
                                 .then((response) => {
