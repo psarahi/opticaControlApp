@@ -26,7 +26,7 @@ import { Select as SelectReact } from "react-dropdown-select";
 
 import dayjs from 'dayjs';
 
-import { appointmentApi } from '../../services/appointmentApi';
+import { opticaControlApi } from '../../services/opticaControlApi';
 import { formatearFecha, formatearNumero } from '../../helpers/formato';
 import { textValidator, validarFechaProxima } from '../../helpers/validator';
 import './PacienteStyle.css';
@@ -213,13 +213,13 @@ export const Pacientes = () => {
       document.body.style.zoom = '100%'
     }
     // bienvenida();
-    appointmentApi.get('paciente', '').then((response) => {
+    opticaControlApi.get('paciente', '').then((response) => {
       setListPaciente(response.data);
     });
-    appointmentApi.get('sucursal', '').then((response) => {
+    opticaControlApi.get('sucursal', '').then((response) => {
       setlistSucursal(response.data);
     });
-    appointmentApi.get('optometrista', '').then((response) => {
+    opticaControlApi.get('optometrista', '').then((response) => {
       setlistoptometrista(response.data);
     });
 
@@ -318,11 +318,11 @@ export const Pacientes = () => {
     setrtnenable(false);
     const sucursal = localStorage.getItem('sucursalID');
 
-    appointmentApi.get(`inventario/activos/${sucursal}`, '').then((response) => {
+    opticaControlApi.get(`inventario/activos/${sucursal}`, '').then((response) => {
       setListInventario(response.data);
     });
 
-    appointmentApi.get(`facturas/facturaRecibo/${sucursal}`).then((response) => {
+    opticaControlApi.get(`facturas/facturaRecibo/${sucursal}`).then((response) => {
       console.log(response);
       if (response.data.factura.length < 1) {
         createToast(
@@ -478,7 +478,7 @@ export const Pacientes = () => {
 
       handleOpenDialogVenta();
     } else if (event.cellIndex === 4) {
-      appointmentApi.get(`expediente/paciente/${event.rowData._id}`, '')
+      opticaControlApi.get(`expediente/paciente/${event.rowData._id}`, '')
         .then(async (response) => {
           setlistExpedientePaciente(await response.data);
         });
@@ -774,7 +774,7 @@ export const Pacientes = () => {
 
   const acceptDialogDisable = () => {
     if (textValidator(pacienteSeleccionado)) {
-      appointmentApi.put(`paciente/cambiarEstado/${pacienteSeleccionado}`, { estado: false })
+      opticaControlApi.put(`paciente/cambiarEstado/${pacienteSeleccionado}`, { estado: false })
         .then((response) => {
           if (response.status === 200) {
             createToast(
@@ -843,7 +843,7 @@ export const Pacientes = () => {
 
   const acceptDialogEnable = () => {
     if (textValidator(pacienteSeleccionado)) {
-      appointmentApi.put(`paciente/cambiarEstado/${pacienteSeleccionado}`, { estado: true })
+      opticaControlApi.put(`paciente/cambiarEstado/${pacienteSeleccionado}`, { estado: true })
         .then((response) => {
           if (response.status === 200) {
             createToast(
@@ -1115,15 +1115,15 @@ export const Pacientes = () => {
 
     console.log(datosSave);
 
-    appointmentApi.post('detalleVentas', datosSave)
+    opticaControlApi.post('detalleVentas', datosSave)
       .then((response) => {
         if (response.status === 201) {
-          appointmentApi.put('inventario/actualizarInventario', { detalleInventario: listInvExistente })
+          opticaControlApi.put('inventario/actualizarInventario', { detalleInventario: listInvExistente })
             .then((response) => {
               if (response.status === 202) {
                 if (op === 'factura' && parseFloat(acuenta) === parseFloat(totalVenta)) {
-                  appointmentApi.put(`facturas/${listRangoFactura[0]._id}`, { ultimaUtilizada: numFacRec }).then(() => {
-                    // appointmentApi.put(`facturas/imprimirFactura`, facturaDatos)
+                  opticaControlApi.put(`facturas/${listRangoFactura[0]._id}`, { ultimaUtilizada: numFacRec }).then(() => {
+                    // opticaControlApi.put(`facturas/imprimirFactura`, facturaDatos)
                     //   .then(() => {
                     //     createToast(
                     //       'success',
@@ -1140,8 +1140,8 @@ export const Pacientes = () => {
                     //   });
                   });
                 } else {
-                  appointmentApi.put(`correlativo/${numReciboActual._id}`, { numRecibo: numFacRec }).then(() => {
-                    // appointmentApi.put(`facturas/imprimirRecibo`, facturaDatos)
+                  opticaControlApi.put(`correlativo/${numReciboActual._id}`, { numRecibo: numFacRec }).then(() => {
+                    // opticaControlApi.put(`facturas/imprimirRecibo`, facturaDatos)
                     //   .then(() => {
                     //     createToast(
                     //       'success',
@@ -1259,7 +1259,7 @@ export const Pacientes = () => {
             event.preventDefault();
 
             if (textValidator(selectedPaciente)) {
-              appointmentApi.put(`paciente/${selectedPaciente}`, formPacientes)
+              opticaControlApi.put(`paciente/${selectedPaciente}`, formPacientes)
                 .then((response) => {
                   if (response.status === 202) {
                     createToast(
@@ -1292,7 +1292,7 @@ export const Pacientes = () => {
                   cleanForm();
                 });
             } else {
-              appointmentApi.post('paciente', formPacientes)
+              opticaControlApi.post('paciente', formPacientes)
                 .then((response) => {
                   if (response.status === 201) {
                     createToast(
@@ -1552,7 +1552,7 @@ export const Pacientes = () => {
             console.log(datosExpedientes);
 
             if (textValidator(expedienteId)) {
-              appointmentApi.put(`expediente/${expedienteId}`, datosExpedientes)
+              opticaControlApi.put(`expediente/${expedienteId}`, datosExpedientes)
                 .then((response) => {
                   if (response.status === 202) {
                     createToast(
@@ -1592,7 +1592,7 @@ export const Pacientes = () => {
                 );
                 return;
               }
-              appointmentApi.post('expediente', datosExpedientes)
+              opticaControlApi.post('expediente', datosExpedientes)
                 .then((response) => {
                   if (response.status === 201) {
                     createToast(

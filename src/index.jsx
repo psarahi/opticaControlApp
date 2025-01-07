@@ -10,18 +10,18 @@ import { CssBaseline, ThemeProvider } from '@mui/material';
 
 import { BlueTheme } from './theme/BlueTheme';
 import { BrowserRouter } from 'react-router-dom';
-import { AppointmentApp } from './AppointmentApp';
+import { OpticaControlApp } from './OpticaControlApp';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   //<React.StrictMode>
-    <ThemeProvider theme={BlueTheme}>
-      <BrowserRouter>
-        <CssBaseline />
-        <AppointmentApp />
-      </BrowserRouter>
-    </ThemeProvider>
- // </React.StrictMode>
+  <ThemeProvider theme={BlueTheme}>
+    <BrowserRouter>
+      <CssBaseline />
+      <OpticaControlApp />
+    </BrowserRouter>
+  </ThemeProvider>
+  // </React.StrictMode>
 );
 
 // If you want to start measuring performance in your app, pass a function

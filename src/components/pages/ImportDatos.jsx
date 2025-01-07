@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useRef } from 'react'
 import * as XLSX from "xlsx";
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
@@ -6,8 +6,7 @@ import Button from '@mui/material/Button';
 import { formatearFecha } from '../../helpers/formato';
 import { textValidator } from '../../helpers/validator';
 
-import { ProgressSpinner } from 'primereact/progressspinner';
-import { appointmentApi } from '../../services/appointmentApi';
+import { opticaControlApi } from '../../services/opticaControlApi';
 import { Toast } from 'primereact';
 
 const docExport = [{
@@ -96,7 +95,7 @@ export const ImportDatos = () => {
     };
 
     const saveCliente = () => {
-        appointmentApi.post('paciente/multipleSave', dataImport)
+        opticaControlApi.post('paciente/multipleSave', dataImport)
             .then((response) => {
                 if (response.status === 201) {
                     createToast(

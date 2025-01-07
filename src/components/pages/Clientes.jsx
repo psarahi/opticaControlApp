@@ -25,7 +25,7 @@ import { formatearFecha } from '../../helpers/formato.js'
 import { textValidator } from '../../helpers/validator.js'
 import { DatePicker } from '@mui/x-date-pickers';
 
-import { appointmentApi } from '../../services/appointmentApi';
+import { opticaControlApi } from '../../services/opticaControlApi.js';
 
 export const Clientes = () => {
   let clienteSeleccionado = '';
@@ -40,7 +40,7 @@ export const Clientes = () => {
   })
 
   useEffect(() => {
-    appointmentApi.get('cliente', '').then((response) => {
+    opticaControlApi.get('cliente', '').then((response) => {
       setclientes(response.data);
     })
     cleanForm();
@@ -100,7 +100,7 @@ export const Clientes = () => {
 
   const acceptDialog = () => {
     if (!textValidator(clienteSeleccionado)) {
-      appointmentApi.delete(`cliente/${clienteSeleccionado}`)
+      opticaControlApi.delete(`cliente/${clienteSeleccionado}`)
         .then((response) => {
           if (response.status === 200) {
             createToast(
@@ -249,7 +249,7 @@ export const Clientes = () => {
             }
 
             if (!textValidator(selectedCliente)) {
-              appointmentApi.put(`cliente/${selectedCliente}`, formValues)
+              opticaControlApi.put(`cliente/${selectedCliente}`, formValues)
                 .then((response) => {
                   console.log(response.status);
 
@@ -286,7 +286,7 @@ export const Clientes = () => {
                   cleanForm();
                 });
             } else {
-              appointmentApi.post('cliente', formValues)
+              opticaControlApi.post('cliente', formValues)
                 .then((response) => {
                   if (response.status === 201) {
                     createToast(

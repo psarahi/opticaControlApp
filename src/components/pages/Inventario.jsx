@@ -15,7 +15,7 @@ import {
     from '@mui/material';
 //import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 
-import { appointmentApi } from '../../services/appointmentApi';
+import { opticaControlApi } from '../../services/opticaControlApi';
 import { formatearNumero } from '../../helpers/formato';
 import './InventarioStyle.css';
 import { textValidator } from '../../helpers/validator';
@@ -74,7 +74,7 @@ export const Inventario = () => {
             document.body.style.zoom = '100%'
         }
         const sucursal = localStorage.getItem('sucursalID');
-        appointmentApi.get(`inventario/bySucursal/${sucursal}`, '').then((response) => {
+        opticaControlApi.get(`inventario/bySucursal/${sucursal}`, '').then((response) => {
             setListInventario(response.data);
         })
         cleanForm();
@@ -170,7 +170,7 @@ export const Inventario = () => {
 
     const acceptDialogDisable = () => {
         if (textValidator(inventarioSeleccionado)) {
-            appointmentApi.put(`inventario/cambiarEstado/${inventarioSeleccionado}`, { estado: false })
+            opticaControlApi.put(`inventario/cambiarEstado/${inventarioSeleccionado}`, { estado: false })
                 .then((response) => {
                     if (response.status === 200) {
                         createToast(
@@ -242,7 +242,7 @@ export const Inventario = () => {
 
     const acceptDialogEnable = () => {
         if (textValidator(inventarioSeleccionado)) {
-            appointmentApi.put(`inventario/cambiarEstado/${inventarioSeleccionado}`, { estado: true })
+            opticaControlApi.put(`inventario/cambiarEstado/${inventarioSeleccionado}`, { estado: true })
                 .then((response) => {
                     if (response.status === 200) {
                         createToast(
@@ -445,7 +445,7 @@ export const Inventario = () => {
 
 
                         if (textValidator(selectedInventario)) {
-                            appointmentApi.put(`inventario/${selectedInventario}`, formValues)
+                            opticaControlApi.put(`inventario/${selectedInventario}`, formValues)
                                 .then((response) => {
                                     if (response.status === 202) {
                                         createToast(
@@ -484,7 +484,7 @@ export const Inventario = () => {
                                 });
                         } else {
 
-                            appointmentApi.post('inventario', formValues)
+                            opticaControlApi.post('inventario', formValues)
                                 .then((response) => {
                                     if (response.status === 201) {
                                         createToast(

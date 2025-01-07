@@ -20,7 +20,7 @@ import { formatearFecha, formatearNumero } from '../../helpers/formato';
 import './DetalleVentasStyle.css';
 import { nuevaFactura } from '../../helpers/nuevaFactura';
 import { textValidator } from '../../helpers/validator';
-import { appointmentApi } from '../../services/appointmentApi';
+import { opticaControlApi } from '../../services/opticaControlApi';
 
 export const DetalleVentas = () => {
     const [listPaciente, setListPaciente] = useState([]);
@@ -49,7 +49,7 @@ export const DetalleVentas = () => {
             document.body.style.zoom = '100%'
         }
         const sucursal = localStorage.getItem('sucursalID');
-        appointmentApi.get(`facturas/facturaRecibo/${sucursal}`).then((response) => {
+        opticaControlApi.get(`facturas/facturaRecibo/${sucursal}`).then((response) => {
             if (response.data.factura.length > 0) {
                 if (response.data.factura.length > 1) {
                     createToast(
@@ -69,7 +69,7 @@ export const DetalleVentas = () => {
             setCorrelativo(response.data.correlativo[0]);
         });
 
-        appointmentApi.get('detalleVentas/pacientes', '').then((response) => {
+        opticaControlApi.get('detalleVentas/pacientes', '').then((response) => {
             setListPaciente(response.data);
         });
 
@@ -126,7 +126,7 @@ export const DetalleVentas = () => {
             usuarios: localStorage.getItem('usuarioId')
         });
         const sucursal = localStorage.getItem('sucursalID');
-        appointmentApi.get(`facturas/facturaRecibo/${sucursal}`).then((response) => {
+        opticaControlApi.get(`facturas/facturaRecibo/${sucursal}`).then((response) => {
             if (response.data.factura.length < 1) {
                 createToast(
                     'error',
@@ -162,7 +162,7 @@ export const DetalleVentas = () => {
 
     const onCellSelect = (e) => {
         if (e.cellIndex === 3) {
-            appointmentApi.get(`detalleVentas/idPaciente/${e.rowData.idPaciente}`, '')
+            opticaControlApi.get(`detalleVentas/idPaciente/${e.rowData.idPaciente}`, '')
                 .then((response) => {
                     console.log(response.data);
 
@@ -256,7 +256,7 @@ export const DetalleVentas = () => {
         const facturaDatos = obtenerDatosFactura(numFacRec);
         console.log(facturaDatos);
 
-        // appointmentApi.put(`facturas/imprimirRecibo`, facturaDatos)
+        // opticaControlApi.put(`facturas/imprimirRecibo`, facturaDatos)
         //     .then(() => {
         //         createToast(
         //             'success',
@@ -272,7 +272,7 @@ export const DetalleVentas = () => {
         //         );
         //     });
 
-        appointmentApi.put(`detalleVentas/detallePago/${selectedVentaId}`, { detallePago: formdetallePagos, numFacRec: numFacRec })
+        opticaControlApi.put(`detalleVentas/detallePago/${selectedVentaId}`, { detallePago: formdetallePagos, numFacRec: numFacRec })
             .then((response) => {
                 if (response.status === 202) {
                     createToast(
@@ -281,8 +281,8 @@ export const DetalleVentas = () => {
                         'El pago fue registrdo correctamente'
                     );
                     if (op === 'factura' && (parseFloat(formdetallePagos.monto) + parseFloat(ventaView.acuenta)) === parseFloat(ventaView.total)) {
-                        appointmentApi.put(`facturas/${facturas[0]._id}`, { ultimaUtilizada: numFacRec }).then(() => {
-                            // appointmentApi.put(`facturas/imprimirFactura`, facturaDatos)
+                        opticaControlApi.put(`facturas/${facturas[0]._id}`, { ultimaUtilizada: numFacRec }).then(() => {
+                            // opticaControlApi.put(`facturas/imprimirFactura`, facturaDatos)
                             //     .then(() => {
                             //         createToast(
                             //             'success',
@@ -299,8 +299,8 @@ export const DetalleVentas = () => {
                             //     });
                         });
                     } else {
-                        appointmentApi.put(`correlativo/${correlativo._id}`, { numRecibo: numFacRec }).then(() => {
-                            // appointmentApi.put(`facturas/imprimirRecibo`, facturaDatos)
+                        opticaControlApi.put(`correlativo/${correlativo._id}`, { numRecibo: numFacRec }).then(() => {
+                            // opticaControlApi.put(`facturas/imprimirRecibo`, facturaDatos)
                             //     .then(() => {
                             //         createToast(
                             //             'success',
@@ -436,7 +436,7 @@ export const DetalleVentas = () => {
                                                         color="success"
                                                         startIcon={<ConstructionIcon />}
                                                         onClick={(e) => {
-                                                            appointmentApi.put(`detalleVentas/${selectedVentaId}`, { trabajoHecho: true, fechaRealizado: dayjs().format('YYYY-MM-DD') })
+                                                            opticaControlApi.put(`detalleVentas/${selectedVentaId}`, { trabajoHecho: true, fechaRealizado: dayjs().format('YYYY-MM-DD') })
                                                                 .then((response) => {
                                                                     setventaView({
                                                                         ...ventaView,
@@ -484,7 +484,7 @@ export const DetalleVentas = () => {
                                                                     'La venta aún requiere pago'
                                                                 );
                                                             } else {
-                                                                appointmentApi.put(`detalleVentas/${selectedVentaId}`,
+                                                                opticaControlApi.put(`detalleVentas/${selectedVentaId}`,
                                                                     { entregado: true, trabajoHecho: true, fechaEntrega: dayjs().format('YYYY-MM-DD') })
                                                                     .then((response) => {
                                                                         console.log(response);
@@ -531,7 +531,7 @@ export const DetalleVentas = () => {
                                                         color="error"
                                                         startIcon={<CloseIcon />}
                                                         onClick={(e) => {
-                                                            appointmentApi.put(`detalleVentas/cancelarVenta/${selectedVentaId}`, {})
+                                                            opticaControlApi.put(`detalleVentas/cancelarVenta/${selectedVentaId}`, {})
                                                                 .then(() => {
                                                                     setventaView({
                                                                         ...ventaView,
@@ -572,7 +572,7 @@ export const DetalleVentas = () => {
                                                         console.log(facturaDatos);
 
                                                         // if (facturaDatos.numFacRec.length === 19) {
-                                                        //     appointmentApi.put(`facturas/imprimirFactura`, facturaDatos)
+                                                        //     opticaControlApi.put(`facturas/imprimirFactura`, facturaDatos)
                                                         //         .then(() => {
                                                         //             createToast(
                                                         //                 'success',
@@ -589,7 +589,7 @@ export const DetalleVentas = () => {
                                                         //             );
                                                         //         });
                                                         // } else {
-                                                        //     appointmentApi.put(`facturas/imprimirRecibo`, facturaDatos)
+                                                        //     opticaControlApi.put(`facturas/imprimirRecibo`, facturaDatos)
                                                         //         .then(() => {
                                                         //             createToast(
                                                         //                 'success',

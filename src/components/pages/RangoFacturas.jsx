@@ -16,7 +16,7 @@ import {
 }
     from '@mui/material';
 
-import { appointmentApi } from '../../services/appointmentApi';
+import { opticaControlApi } from '../../services/opticaControlApi';
 import { textValidator } from '../../helpers/validator';
 import { formatearFecha } from '../../helpers/formato';
 
@@ -37,7 +37,7 @@ export const RangoFacturas = () => {
 
     useEffect(() => {
         const sucursal = localStorage.getItem('sucursalID');
-        appointmentApi.get(`facturas/bySucursal/${sucursal}`, '').then((response) => {
+        opticaControlApi.get(`facturas/bySucursal/${sucursal}`, '').then((response) => {
             console.log(response.data);
             setListFacturas(response.data);
         })
@@ -139,7 +139,7 @@ export const RangoFacturas = () => {
 
     const acceptDialogDisable = () => {
         if (textValidator(idFactura)) {
-            appointmentApi.put(`facturas/cambiarEstado/${idFactura}`, { estado: false })
+            opticaControlApi.put(`facturas/cambiarEstado/${idFactura}`, { estado: false })
                 .then((response) => {
                     if (response.status === 200) {
                         createToast(
@@ -210,7 +210,7 @@ export const RangoFacturas = () => {
 
     const acceptDialogEnable = () => {
         if (textValidator(idFactura)) {
-            appointmentApi.put(`facturas/cambiarEstado/${idFactura}`, { estado: true })
+            opticaControlApi.put(`facturas/cambiarEstado/${idFactura}`, { estado: true })
                 .then((response) => {
                     if (response.status === 200) {
                         createToast(
@@ -330,7 +330,7 @@ export const RangoFacturas = () => {
                             return;
                         }                        
                         if (textValidator(facturaSelected)) {
-                            appointmentApi.put(`facturas/${facturaSelected}`, formFactura)
+                            opticaControlApi.put(`facturas/${facturaSelected}`, formFactura)
                                 .then((response) => {
                                     if (response.status === 202) {
                                         createToast(
@@ -367,7 +367,7 @@ export const RangoFacturas = () => {
                                     cleanForm();
                                 });
                         } else {
-                            appointmentApi.post('facturas', formFactura)
+                            opticaControlApi.post('facturas', formFactura)
                                 .then((response) => {
                                     if (response.status === 201) {
                                         createToast(

@@ -5,7 +5,7 @@ import { DataTable, Column, Tooltip, Button as ButtonPrime } from 'primereact';
 
 import { Button, TextField } from '@mui/material';
 import './DetalleInventarioVendidoStyle.css'
-import { appointmentApi } from '../../../services/appointmentApi';
+import { opticaControlApi } from '../../../services/opticaControlApi';
 export const DetalleInventarioVendido = () => {
     const [fechas, setfechas] = useState({
         fechaInicial: dayjs().format('YYYY-MM-DD'),
@@ -48,7 +48,7 @@ export const DetalleInventarioVendido = () => {
     const handleConsultar = (inicio, fin) => {
         console.log(inicio, fin);
 
-        appointmentApi.get(`detalleVentas/detalleInventario/${localStorage.getItem('sucursalID')}/${inicio}/${fin}`)
+        opticaControlApi.get(`detalleVentas/detalleInventario/${localStorage.getItem('sucursalID')}/${inicio}/${fin}`)
             .then((response) => {
                     console.log(response);
                     setdetalleVentas(response.data);

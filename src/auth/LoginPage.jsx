@@ -7,17 +7,16 @@ import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import { textValidator } from '../helpers/validator';
 import { Toast } from 'primereact/toast';
 
-import { appointmentApi } from '../services/appointmentApi';
+import { opticaControlApi } from '../services/opticaControlApi';
 
 export const LoginPage = () => {
   const navigate = useNavigate();
   const [sucursales, setsucursales] = useState([]);
-  const [sucursal, setsucursal] = useState('');
 
   useEffect(() => {
     document.body.style.zoom = '100%';
 
-    appointmentApi.get('sucursal', '')
+    opticaControlApi.get('sucursal', '')
       .then((response) => {
         if (response.status === 200) {
           setsucursales(response.data);
@@ -36,7 +35,8 @@ export const LoginPage = () => {
 
   const [formValues, setFormValues] = useState({
     usuario: '',
-    password: ''
+    password: '',
+    sucursal: ''
   })
 
   const toast = useRef(null);
@@ -72,7 +72,7 @@ export const LoginPage = () => {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    if (!textValidator(formValues.usuario) || !textValidator(formValues.password)) {
+    if (!textValidator(formValues.usuario) || !textValidator(formValues.password) || !textValidator(formValues.sucursal)) {
       createToast(
         'warn',
         'Accion requerida',
@@ -80,14 +80,14 @@ export const LoginPage = () => {
       );
       return;
     }
-    appointmentApi.post(`usuario/login`, formValues)
+    opticaControlApi.post(`usuario/login`, formValues)
       .then(async (response) => {
         if (response.status === 201) {
           localStorage.setItem('token', await response.data.token);
           localStorage.setItem('nombre', await response.data.nombre);
           localStorage.setItem('usuarioId', await response.data.uid);
-          localStorage.setItem('sucursalID', sucursal);
-          const sucrsalFilter = sucursales.filter(s => s._id === sucursal);
+          localStorage.setItem('sucursalID', formValues.sucursal);
+          const sucrsalFilter = sucursales.filter(s => s._id === formValues.sucursal);
           localStorage.setItem('sucursalNombre', sucrsalFilter[0].nombre);
           navigate('/pacientes');
           cleanForm();
@@ -161,8 +161,8 @@ export const LoginPage = () => {
                 <Select
                   labelId="sucursal"
                   id="sucursal"
-                  value={sucursal}
-                  onChange={(e) => setsucursal(e.target.value)}
+                  value={formValues.sucursal}
+                  onChange={(event) => handleChangeText(event, 'sucursal')}
                   label="Age"
                 >
                   {

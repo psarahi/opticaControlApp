@@ -5,7 +5,7 @@ import { DataTable, Column, Tooltip, Button as ButtonPrime } from 'primereact';
 
 import { Button, TextField } from '@mui/material';
 import './VentasReporteStyle.css'
-import { appointmentApi } from '../../../services/appointmentApi';
+import { opticaControlApi } from '../../../services/opticaControlApi';
 import { formatearNumero } from '../../../helpers/formato';
 
 export const VentasReporte = () => {
@@ -31,7 +31,7 @@ export const VentasReporte = () => {
     const handleConsultar = (inicio, fin) => {
         console.log(inicio, fin);
 
-        appointmentApi.get(`detalleVentas/reporteVentas/${localStorage.getItem('sucursalID')}/${inicio}/${fin}`)
+        opticaControlApi.get(`detalleVentas/reporteVentas/${localStorage.getItem('sucursalID')}/${inicio}/${fin}`)
             .then((response) => {
                 if (response.status === 200) {
                     console.log(response.data);

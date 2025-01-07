@@ -4,7 +4,7 @@ import { Toast, DataTable, Column, FilterMatchMode, TabView, TabPanel } from 'pr
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import dayjs from 'dayjs';
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
-import { appointmentApi } from '../../services/appointmentApi';
+import { opticaControlApi } from '../../services/opticaControlApi';
 
 import 'react-date-picker/dist/DatePicker.css';
 import 'react-calendar/dist/Calendar.css';
@@ -34,7 +34,7 @@ export const DetalleExpediente = () => {
         } else {
             document.body.style.zoom = '100%'
         }
-        appointmentApi.get('expediente/pacientes', '').then((response) => {
+        opticaControlApi.get('expediente/pacientes', '').then((response) => {
             setListPaciente(response.data);
         });
 
@@ -46,7 +46,7 @@ export const DetalleExpediente = () => {
 
     const onCellSelect = (e) => {
         if (e.cellIndex === 1) {
-            appointmentApi.get(`expediente/pacienteExpediente/${e.rowData.paciente._id}`, '')
+            opticaControlApi.get(`expediente/pacienteExpediente/${e.rowData.paciente._id}`, '')
                 .then((response) => {
                     console.log(response.data);
                     setListDetalleExpediente(response.data.expedientes);
