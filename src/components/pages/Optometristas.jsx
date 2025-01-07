@@ -21,7 +21,7 @@ export const Optometristas = () => {
 
   const optometristaJSON = {
     nombre: '',
-    sucursales: ''
+    sucursales: localStorage.getItem('sucursalID')
   }
   let idOptometrista = '';
   const [listOptometristas, setListOptometristas] = useState([]);
@@ -65,12 +65,17 @@ export const Optometristas = () => {
 
     const sucursales = event.rowData.sucursales.nombre;
     console.log(sucursales);
-    setFormOptometrista({
-      _id: event.rowData._id,
+    let test = {
       nombre: event.rowData.nombre,
-      sucursales: event.rowData.sucursales.nombre,
+      sucursales: event.rowData.sucursales._id,
+    }
+    console.log(test);
+    
+    setFormOptometrista({
+      nombre: event.rowData.nombre,
+      sucursales: event.rowData.sucursales._id,
     });
-    console.log(setFormOptometrista.nombre);
+    console.log(formOptometrista);
     if (event.cellIndex === 0) {
       handleEdit();
     } else if (event.cellIndex === 1) {
@@ -85,17 +90,17 @@ export const Optometristas = () => {
   };
 
   const handleDisable = () => {
-          confirmDialog({
-              message: `¿Desea deshabilitar el registro? `,
-              header: 'Deshabilitar',
-              icon: 'pi pi-info-circle',
-              defaultFocus: 'reject',
-              acceptClassName: 'p-button-danger',
-              accept: acceptDialogDisable,
-              reject: rejectDialogDisable
-          });
-      };
-  
+    confirmDialog({
+      message: `¿Desea deshabilitar el registro? `,
+      header: 'Deshabilitar',
+      icon: 'pi pi-info-circle',
+      defaultFocus: 'reject',
+      acceptClassName: 'p-button-danger',
+      accept: acceptDialogDisable,
+      reject: rejectDialogDisable
+    });
+  };
+
 
   const handleCloseDialog = () => {
     cleanForm();
@@ -296,7 +301,6 @@ export const Optometristas = () => {
           <Column body={renderEditButton} style={{ textAlign: 'center' }}></Column>
           <Column body={renderDeleteButton} style={{ textAlign: 'center' }}></Column>
           <Column body={renderChangeStatus} style={{ textAlign: 'center' }}></Column>
-          <Column field="_id" header="ID"></Column>
           <Column field="nombre" header="Nombre"></Column>
           <Column field="sucursales.nombre" header="Sucursal"></Column>
         </DataTable>
@@ -312,7 +316,7 @@ export const Optometristas = () => {
           onSubmit: (event) => {
             event.preventDefault();
             console.log(formOptometrista);
-            if (!textValidator(formOptometrista.id) && !textValidator(formOptometrista.nombre) && !textValidator(formOptometrista.sucursales)) {
+            if (!textValidator(formOptometrista.nombre) && !textValidator(formOptometrista.sucursales)) {
               createToast(
                 'warn',
                 'Acción requerida',
@@ -321,11 +325,7 @@ export const Optometristas = () => {
               return;
             }
             if (textValidator(optometristasSelected)) {
-              const sucursal = localStorage.getItem('sucursalID');
-              opticaControlApi.put(`optometrista/${optometristasSelected}`, {
-                ...formOptometrista,
-                sucursal,
-              })
+              opticaControlApi.put(`optometrista/${optometristasSelected}`, formOptometrista)
                 .then((response) => {
                   if (response.status === 202) {
                     createToast(
@@ -336,7 +336,7 @@ export const Optometristas = () => {
                     handleCloseDialog();
                     setListOptometristas(
                       listOptometristas.map((i) =>
-                        i._id === optometristasSelected ? { ...i, ...formOptometrista } : i
+                        i._id === optometristasSelected ? { ...i, ...response.data } : i
                       )
                     );
                     cleanForm();
@@ -362,11 +362,7 @@ export const Optometristas = () => {
                   cleanForm();
                 });
             } else {
-              const sucursal = localStorage.getItem('sucursalID');
-              opticaControlApi.post('optometrista', {
-                ...formOptometrista,
-                sucursal,
-              })
+              opticaControlApi.post('optometrista', formOptometrista)
                 .then((response) => {
                   if (response.status === 201) {
                     createToast(
@@ -375,6 +371,8 @@ export const Optometristas = () => {
                       'El registro fue creado correctamente'
                     );
                     handleCloseDialog();
+                    console.log(response.data);
+                    
                     setListOptometristas([...listOptometristas, response.data]);
                     console.log(response);
                     cleanForm();
@@ -405,11 +403,6 @@ export const Optometristas = () => {
       >
         <DialogTitle>Datos del optometrista</DialogTitle>
         <DialogContent                 >
-          <p style={{
-            textAlign: 'center',
-            fontWeight: '100',
-            fontSize: '22px'
-          }}>Rango autorizado</p>
           <div style={{
             display: 'flex',
             flexDirection: 'row',
