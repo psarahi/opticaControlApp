@@ -38,7 +38,6 @@ export const RangoFacturas = () => {
     useEffect(() => {
         const sucursal = localStorage.getItem('sucursalID');
         opticaControlApi.get(`facturas/bySucursal/${sucursal}`, '').then((response) => {
-            console.log(response.data);
             setListFacturas(response.data);
         })
         cleanForm();
@@ -99,9 +98,7 @@ export const RangoFacturas = () => {
     }
 
     const onCellSelect = (event) => {
-        console.log(event);
         idFactura = event.rowData._id;
-        console.log(idFactura);
         setfacturaSelected(event.rowData._id);
 
         setFormFactura({
@@ -273,10 +270,31 @@ export const RangoFacturas = () => {
         })
     };
 
+    const printTest = () => {
+        opticaControlApi.post(`thermalPrinter/print`, { content: "Prueba desde app React" })
+            .then((response) => {
+                createToast(
+                    'success',
+                    'Confirmado',
+                    'Exito'
+                );
+                console.log(response);
+            })
+            .catch((err) => {
+                createToast(
+                    'error',
+                    'Error',
+                    'Ha ocurrido un error al intentar habilitar el registro'
+                );
+                console.log(err);
+            });
+    };
+
     return (
         <>
             <h1>Informacion sobre Inventario </h1>
             <Button variant='outlined' startIcon={<AddIcon />} onClick={handleOpenDialog}>Agregar</Button>
+            <Button onClick={printTest}>Prueba Print</Button>
             <br />
             <br />
             <Toast ref={toast} />
@@ -320,7 +338,6 @@ export const RangoFacturas = () => {
                     component: 'form',
                     onSubmit: (event) => {
                         event.preventDefault();
-                        console.log(formFactura);
                         if (!textValidator(formFactura.desde) && !textValidator(formFactura.hasta) && !textValidator(formFactura.fechaLimiteEmision)) {
                             createToast(
                                 'warn',
