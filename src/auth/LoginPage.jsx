@@ -123,7 +123,7 @@ export const LoginPage = () => {
           height: '100vh',
           backgroundColor: '#94d0ff6e',
           position: 'relative',
-          margin: '0%'
+          margin: '0%',
         }}>
         <Box
           sx={{
@@ -138,16 +138,16 @@ export const LoginPage = () => {
             left: '50%',
             transform: 'translate(-50%, -50%)',
             boxShadow: '15px 14px 20px 0px #10294663',
-
           }}
         >
-          <div style={{ backgroundColor: '#102946' }}>
+          <div style={{ backgroundColor: '#102946' ,borderRadius: '10px'}}>
           </div>
           <div
             style={{
               width: '100%',
               backgroundColor: '#ffffff',
-              padding: '10%'
+              padding: '10%',
+              borderRadius: '10px'
             }}
           >
             <h1 style={{ color: 'primary.main' }}>Inicio de sesión</h1>
