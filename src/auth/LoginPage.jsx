@@ -111,6 +111,9 @@ export const LoginPage = () => {
       });
 
   };
+  const handleRegistro = () => { 
+    navigate('/registro');
+  }
 
   return (
     <>
@@ -203,9 +206,11 @@ export const LoginPage = () => {
                 }
               />
               <br />
-              <Link href='#' underline='hover' sx={{
+              <Link to='/registro' underline='hover' sx={{
                 color: 'primary.main', fontWeight: 'bold', fontSize: '18px',
-              }}>
+              }}
+              onClick={handleRegistro}
+              >
                 {'Crear cuenta'}
               </Link>
             </Box>
