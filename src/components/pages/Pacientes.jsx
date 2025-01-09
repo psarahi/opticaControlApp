@@ -31,9 +31,6 @@ import { formatearFecha, formatearNumero } from '../../helpers/formato';
 import { textValidator, validarFechaProxima } from '../../helpers/validator';
 import './PacienteStyle.css';
 import { agudezaVisual, obtenerAdicion, obtenerGraduaciones } from '../../helpers/metricas';
-import afternoon from '../../assets/afternoon.png';
-import crescentMoon from '../../assets/crescent-moon.png';
-import sunny from '../../assets/sunny.png';
 import { nuevaFactura } from '../../helpers/nuevaFactura';
 
 
@@ -139,7 +136,6 @@ export const Pacientes = () => {
   const [expedienteId, setexpedienteId] = useState('');
   const [subtotalVenta, setsubtotalVenta] = useState(0);
   const [descReb, setDescReb] = useState(0);
-  const [usuario, setusuario] = useState('');
   const [totalDescuento, settotalDescuento] = useState(0);
   const [cantPagos, setcantPagos] = useState(0);
   const [montoPagos, setmontoPagos] = useState(0);
@@ -230,67 +226,6 @@ export const Pacientes = () => {
     setListAgudezaVisual(agudezaVisual);
 
   }, [])
-
-  // const bienvenida = () => {
-  //   let saludo = '';
-  //   let imagen = '';
-  //   const hour = new Date().getHours();
-
-  //   if (hour <= 12) {
-  //     saludo = 'Buen día';
-  //     imagen = sunny;
-  //   }
-  //   if (hour > 12 && hour < 18) {
-  //     saludo = 'Buenas tardes';
-  //     imagen = afternoon;
-  //   }
-  //   if (hour > 17) {
-  //     saludo = 'Buenas noches';
-  //     imagen = crescentMoon;
-  //   }
-
-  //   const nombre = `${localStorage.getItem('nombre')}`;
-  //   createToastSaludo(
-  //     'success',
-  //     saludo,
-  //     nombre,
-  //     imagen
-  //   );
-  // };
-
-  const createToastSaludo = (severity, summary, detail, imagen) => {
-    toast.current.show({
-      severity: severity, summary: summary, detail: detail, life: 6000,
-      content: (props) => (
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-          }}
-        >
-          <img src={imagen} style={{ width: '15%' }} />
-          <div style={{
-            marginLeft: '4%'
-          }}>
-            <p
-              style={{
-                fontSize: '20px',
-                margin: '0%',
-                fontWeight: 'bold',
-              }}
-            >{props.message.summary}</p>
-            <p
-              style={{
-                fontSize: '19px',
-                margin: '0%',
-                fontWeight: 300
-              }}
-            >{props.message.detail}</p>
-          </div>
-        </div>
-      )
-    });
-  };
 
   const cleanForm = () => {
     setFormPaciente(pacienteJson);
@@ -1123,21 +1058,22 @@ export const Pacientes = () => {
               if (response.status === 202) {
                 if (op === 'factura' && parseFloat(acuenta) === parseFloat(totalVenta)) {
                   opticaControlApi.put(`facturas/${listRangoFactura[0]._id}`, { ultimaUtilizada: numFacRec }).then(() => {
-                    // opticaControlApi.put(`facturas/imprimirFactura`, facturaDatos)
-                    //   .then(() => {
-                    //     createToast(
-                    //       'success',
-                    //       'Confirmado',
-                    //       'La factura a sido generada'
-                    //     );
-                    //   })
-                    //   .catch((error) => {
-                    //     createToast(
-                    //       'error',
-                    //       'Error',
-                    //       'Hubo un error al generar la factura, favor revise la impresora'
-                    //     );
-                    //   });
+                    console.log(facturaDatos);
+                    opticaControlApi.put(`facturas/imprimirFactura`, facturaDatos)
+                      .then(() => {
+                        createToast(
+                          'success',
+                          'Confirmado',
+                          'La factura a sido generada'
+                        );
+                      })
+                      .catch((error) => {
+                        createToast(
+                          'error',
+                          'Error',
+                          'Hubo un error al generar la factura, favor revise la impresora'
+                        );
+                      });
                   });
                 } else {
                   opticaControlApi.put(`correlativo/${numReciboActual._id}`, { numRecibo: numFacRec }).then(() => {
