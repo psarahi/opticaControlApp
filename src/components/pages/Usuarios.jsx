@@ -114,10 +114,8 @@ export const Usuarios = () => {
         });
         if (event.cellIndex === 0) {
             handleEdit();
-        } else if (event.cellIndex === 1) {
-            handleDeleteUsuario();
-        }
-    };
+        };
+    }
 
     const handleEdit = () => {
         handleOpenDialog();
@@ -133,68 +131,6 @@ export const Usuarios = () => {
         setUsuarioSelected('');
         idUsuario = '';
     };
-
-    const handleDeleteUsuario = () => {
-        confirmDialog({
-            message: `¿Desea eliminar este registro? `,
-            header: 'Eliminar',
-            icon: 'pi pi-info-circle',
-            defaultFocus: 'reject',
-            acceptClassName: 'p-button-danger',
-            accept: deleteUsuario,
-            reject: rejectDialogDelete
-        });
-    };
-
-    const deleteUsuario = () => {
-        if (textValidator(idUsuario)) {
-            opticaControlApi.delete(`usuario/${idUsuario}`)
-                .then((response) => {
-                    if (response.status === 200) {
-                        createToast(
-                            'success',
-                            'Confirmado',
-                            'El registro ha sido eliminado'
-                        );
-                        setListUsuarios(
-                            listUsuarios.filter(i => i._id !== idUsuario)
-                        );
-                        cleanForm();
-                    } else {
-                        createToast(
-                            'error',
-                            'Error',
-                            response.statusText,
-                        );
-                        cleanForm();
-                    }
-                })
-                .catch((err) => {
-                    createToast(
-                        'error',
-                        'Error',
-                        'Ha ocurrido un error al intentar eliminar el registro'
-                    );
-                    console.log(err);
-                    handleCloseDialog();
-                    cleanForm();
-                });
-        } else {
-            createToast(
-                'warn',
-                'Acción requerida',
-                'No se seleccionó el usuario correctamente'
-            );
-        }
-    }
-
-    const rejectDialogDelete = () => {
-        createToast(
-            'warn',
-            'Cancelado',
-            'Acción cancelada'
-        );
-    }
 
     const handleChangeText = ({ target }, select) => {
         setFormUsuarios({
@@ -215,16 +151,16 @@ export const Usuarios = () => {
             return <EditIcon color='primary' fontSize='medium' />
         }
     };
-    
-    const renderDeleteButton = (data) => {
-        if (data.estado !== true) {
-            return <CancelIcon color='error' fontSize='medium' />
-        }
-    };
-    const renderChangeStatus = (data) => {
-        if (data.estado !== false) {
+
+    const renderStatusEnabled = (data) => {
+        if (data.estado === true) {
             return <DoneIcon color='success' fontSize='medium' />
-        }
+        } 
+    };
+    const renderStatusDisabled = (data) => {
+        if (data.estado === false) {
+            return <CancelIcon color='error' fontSize='medium' />
+        } 
     };
 
 
@@ -252,8 +188,8 @@ export const Usuarios = () => {
                     resizableColumns
                 >
                     <Column body={renderEditButton} style={{ textAlign: 'center' }}></Column>
-                    <Column body={renderDeleteButton} style={{ textAlign: 'center' }}></Column>
-                    <Column body={renderChangeStatus} style={{ textAlign: 'center' }}></Column>
+                    <Column body={renderStatusDisabled} style={{ textAlign: 'center' }}></Column>
+                    <Column body={renderStatusEnabled} style={{ textAlign: 'center' }}></Column>
                     <Column field="nombre" header="Nombre"></Column>
                     <Column field="usuario" header="Usuario"></Column>
                     <Column field="password" header="Contraseña"></Column>
