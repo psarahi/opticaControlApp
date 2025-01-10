@@ -2,6 +2,7 @@ import { Route, Routes } from 'react-router-dom';
 import {
   Inventario,
   Pacientes,
+  Usuarios,
   DetalleVentas,
   RangoFacturas,
   DetalleExpediente,
@@ -26,6 +27,7 @@ export const ComponentesRoutes = () => {
           {/* Componentes */}
           <Route path="/inventario" element={<Inventario />} />
           <Route path="/pacientes" element={<Pacientes />} />
+          <Route path="/usuarios" element={<Usuarios />} />
           <Route path="/detalleVentas" element={<DetalleVentas />} />
           <Route path="/detalleExpediente" element={<DetalleExpediente />} />
           <Route path="/rangoFactura" element={<RangoFacturas />} />

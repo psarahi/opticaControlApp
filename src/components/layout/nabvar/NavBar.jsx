@@ -22,6 +22,7 @@ import NumbersIcon from '@mui/icons-material/Numbers';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import TrackChangesIcon from '@mui/icons-material/TrackChanges';
 import LocalConvenienceStoreIcon from '@mui/icons-material/LocalConvenienceStore';
+import PersonIcon from '@mui/icons-material/Person';
 
 const drawerWidth = 240;
 
@@ -87,6 +88,17 @@ export const NavBar = () => {
               <PermContactCalendarIcon />
             </ListItemIcon>
             <ListItemText primary='Pacientes' />
+          </ListItemButton>
+        </ListItem>
+        <ListItem key='Pacientes' disablePadding>
+          <ListItemButton
+            component={NavLink}
+            to='/usuarios'
+          >
+            <ListItemIcon>
+              <PersonIcon />
+            </ListItemIcon>
+            <ListItemText primary='Usuarios' />
           </ListItemButton>
         </ListItem>
       </List>

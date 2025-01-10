@@ -321,6 +321,7 @@ export const Pacientes = () => {
 
   const toast = useRef(null);
   const toastSaludo = useRef(null);
+
   const toastForm = useRef(null);
   const toastFormVenta = useRef(null);
 

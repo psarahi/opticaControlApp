@@ -1,6 +1,7 @@
 export * from './Clientes';
 export * from './Info';
 export * from './Pacientes';
+export * from './Usuarios';
 export * from './Inventario';
 export * from './DetalleVentas';
 export * from './RangoFacturas'
