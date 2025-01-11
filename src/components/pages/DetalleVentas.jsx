@@ -282,7 +282,7 @@ export const DetalleVentas = () => {
                     );
                     if (op === 'factura' && (parseFloat(formdetallePagos.monto) + parseFloat(ventaView.acuenta)) === parseFloat(ventaView.total)) {
                         opticaControlApi.put(`facturas/${facturas[0]._id}`, { ultimaUtilizada: numFacRec }).then(() => {
-                            opticaControlApi.put(`facturas/imprimirFactura`, facturaDatos)
+                            opticaControlApi.put(`thermalPrinter/imprimirFactura`, facturaDatos)
                                 .then(() => {
                                     createToast(
                                         'success',
@@ -300,7 +300,7 @@ export const DetalleVentas = () => {
                         });
                     } else {
                         opticaControlApi.put(`correlativo/${correlativo._id}`, { numRecibo: numFacRec }).then(() => {
-                            opticaControlApi.put(`facturas/imprimirRecibo`, facturaDatos)
+                            opticaControlApi.put(`thermalPrinter/imprimirRecibo`, facturaDatos)
                                 .then(() => {
                                     createToast(
                                         'success',
@@ -572,7 +572,7 @@ export const DetalleVentas = () => {
                                                         console.log(facturaDatos);
 
                                                         if (facturaDatos.numFacRec.length === 19) {
-                                                            opticaControlApi.put(`facturas/imprimirFactura`, facturaDatos)
+                                                            opticaControlApi.put(`thermalPrinter/imprimirFactura`, facturaDatos)
                                                                 .then(() => {
                                                                     createToast(
                                                                         'success',
@@ -589,7 +589,7 @@ export const DetalleVentas = () => {
                                                                     );
                                                                 });
                                                         } else {
-                                                            opticaControlApi.put(`facturas/imprimirRecibo`, facturaDatos)
+                                                            opticaControlApi.put(`thermalPrinter/imprimirRecibo`, facturaDatos)
                                                                 .then(() => {
                                                                     createToast(
                                                                         'success',
