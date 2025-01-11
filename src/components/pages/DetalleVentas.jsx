@@ -282,39 +282,39 @@ export const DetalleVentas = () => {
                     );
                     if (op === 'factura' && (parseFloat(formdetallePagos.monto) + parseFloat(ventaView.acuenta)) === parseFloat(ventaView.total)) {
                         opticaControlApi.put(`facturas/${facturas[0]._id}`, { ultimaUtilizada: numFacRec }).then(() => {
-                            // opticaControlApi.put(`facturas/imprimirFactura`, facturaDatos)
-                            //     .then(() => {
-                            //         createToast(
-                            //             'success',
-                            //             'Confirmado',
-                            //             'La factura a sido generada'
-                            //         );
-                            //     })
-                            //     .catch((error) => {
-                            //         createToast(
-                            //             'error',
-                            //             'Error',
-                            //             'Hubo un error al generar la factura, favor revise la impresora'
-                            //         );
-                            //     });
+                            opticaControlApi.put(`facturas/imprimirFactura`, facturaDatos)
+                                .then(() => {
+                                    createToast(
+                                        'success',
+                                        'Confirmado',
+                                        'La factura a sido generada'
+                                    );
+                                })
+                                .catch((error) => {
+                                    createToast(
+                                        'error',
+                                        'Error',
+                                        'Hubo un error al generar la factura, favor revise la impresora'
+                                    );
+                                });
                         });
                     } else {
                         opticaControlApi.put(`correlativo/${correlativo._id}`, { numRecibo: numFacRec }).then(() => {
-                            // opticaControlApi.put(`facturas/imprimirRecibo`, facturaDatos)
-                            //     .then(() => {
-                            //         createToast(
-                            //             'success',
-                            //             'Confirmado',
-                            //             'El recibo a sido generado'
-                            //         );
-                            //     })
-                            //     .catch((error) => {
-                            //         createToast(
-                            //             'error',
-                            //             'Error',
-                            //             'Hubo un error al generar el recibo, favor revise la impresora'
-                            //         );
-                            //     });
+                            opticaControlApi.put(`facturas/imprimirRecibo`, facturaDatos)
+                                .then(() => {
+                                    createToast(
+                                        'success',
+                                        'Confirmado',
+                                        'El recibo a sido generado'
+                                    );
+                                })
+                                .catch((error) => {
+                                    createToast(
+                                        'error',
+                                        'Error',
+                                        'Hubo un error al generar el recibo, favor revise la impresora'
+                                    );
+                                });
                         });
                     }
 
@@ -571,41 +571,41 @@ export const DetalleVentas = () => {
                                                         const facturaDatos = obtenerDatosFactura(ventaView.numFacRec);
                                                         console.log(facturaDatos);
 
-                                                        // if (facturaDatos.numFacRec.length === 19) {
-                                                        //     opticaControlApi.put(`facturas/imprimirFactura`, facturaDatos)
-                                                        //         .then(() => {
-                                                        //             createToast(
-                                                        //                 'success',
-                                                        //                 'Confirmado',
-                                                        //                 'La factura a sido generada'
-                                                        //             );
-                                                        //         })
-                                                        //         .catch((error) => {
-                                                        // console.log(error);
-                                                        //             createToast(
-                                                        //                 'error',
-                                                        //                 'Error',
-                                                        //                 'Hubo un error al generar la factura, favor revise la impresora'
-                                                        //             );
-                                                        //         });
-                                                        // } else {
-                                                        //     opticaControlApi.put(`facturas/imprimirRecibo`, facturaDatos)
-                                                        //         .then(() => {
-                                                        //             createToast(
-                                                        //                 'success',
-                                                        //                 'Confirmado',
-                                                        //                 'El recibo a sido generado'
-                                                        //             );
-                                                        //         })
-                                                        //         .catch((error) => {
-                                                        // console.log(error);
-                                                        //             createToast(
-                                                        //                 'error',
-                                                        //                 'Error',
-                                                        //                 'Hubo un error al generar el recibo, favor revise la impresora'
-                                                        //             );
-                                                        //         });
-                                                        // }
+                                                        if (facturaDatos.numFacRec.length === 19) {
+                                                            opticaControlApi.put(`facturas/imprimirFactura`, facturaDatos)
+                                                                .then(() => {
+                                                                    createToast(
+                                                                        'success',
+                                                                        'Confirmado',
+                                                                        'La factura a sido generada'
+                                                                    );
+                                                                })
+                                                                .catch((error) => {
+                                                        console.log(error);
+                                                                    createToast(
+                                                                        'error',
+                                                                        'Error',
+                                                                        'Hubo un error al generar la factura, favor revise la impresora'
+                                                                    );
+                                                                });
+                                                        } else {
+                                                            opticaControlApi.put(`facturas/imprimirRecibo`, facturaDatos)
+                                                                .then(() => {
+                                                                    createToast(
+                                                                        'success',
+                                                                        'Confirmado',
+                                                                        'El recibo a sido generado'
+                                                                    );
+                                                                })
+                                                                .catch((error) => {
+                                                        console.log(error);
+                                                                    createToast(
+                                                                        'error',
+                                                                        'Error',
+                                                                        'Hubo un error al generar el recibo, favor revise la impresora'
+                                                                    );
+                                                                });
+                                                        }
                                                     }}
                                                 >FACTURA/RECIBO</Button>
                                             </div>

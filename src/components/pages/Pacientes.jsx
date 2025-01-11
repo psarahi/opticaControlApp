@@ -1060,39 +1060,39 @@ export const Pacientes = () => {
                 if (op === 'factura' && parseFloat(acuenta) === parseFloat(totalVenta)) {
                   opticaControlApi.put(`facturas/${listRangoFactura[0]._id}`, { ultimaUtilizada: numFacRec }).then(() => {
                     console.log(facturaDatos);
-                    // opticaControlApi.put(`facturas/imprimirFactura`, facturaDatos)
-                    //   .then(() => {
-                    //     createToast(
-                    //       'success',
-                    //       'Confirmado',
-                    //       'La factura a sido generada'
-                    //     );
-                    //   })
-                    //   .catch((error) => {
-                    //     createToast(
-                    //       'error',
-                    //       'Error',
-                    //       'Hubo un error al generar la factura, favor revise la impresora'
-                    //     );
-                    //   });
+                    opticaControlApi.put(`thermalPrinter/imprimirFactura`, facturaDatos)
+                      .then(() => {
+                        createToast(
+                          'success',
+                          'Confirmado',
+                          'La factura a sido generada'
+                        );
+                      })
+                      .catch((error) => {
+                        createToast(
+                          'error',
+                          'Error',
+                          'Hubo un error al generar la factura, favor revise la impresora'
+                        );
+                      });
                   });
                 } else {
                   opticaControlApi.put(`correlativo/${numReciboActual._id}`, { numRecibo: numFacRec }).then(() => {
-                    // opticaControlApi.put(`facturas/imprimirRecibo`, facturaDatos)
-                    //   .then(() => {
-                    //     createToast(
-                    //       'success',
-                    //       'Confirmado',
-                    //       'El recibo a sido generado'
-                    //     );
-                    //   })
-                    //   .catch((error) => {
-                    //     createToast(
-                    //       'error',
-                    //       'Error',
-                    //       'Hubo un error al generar el recibo, favor revise la impresora'
-                    //     );
-                    //   });
+                    opticaControlApi.put(`thermalPrinter/imprimirRecibo`, facturaDatos)
+                      .then(() => {
+                        createToast(
+                          'success',
+                          'Confirmado',
+                          'El recibo a sido generado'
+                        );
+                      })
+                      .catch((error) => {
+                        createToast(
+                          'error',
+                          'Error',
+                          'Hubo un error al generar el recibo, favor revise la impresora'
+                        );
+                      });
                   });
                 }
                 createToast(

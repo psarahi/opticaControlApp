@@ -270,31 +270,10 @@ export const RangoFacturas = () => {
         })
     };
 
-    const printTest = () => {
-        opticaControlApi.post(`thermalPrinter/print`, { content: "Prueba desde app React" })
-            .then((response) => {
-                createToast(
-                    'success',
-                    'Confirmado',
-                    'Exito'
-                );
-                console.log(response);
-            })
-            .catch((err) => {
-                createToast(
-                    'error',
-                    'Error',
-                    'Ha ocurrido un error al intentar habilitar el registro'
-                );
-                console.log(err);
-            });
-    };
-
     return (
         <>
             <h1>Informacion sobre Inventario </h1>
             <Button variant='outlined' startIcon={<AddIcon />} onClick={handleOpenDialog}>Agregar</Button>
-            <Button onClick={printTest}>Prueba Print</Button>
             <br />
             <br />
             <Toast ref={toast} />
