@@ -16,17 +16,12 @@ import CancelIcon from '@mui/icons-material/Cancel';
 import DoneIcon from '@mui/icons-material/Done';
 
 import dayjs from 'dayjs';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 
 import { opticaControlApi } from '../../services/opticaControlApi';
 import { textValidator } from '../../helpers/validator';
 import { formatearFecha } from '../../helpers/formato';
-import { DatePicker } from '@mui/x-date-pickers';
 
 export const Usuarios = () => {
-
-
     const usuariosJSON = {
         nombre: '',
         usuario: '',
@@ -46,6 +41,7 @@ export const Usuarios = () => {
     const [sucursales, setSucursales] = useState([]);
     const [formUsuarios, setFormUsuarios] = useState(usuariosJSON);
     const [openDialog, setOpenDialog] = useState(false);
+    const [changePass, setchangePass] = useState(false);
 
     useEffect(() => {
         document.body.style.zoom = '100%';
@@ -115,7 +111,156 @@ export const Usuarios = () => {
         if (event.cellIndex === 0) {
             handleEdit();
         };
+        if (event.cellIndex === 1) {
+            handleDisabled();
+        };
+        if (event.cellIndex === 2) {
+            handleEnabled();
+        };
     }
+
+    const handleDisabled = () => {
+        confirmDialog({
+            message: `¿Desea deshabilitar el registro? `,
+            header: 'Deshabilitar',
+            icon: 'pi pi-info-circle',
+            defaultFocus: 'reject',
+            acceptClassName: 'p-button-danger',
+            accept: acceptDialogDisable,
+            reject: rejectDialogDisable
+        });
+    };
+
+    const acceptDialogDisable = () => {
+        if (textValidator(idUsuario)) {
+            opticaControlApi.put(`usuario/cambiarEstado/${idUsuario}`, { estado: false })
+                .then((response) => {
+                    if (response.status === 202) {
+                        createToast(
+                            'success',
+                            'Confirmado',
+                            'El registro a sido deshabilitado'
+                        );
+
+                        setListUsuarios(
+                            listUsuarios.map(i =>
+                                i._id === idUsuario ? {
+                                    ...i,
+                                    estado: response.data.estado
+                                } : i
+                            )
+                        );
+
+                        console.log(response);
+                        cleanForm();
+                    } else {
+                        createToast(
+                            'error',
+                            'Error',
+                            response.statusText,
+                        );
+                        console.log(response.data);
+                        cleanForm();
+                        return;
+                    }
+                })
+                .catch((err) => {
+                    createToast(
+                        'error',
+                        'Error',
+                        'Ha ocurrido un error al intentar deshabilitar el registro'
+                    );
+                    console.log(err);
+                    handleCloseDialog();
+                    cleanForm();
+                });
+        } else {
+            createToast(
+                'warn',
+                'Acction requerida',
+                'No se selecciono el inventario correctamente'
+            );
+        }
+    }
+
+    const rejectDialogDisable = () => {
+        createToast(
+            'warn',
+            'Cancelado',
+            'Acción cancelada'
+        );
+    }
+
+    const handleEnabled = () => {
+        confirmDialog({
+            message: `¿Desea habilitar el registro? `,
+            header: 'Habilitar',
+            icon: 'pi pi-info-circle',
+            defaultFocus: 'reject',
+            acceptClassName: 'p-button-danger',
+            accept: acceptDialogEnable,
+            reject: rejectDialogEnable
+        });
+    };
+
+    const acceptDialogEnable = () => {
+        if (textValidator(idUsuario)) {
+            opticaControlApi.put(`usuario/cambiarEstado/${idUsuario}`, { estado: true })
+                .then((response) => {
+                    if (response.status === 202) {
+                        createToast(
+                            'success',
+                            'Confirmado',
+                            'El registro a sido deshabilitado'
+                        );
+                        setListUsuarios(
+                            listUsuarios.map(i =>
+                                i._id === idUsuario ? {
+                                    ...i,
+                                    estado: response.data.estado
+                                } : i
+                            )
+                        );
+                        console.log(response);
+                        cleanForm();
+                    } else {
+                        createToast(
+                            'error',
+                            'Error',
+                            response.statusText,
+                        );
+                        console.log(response.data);
+                        cleanForm();
+                        return;
+                    }
+                })
+                .catch((err) => {
+                    createToast(
+                        'error',
+                        'Error',
+                        'Ha ocurrido un error al intentar habilitar el registro'
+                    );
+                    console.log(err);
+                    handleCloseDialog();
+                    cleanForm();
+                });
+        } else {
+            createToast(
+                'warn',
+                'Acction requerida',
+                'No se selecciono el inventario correctamente'
+            );
+        }
+    }
+
+    const rejectDialogEnable = () => {
+        createToast(
+            'warn',
+            'Cancelado',
+            'Acción cancelada'
+        );
+    }
+
 
     const handleEdit = () => {
         handleOpenDialog();
@@ -130,6 +275,7 @@ export const Usuarios = () => {
         setFormUsuarios(usuariosJSON);
         setUsuarioSelected('');
         idUsuario = '';
+        setchangePass(false);
     };
 
     const handleChangeText = ({ target }, select) => {
@@ -147,22 +293,29 @@ export const Usuarios = () => {
 
 
     const renderEditButton = (data) => {
-        if (data.estado !== true || data.estado !== false) {
+        if (data.estado === true) {
             return <EditIcon color='primary' fontSize='medium' />
         }
     };
 
     const renderStatusEnabled = (data) => {
-        if (data.estado === true) {
+        if (data.estado === false) {
             return <DoneIcon color='success' fontSize='medium' />
-        } 
+        }
     };
     const renderStatusDisabled = (data) => {
-        if (data.estado === false) {
+        if (data.estado === true) {
             return <CancelIcon color='error' fontSize='medium' />
-        } 
+        }
     };
 
+    const handleChangePass = () => {
+        setchangePass(true);
+        setFormUsuarios({
+            ...formUsuarios,
+            password: ''
+        });
+    };
 
     return (
         <>
@@ -170,7 +323,9 @@ export const Usuarios = () => {
             <Toast ref={toast} />
             <Toast ref={toastForm} />
             <Toast ref={toast} />
-            <div style={{ width: '65%' }}>
+            <ConfirmDialog />
+
+            <div style={{ width: '90%' }}>
                 <DataTable value={listUsuarios} tableStyle={{ minWidth: '50rem' }}
                     showGridlines
                     stripedRows
@@ -192,7 +347,6 @@ export const Usuarios = () => {
                     <Column body={renderStatusEnabled} style={{ textAlign: 'center' }}></Column>
                     <Column field="nombre" header="Nombre"></Column>
                     <Column field="usuario" header="Usuario"></Column>
-                    <Column field="password" header="Contraseña"></Column>
                     <Column field="sucursales.nombre" header="Sucursal"></Column>
                     <Column field="fechaRegistro" header="Fecha de registro" body={(data) => (textValidator(data.fechaRegistro)) ? formatearFecha(data.fechaRegistro) : '-'}></Column>
                     <Column
@@ -206,7 +360,8 @@ export const Usuarios = () => {
                                 }
                             </div>
                         )}
-                    />                </DataTable>
+                    />
+                </DataTable>
             </div>
             <Dialog
                 open={openDialog}
@@ -233,42 +388,64 @@ export const Usuarios = () => {
                             return;
                         }
                         if (textValidator(usuarioSelected)) {
-                            opticaControlApi.put(`usuario/${usuarioSelected}`, formUsuarios)
-                                .then((response) => {
-                                    if (response.status === 202) {
-                                        createToast(
-                                            'success',
-                                            'Confirmado',
-                                            'El registro fue editado correctamente'
-                                        );
-                                        handleCloseDialog();
-                                        setListUsuarios(
-                                            listUsuarios.map((i) =>
-                                                i._id === usuarioSelected ? { ...i, ...response.data } : i
-                                            )
-                                        );
-                                        cleanForm();
-                                    } else {
+                            if (changePass) {
+                                opticaControlApi.put(`usuario/changePass/${usuarioSelected}`, formUsuarios)
+                                    .then((response) => {
+                                        if (response.status === 202) {
+                                            createToast(
+                                                'success',
+                                                'Confirmado',
+                                                'El registro fue editado correctamente'
+                                            );
+                                            handleCloseDialog();
+                                            setListUsuarios(
+                                                listUsuarios.map((i) =>
+                                                    i._id === usuarioSelected ? { ...i, ...response.data } : i
+                                                )
+                                            );
+                                            cleanForm();
+                                        }
+                                    })
+                                    .catch((err) => {
                                         createToast(
                                             'error',
                                             'Error',
-                                            response.statusText,
+                                            'Ha ocurrido un error'
                                         );
-                                        console.log(response.data);
+                                        console.log(err);
+                                        handleCloseDialog();
                                         cleanForm();
-                                        return;
-                                    }
-                                })
-                                .catch((err) => {
-                                    createToast(
-                                        'error',
-                                        'Error',
-                                        'Ha ocurrido un error'
-                                    );
-                                    console.log(err);
-                                    handleCloseDialog();
-                                    cleanForm();
-                                });
+                                    });
+                            } else {
+                                opticaControlApi.put(`usuario/${usuarioSelected}`, formUsuarios)
+                                    .then((response) => {
+                                        if (response.status === 202) {
+                                            createToast(
+                                                'success',
+                                                'Confirmado',
+                                                'El registro fue editado correctamente'
+                                            );
+                                            handleCloseDialog();
+                                            setListUsuarios(
+                                                listUsuarios.map((i) =>
+                                                    i._id === usuarioSelected ? { ...i, ...response.data } : i
+                                                )
+                                            );
+                                            cleanForm();
+                                        }
+                                    })
+                                    .catch((err) => {
+                                        createToast(
+                                            'error',
+                                            'Error',
+                                            'Ha ocurrido un error'
+                                        );
+                                        console.log(err);
+                                        handleCloseDialog();
+                                        cleanForm();
+                                    });
+                            }
+
 
                         }
                     },
@@ -282,6 +459,7 @@ export const Usuarios = () => {
                         gap: '30px',
                         marginBottom: '2%'
                     }}>
+                        <Button variant='contained' onClick={handleChangePass}>Cambiar contraseña</Button>
                         <TextField
                             required
                             value={formUsuarios.nombre}
@@ -306,18 +484,21 @@ export const Usuarios = () => {
                             variant="standard"
                             size="medium"
                         />
-                        <TextField
-                            required
-                            value={formUsuarios.password}
-                            onChange={(event) => handleChangeText(event, 'password')}
-                            margin="dense"
-                            id="password"
-                            name="password"
-                            label="Contraseña"
-                            sx={{ width: "70%" }}
-                            variant="standard"
-                            size="medium"
-                        />
+                        {changePass &&
+                            <TextField
+                                required
+                                value={formUsuarios.password}
+                                onChange={(event) => handleChangeText(event, 'password')}
+                                margin="dense"
+                                id="password"
+                                name="password"
+                                label="Contraseña"
+                                sx={{ width: "70%" }}
+                                variant="standard"
+                                size="medium"
+                            />
+                        }
+
                         <FormControl variant="standard">
                             <InputLabel id="sucursales">Sucursal</InputLabel>
                             <br />
@@ -335,7 +516,16 @@ export const Usuarios = () => {
                             </Select>
                         </FormControl>
                         <br />
-                        <LocalizationProvider dateAdapter={AdapterDayjs}>
+                        <TextField
+                            style={{ width: '100%' }}
+                            id="fechaRegistro"
+                            name="fechaRegistro"
+                            type='date'
+                            value={formUsuarios.fechaRegistro}
+                            onChange={(event) => handleChangeText(event, 'fechaRegistro')}
+                            variant='standard'
+                        />
+                        {/* <LocalizationProvider dateAdapter={AdapterDayjs}>
                             <DatePicker
                                 label="Fecha de registro *"
                                 value={formUsuarios.fechaRegistro ? dayjs(formUsuarios.fechaRegistro) : null}
@@ -354,23 +544,8 @@ export const Usuarios = () => {
                                 }}
                                 renderInput={(params) => <TextField {...params} variant="standard" />}
                             />
-                        </LocalizationProvider>
+                        </LocalizationProvider> */}
                     </div>
-                    <FormControl variant="standard">
-                        <InputLabel id="estado">Estado</InputLabel>
-                        <Select
-                            style={{ width: '250px', marginBottom: '-100px' }}
-                            labelId="estado"
-                            id="estado"
-                            value={formUsuarios.estado}
-                            onChange={(event) => handleChangeText(event, 'estado')}
-                            label="Estado"
-                        >
-                            {estados.map((estado, index) => (
-                                <MenuItem key={index} value={estado.id}>{estado.name}</MenuItem>
-                            ))}
-                        </Select>
-                    </FormControl>
                     <br />
                     <div>
                     </div>
