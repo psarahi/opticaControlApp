@@ -1060,7 +1060,7 @@ export const Pacientes = () => {
                 if (op === 'factura' && parseFloat(acuenta) === parseFloat(totalVenta)) {
                   opticaControlApi.put(`facturas/${listRangoFactura[0]._id}`, { ultimaUtilizada: numFacRec }).then(() => {
                     console.log(facturaDatos);
-                    opticaControlApi.put(`thermalPrinter/imprimirFactura`, facturaDatos)
+                    opticaControlApi.post(`thermalPrinter/imprimirFactura`, facturaDatos)
                       .then(() => {
                         createToast(
                           'success',
@@ -1078,7 +1078,7 @@ export const Pacientes = () => {
                   });
                 } else {
                   opticaControlApi.put(`correlativo/${numReciboActual._id}`, { numRecibo: numFacRec }).then(() => {
-                    opticaControlApi.put(`thermalPrinter/imprimirRecibo`, facturaDatos)
+                    opticaControlApi.post(`thermalPrinter/imprimirRecibo`, facturaDatos)
                       .then(() => {
                         createToast(
                           'success',
