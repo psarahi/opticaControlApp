@@ -107,7 +107,7 @@ export const RangoFacturas = () => {
             fechaLimiteEmision: formatearFecha(event.rowData.fechaLimiteEmision),
             sucursales: event.rowData.sucursales,
             ultimaUtilizada: event.rowData.ultimaUtilizada,
-            estado: event.rowData.estado
+            estado: event.rowData.estado,
         });
         if (event.cellIndex === 0) {
             handleEdit();
@@ -272,7 +272,7 @@ export const RangoFacturas = () => {
 
     return (
         <>
-            <h1>Informacion sobre Inventario </h1>
+            <h1>Informacion sobre facturas </h1>
             <Button variant='outlined' startIcon={<AddIcon />} onClick={handleOpenDialog}>Agregar</Button>
             <br />
             <br />
@@ -453,6 +453,7 @@ export const RangoFacturas = () => {
                             variant="standard"
                             size="medium"
                         />
+               
                     </div>
                     <br />
                     <br />

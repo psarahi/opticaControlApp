@@ -4,12 +4,18 @@ import { Toast } from 'primereact/toast';
 import {
     Button,
     TextField,
-    InputLabel, 
-    MenuItem, 
-    Select, 
-    FormControl
+    InputLabel,
+    MenuItem,
+    Select,
+    FormControl,
+    IconButton,
+    Input,
+    InputAdornment
 }
     from '@mui/material';
+import Visibility from '@mui/icons-material/Visibility';
+import VisibilityOff from '@mui/icons-material/VisibilityOff';
+import dayjs from 'dayjs';
 
 import { useNavigate } from 'react-router-dom';
 
@@ -21,8 +27,9 @@ export const Registro = () => {
         nombre: '',
         usuario: '',
         password: '',
+        tipoUsuario: '',
         sucursales: '',
-        fechaRegistro: '',
+        fechaRegistro: dayjs().format('YYYY-MM-DD'),
     }
     const [sucursales, setSucursales] = useState([]);
 
@@ -68,13 +75,7 @@ export const Registro = () => {
         navigate('/login');
     }
     const cleanForm = () => {
-        setFormUsuarios({
-            nombre: '',
-            usuario: '',
-            password: '',
-            sucursales: '',
-            fechaRegistro: ''
-        })
+        setFormUsuarios(usuariosJSON)
     };
 
     const handleChangeText = ({ target }, select) => {
@@ -87,8 +88,9 @@ export const Registro = () => {
         event.preventDefault();
         if (!textValidator(formUsuarios.nombre) ||
             !textValidator(formUsuarios.usuario) ||
+            !textValidator(formUsuarios.tipoUsuario) ||
             !textValidator(formUsuarios.password) ||
-            !formUsuarios.sucursales ||
+            !textValidator(formUsuarios.sucursales) ||
             !formUsuarios.fechaRegistro) {
 
             createToast(
@@ -102,15 +104,11 @@ export const Registro = () => {
         opticaControlApi.post('usuario', formUsuarios)
             .then(async (response) => {
                 if (response.status === 201) {
-                    navigate('/login');
-                    cleanForm();
-                } else {
                     createToast(
-                        'error',
-                        'Error',
-                        'Error en el ingreso'
+                        'success',
+                        'Confirmado',
+                        'El registro a sido creado'
                     );
-                    setFormUsuarios(response.data)
                     cleanForm();
                 }
             })
@@ -158,19 +156,14 @@ export const Registro = () => {
                 </div>
                 <form action=""
                     style={{
-                        display: 'flex',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        flexDirection: 'column',
-                        padding: '20px',
-                        width: '50%',
+                        padding: '50px',
+                        width: '30%',
                         backgroundColor: '#ffffff',
-                        maxWidth: '500px',
                         borderRadius: '10px',
                         boxShadow: '15px 14px 20px 0px #10294663',
                     }}
                 >
-                    <h1 style={{ textAlign: 'center' }}>Registrarse</h1>
+                    <h1 style={{ textAlign: 'center' }}>Registrar usuario</h1>
                     <div style={{
                         display: 'flex',
                         justifyContent: 'center',
@@ -180,6 +173,7 @@ export const Registro = () => {
                     }}>
 
                         <TextField
+                            required
                             style={{ width: '100%' }}
                             id="nombre"
                             label="Nombre"
@@ -188,30 +182,61 @@ export const Registro = () => {
                             onChange={(event) => handleChangeText(event, 'nombre')}
                             variant='standard'
                         />
-                        <TextField
-                            style={{ width: '100%' }}
-                            id="usuario"
-                            label="Usuario"
-                            name="apellido"
-                            value={formUsuarios.usuario}
-                            onChange={(event) => handleChangeText(event, 'usuario')}
-                            variant='standard'
-                        />
-                        <TextField
-                            style={{ width: '100%' }}
-                            id="password"
-                            label="Contraseña"
-                            name="password"
-                            type={showPassword ? 'text' : 'password'}
-                            value={formUsuarios.password}
-                            onChange={(event) => handleChangeText(event, 'password')}
-                            variant='standard'
-                        />
+                        <div style={{ display: 'flex', flexDirection: 'row', gap: '20px', width: '100%' }}>
+                            <TextField
+                                required
+                                style={{ width: '50%' }}
+                                id="usuario"
+                                label="Usuario"
+                                name="apellido"
+                                value={formUsuarios.usuario}
+                                onChange={(event) => handleChangeText(event, 'usuario')}
+                                variant='standard'
+                            />
+                            <FormControl variant="standard">
+                                <InputLabel id="tipoUsuario">Password *</InputLabel>
+                                <Input
+                                    id="standard-adornment-password"
+                                    value={formUsuarios.password}
+                                    type={showPassword ? 'text' : 'password'}
+                                    onChange={(event) => handleChangeText(event, 'password')}
+                                    required
+                                    endAdornment={
+                                        <InputAdornment position="end">
+                                            <IconButton
+                                                aria-label="toggle password visibility"
+                                                onClick={handleClickShowPassword}
+                                                onMouseDown={handleMouseDownPassword}
+                                                onMouseUp={handleMouseUpPassword}
+                                            >
+                                                {showPassword ? <VisibilityOff /> : <Visibility />}
+                                            </IconButton>
+                                        </InputAdornment>
+                                    }
+                                />
+                            </FormControl>
+                        </div>
                         <FormControl variant="standard">
-                            <InputLabel id="sucursales">Sucursal</InputLabel>
+                            <InputLabel id="tipoUsuario">Tipo Usuario *</InputLabel>
                             <br />
                             <Select
-                                style={{ width: '250px' , marginBottom: '-100px'}}
+                                style={{ width: '250px', marginBottom: '-100px' }}
+                                labelId="tipoUsuario"
+                                id="tipoUsuario"
+                                value={formUsuarios.tipoUsuario || ''}
+                                onChange={(event) => handleChangeText(event, 'tipoUsuario')}
+                                label="Tipo Usuario"
+                            >
+                                <MenuItem key="1" value="Administrador">Administrador</MenuItem>
+                                <MenuItem key="2" value="Usuario">Usuario</MenuItem>
+                            </Select>
+                        </FormControl>
+                        <br />
+                        <FormControl variant="standard">
+                            <InputLabel id="sucursales">Sucursal *</InputLabel>
+                            <br />
+                            <Select
+                                style={{ width: '250px', marginBottom: '-100px' }}
                                 labelId="sucursales"
                                 id="sucursales"
                                 value={formUsuarios.sucursales || ''}
@@ -234,7 +259,7 @@ export const Registro = () => {
                             Fecha de registro
                         </p>
                         <TextField
-                            style={{ width: '100%' }}
+                            style={{ width: '55%' }}
                             id="fechaRegistro"
                             name="fechaRegistro"
                             type='date'

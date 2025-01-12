@@ -62,12 +62,12 @@ export const Sucursales = () => {
     return (
         <>
             <h1>Sucursales</h1>
-            <Button variant='outlined' startIcon={<AddIcon />} onClick={handleOpenDialog}>Agregar</Button>
+            {/* <Button variant='outlined' startIcon={<AddIcon />} onClick={handleOpenDialog}>Agregar</Button> */}
             <br />
             <br />
             <Toast ref={toast} />
             {/* <ConfirmDialog /> */}
-            <div style={{ width: '65%' }}>
+            <div style={{ width: '90%' }}>
                 <DataTable value={listSurcursales} tableStyle={{ minWidth: '50rem' }}
                     showGridlines
                     stripedRows
@@ -77,9 +77,9 @@ export const Sucursales = () => {
                     rowsPerPageOptions={[5, 10, 15]}
                     selection={sucursalSelected}
                 >
-                    <Column body={renderEditButton} style={{ textAlign: 'center' }}></Column>
+                    {/* <Column body={renderEditButton} style={{ textAlign: 'center' }}></Column>
                     <Column body={renderDeleteButton} style={{ textAlign: 'center' }}></Column>
-                    <Column body={renderChangeStatus} style={{ textAlign: 'center' }}></Column>
+                    <Column body={renderChangeStatus} style={{ textAlign: 'center' }}></Column> */}
                     <Column field="_id" header="ID"></Column>
                     <Column field="nombre" header="Nombre"></Column>
                     <Column field="direccion" header="Direccion"></Column>

@@ -44,8 +44,12 @@ export const Usuarios = () => {
     const [changePass, setchangePass] = useState(false);
 
     useEffect(() => {
-        document.body.style.zoom = '100%';
-
+        if (window.innerWidth < 1900) {
+            document.body.style.zoom = '80%'
+          } else {
+            document.body.style.zoom = '100%'
+          }
+          
         opticaControlApi.get('sucursal', '')
             .then((response) => {
                 if (response.status === 200) {

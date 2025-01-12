@@ -12,6 +12,7 @@ import { opticaControlApi } from '../services/opticaControlApi';
 export const LoginPage = () => {
   const navigate = useNavigate();
   const [sucursales, setsucursales] = useState([]);
+  const [addSucursal, setaddSucursal] = useState(false);
 
   useEffect(() => {
     document.body.style.zoom = '100%';
@@ -19,6 +20,7 @@ export const LoginPage = () => {
     opticaControlApi.get('sucursal', '')
       .then((response) => {
         if (response.status === 200) {
+          (response.data.length < 1) ? setaddSucursal(true) : setaddSucursal(false);
           setsucursales(response.data);
         }
       })
@@ -111,8 +113,12 @@ export const LoginPage = () => {
       });
 
   };
-  const handleRegistro = () => { 
+  const handleRegistro = () => {
     navigate('/registro');
+  }
+
+  const handleSucursal = () => {
+    navigate('/crearSucursal');
   }
 
   return (
@@ -140,14 +146,14 @@ export const LoginPage = () => {
             boxShadow: '15px 14px 20px 0px #10294663',
           }}
         >
-          <div style={{ backgroundColor: '#102946' ,borderRadius: '10px'}}>
+          <div style={{ backgroundColor: '#102946', borderRadius: '10px' }}>
           </div>
           <div
             style={{
               width: '100%',
               backgroundColor: '#ffffff',
               padding: '10%',
-              borderRadius: '10px'
+              borderRadius: '10px',
             }}
           >
             <h1 style={{ color: 'primary.main' }}>Inicio de sesión</h1>
@@ -206,13 +212,28 @@ export const LoginPage = () => {
                 }
               />
               <br />
-              <Link to='/registro' underline='hover' sx={{
-                color: 'primary.main', fontWeight: 'bold', fontSize: '18px',
-              }}
-              onClick={handleRegistro}
-              >
-                {'Crear cuenta'}
-              </Link>
+              {
+                addSucursal && (
+                  <Button
+                    variant='outline'
+                    sx={{ width: '100%', marginTop: '10px' }}
+                    onClick={handleSucursal}
+                  >
+                    {'Agregar sucursal'}
+                  </Button>
+                )
+              }
+              {
+                !addSucursal && (
+                  <Link to='/registro' underline='hover' sx={{
+                    color: 'primary.main', fontWeight: 'bold', fontSize: '18px',
+                  }}
+                    onClick={handleRegistro}
+                  >
+                    {'Crear usuario'}
+                  </Link>
+                )}
+
             </Box>
             <br />
             <br />

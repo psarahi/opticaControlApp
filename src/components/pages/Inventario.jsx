@@ -74,7 +74,11 @@ export const Inventario = () => {
             document.body.style.zoom = '100%'
         }
         const sucursal = localStorage.getItem('sucursalID');
+        console.log(sucursal);
+        
         opticaControlApi.get(`inventario/bySucursal/${sucursal}`, '').then((response) => {
+            console.log(response.data);
+            
             setListInventario(response.data);
         })
         cleanForm();

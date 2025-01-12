@@ -1352,7 +1352,22 @@ export const Pacientes = () => {
                 <MenuItem key='Masculino' value='Masculino'>Masculino</MenuItem>
               </Select>
             </FormControl>
-            <div>
+            <TextField
+              value={formPacientes.direccion}
+              onChange={(event) => handleChangeTextPaciente(event, 'direccion')}
+              margin="dense"
+              id="direccion"
+              name="direccion"
+              label="Direccion"
+              type="text"
+              multiline
+              maxRows={2}
+              variant="standard"
+              size="small"
+            />
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'row', width: '100%'}}>
+            <div style={{width: '100%'}}>
               <p style={{ color: '#696969' }}>Registro *</p>
               <TextField
                 required
@@ -1385,7 +1400,7 @@ export const Pacientes = () => {
                 size='medium'
               />
             </div>
-            <div>
+            <div style={{width: '100%'}}>
               <p style={{ color: '#696969' }}>Utima cita *</p>
               <TextField
                 required
@@ -1405,7 +1420,7 @@ export const Pacientes = () => {
                 size='medium'
               />
             </div>
-            <div>
+            <div style={{width: '100%'}}>
               <p style={{ color: '#696969' }}>Proxima cita *</p>
               <TextField
                 required
@@ -1439,20 +1454,6 @@ export const Pacientes = () => {
               />
             </div>
           </div>
-          <TextField
-            value={formPacientes.direccion}
-            onChange={(event) => handleChangeTextPaciente(event, 'direccion')}
-            margin="dense"
-            id="direccion"
-            name="direccion"
-            label="Direccion"
-            type="text"
-            multiline
-            sx={{ width: '70%' }}
-            maxRows={2}
-            variant="standard"
-            size="small"
-          />
           <br />
           <br />
         </DialogContent>

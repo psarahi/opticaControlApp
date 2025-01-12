@@ -27,10 +27,13 @@ export const DetalleExpediente = () => {
     const [listDetalleExpediente, setListDetalleExpediente] = useState([]);
     const toast = useRef(null);
 
+    const createToast = (severity, summary, detail) => {
+        toast.current.show({ severity: severity, summary: summary, detail: detail, life: 6000 });
+    };
 
     useEffect(() => {
         if (window.innerWidth < 1900) {
-            document.body.style.zoom = '90%'
+            document.body.style.zoom = '79%'
         } else {
             document.body.style.zoom = '100%'
         }
@@ -81,6 +84,11 @@ export const DetalleExpediente = () => {
             const width = doc.internal.pageSize.width;
             doc.addImage(imgData, 'PNG', 5, 0, width, 0);
             doc.save(`Exp_${paciente}.pdf`);
+            createToast(
+                'success',
+                'Confirmado',
+                'PDF generado con éxito'
+            );
         });
     };
     return (
@@ -239,120 +247,7 @@ export const DetalleExpediente = () => {
                                                 <p className='textoPequeño'>{detalle.optometrista.sucursales.paginaDigital}</p>
                                                 <br />
                                             </div>
-
-
-
-
-
-                                            <div style={{
-                                                display: 'grid',
-                                                gridTemplateColumns: '1fr 0.2fr',
-                                                gridTemplateRows: '1fr',
-                                                gap: '0px 10px',
-                                                gridTemplateAreas: ". ."
-                                            }}>
-                                                <div>
-                                                    <img src={logoOptica} alt='logo' />
-                                                    <p className='texto'>
-                                                        <span style={{ fontWeight: 500 }}>Paciente: </span>
-                                                        <span style={{ fontWeight: 200 }}>{detalle.paciente.nombre}</span>
-                                                        <span style={{ fontWeight: 500 }}> Edad: </span>
-                                                        <span style={{ fontWeight: 200 }}>{detalle.paciente.edad}</span>
-                                                        <span style={{ fontWeight: 500 }}> Telefono: </span>
-                                                        <span style={{ fontWeight: 200 }}>{detalle.paciente.telefono}</span>
-                                                    </p>
-                                                    <p className='texto'>
-                                                        <span style={{ fontWeight: 500 }}>Dirección: </span>
-                                                        <span style={{ fontWeight: 200 }}>{detalle.optometrista.sucursales.direccion}</span>
-                                                    </p>
-                                                    <p className='texto'>
-                                                        <span style={{ fontWeight: 500 }}>Fecha: </span>
-                                                        <span style={{ fontWeight: 200 }}>{dayjs(detalle.fecha).format('YYYY-MM-DD')}</span>
-                                                    </p>
-                                                </div>
-                                                <div style={{
-                                                    display: 'flex',
-                                                    flexDirection: 'row',
-                                                    alignItems: 'center',
-                                                }}>
-                                                    <img src={qrWhatsApp} style={{ width: '100%' }} alt='qr' />
-                                                </div>
-                                            </div>
-                                            <h4 style={{ textAlign: 'center', margin: '0%' }}>Diagnóstico Visual</h4>
-                                            <div style={{
-                                                display: 'flex',
-                                                flexDirection: 'row',
-                                                alignItems: 'center',
-                                                justifyContent: 'space-between'
-                                            }}>
-                                                <div style={{
-                                                    display: 'flex',
-                                                    flexDirection: 'column',
-                                                    alignItems: 'center'
-                                                }}>
-                                                    <h4 style={{ margin: '0%' }}>Ojo Derecho</h4>
-                                                    <img src={transportador} style={{ width: '50%' }} alt='transportador' />
-                                                    <p className='textoPequeño'>{detalle.recetaOjoDerecho.agudezaVisual}</p>
-                                                    <p className='textoPequeño'>Dip. {detalle.recetaOjoDerecho.distanciaPupilar}</p>
-                                                    <p className='textoPequeño'>{detalle.recetaOjoDerecho.esfera} {detalle.recetaOjoDerecho.cilindro} {detalle.recetaOjoDerecho.eje} {detalle.recetaOjoDerecho.adicion}</p>
-                                                </div>
-                                                <div style={{
-                                                    display: 'flex',
-                                                    flexDirection: 'column',
-                                                    alignItems: 'center'
-                                                }}>
-                                                    <h4 style={{ margin: '0%' }}>Ojo Izquierdo</h4>
-                                                    <img src={transportador} style={{ width: '50%' }} alt='transportador' />
-                                                    <p className='textoPequeño'>A. V. {detalle.recetaOjoIzquierdo.agudezaVisual}</p>
-                                                    <p className='textoPequeño'>Dip. {detalle.recetaOjoIzquierdo.distanciaPupilar}</p>
-                                                    <p className='textoPequeño'>{detalle.recetaOjoIzquierdo.esfera} {detalle.recetaOjoIzquierdo.cilindro} {detalle.recetaOjoIzquierdo.eje} {detalle.recetaOjoIzquierdo.adicion} </p>
-                                                </div>
-                                            </div>
-                                            <p className='texto'>
-                                                <span style={{ fontWeight: 500 }}>Tipo de lente: </span>
-                                                <span style={{ fontWeight: 200 }}>{detalle.tipoLente}</span>
-                                            </p>
-                                            <p className='texto'>
-                                                <span style={{ fontWeight: 500 }}>Protección: </span>
-                                                {
-                                                    detalle.proteccion.map(p => {
-                                                        return <span style={{ fontWeight: 200 }}>{p}. </span>
-                                                    })
-                                                }
-
-                                            </p>
-                                            <h4 style={{ textAlign: 'center', margin: '0%' }}>Pruebas y valoraciones</h4>
-                                            <p className='texto'>
-                                                <span style={{ fontWeight: 500 }}>Optometrista: </span>
-                                                <span style={{ fontWeight: 200 }}>{detalle.optometrista.nombre}</span>
-                                            </p>
-                                            <p className='texto'>
-                                                <span style={{ fontWeight: 500 }}>Observaciones: </span>
-                                                <span style={{ fontWeight: 200 }}>{detalle.observaciones}</span>
-                                            </p>
-                                            <p className='texto'>
-                                                <span style={{ fontWeight: 500 }}>Antecentes: </span>
-                                                <span style={{ fontWeight: 200 }}>{detalle.antecedentes}</span>
-                                            </p>
-                                            <p className='texto'>
-                                                <span style={{ fontWeight: 500 }}>Pruebas y valoraciones: </span>
-                                                <span style={{ fontWeight: 200 }}>{detalle.pruebasValoraciones}</span>
-                                            </p>
-                                            <hr />
-                                            <div>
-                                                <p className='textoPequeño'>Sucursal {detalle.optometrista.sucursales.nombre} Dirección {detalle.optometrista.sucursales.direccion}</p>
-                                                <p className='textoPequeño'>Telefono {detalle.optometrista.sucursales.telefono} {detalle.optometrista.sucursales.celular} {detalle.optometrista.sucursales.email} </p>
-                                                <p className='textoPequeño'>{detalle.optometrista.sucursales.paginaDigital}</p>
-                                                <br />
-                                            </div>
-
-
-
-
-
-
                                         </div>
-
                                     </TabPanel>
                                 )
                             })
