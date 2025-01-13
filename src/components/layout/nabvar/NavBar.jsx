@@ -176,7 +176,7 @@ export const NavBar = () => {
               <ListItemIcon>
                 <NumbersIcon />
               </ListItemIcon>
-              <ListItemText primary="Facturas" />
+              <ListItemText primary="Facturas/Recibo" />
             </ListItemButton>
             <ListItemButton
               sx={{ pl: 4 }}

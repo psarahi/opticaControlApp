@@ -10,11 +10,9 @@ import {
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import CancelIcon from '@mui/icons-material/Cancel';
-import DoneIcon from '@mui/icons-material/Done';
 
 import { opticaControlApi } from '../../services/opticaControlApi';
 import { textValidator } from '../../helpers/validator';
-import { formatearFecha } from '../../helpers/formato';
 
 export const Optometristas = () => {
 
@@ -60,13 +58,6 @@ export const Optometristas = () => {
   const onCellSelect = (event) => {
     idOptometrista = event.rowData._id;
     setOptometristasSelected(event.rowData._id);
-
-    const sucursales = event.rowData.sucursales.nombre;
-    let test = {
-      nombre: event.rowData.nombre,
-      sucursales: event.rowData.sucursales._id,
-    }
-    console.log(test);
     
     setFormOptometrista({
       nombre: event.rowData.nombre,
@@ -173,12 +164,6 @@ export const Optometristas = () => {
   const renderEditButton = (data) => {
     if (data.estado !== true) {
       return <EditIcon color='primary' fontSize='medium' />
-    }
-  };
-
-  const renderChangeStatus = (data) => {
-    if (data.estado !== true) {
-      return <DoneIcon color='success' fontSize='medium' />
     }
   };
 
@@ -335,8 +320,6 @@ export const Optometristas = () => {
               variant="standard"
               size="medium"
             />
-          </div>
-          <div>
           </div>
           <br />
           <br />

@@ -251,7 +251,7 @@ export const DetalleVentas = () => {
                 numFacRec = nuevaFactura(facturas[0].ultimaUtilizada);
             }
         } else {
-            numFacRec = parseInt(correlativo.numRecibo) + 1;
+            numFacRec = parseInt(correlativo.numCorrelativo) + 1;
         }
         const facturaDatos = obtenerDatosFactura(numFacRec);
         console.log(facturaDatos);
@@ -299,7 +299,7 @@ export const DetalleVentas = () => {
                                 });
                         });
                     } else {
-                        opticaControlApi.put(`correlativo/${correlativo._id}`, { numRecibo: numFacRec }).then(() => {
+                        opticaControlApi.put(`correlativo/${correlativo._id}`, { numCorrelativo: numFacRec }).then(() => {
                             opticaControlApi.post(`thermalPrinter/imprimirRecibo`, facturaDatos)
                                 .then(() => {
                                     createToast(
@@ -624,7 +624,7 @@ export const DetalleVentas = () => {
                                                         <span style={{ fontWeight: 200 }}>{detalle.rtn}</span>
                                                     </p>
                                                     <p style={{ fontSize: '20px' }}>
-                                                        <span style={{ fontWeight: 500 }}>Nombre: </span>
+                                                        <span style={{ fontWeight: 500 }}>Nombre RTN: </span>
                                                         <span style={{ fontWeight: 200 }}>{detalle.nombreRtn}</span>
                                                     </p>
                                                 </>

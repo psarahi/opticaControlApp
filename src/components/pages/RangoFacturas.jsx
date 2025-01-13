@@ -29,16 +29,29 @@ export const RangoFacturas = () => {
         ultimaUtilizada: '',
         estado: true
     }
+    const correlativoJSON = {
+        numCorrelativo: 0,
+        sucursales: localStorage.getItem('sucursalID'),
+        nombre: ''
+    };
     let idFactura = '';
+    let idCorrelativo = '';
     const [listFacturas, setListFacturas] = useState([]);
+    const [listCorrelativo, setListCorrelativo] = useState([]);
     const [formFactura, setFormFactura] = useState(facturaJSON);
+    const [formCorrelativo, setFormCorrelativo] = useState(correlativoJSON);
     const [facturaSelected, setfacturaSelected] = useState('');
+    const [correlativoSelected, setCorrelativoSelected] = useState('');
     const [openDialog, setOpenDialog] = useState(false);
+    const [openDialogCorrelativo, setOpenDialogCorrelativo] = useState(false);
 
     useEffect(() => {
         const sucursal = localStorage.getItem('sucursalID');
         opticaControlApi.get(`facturas/bySucursal/${sucursal}`, '').then((response) => {
             setListFacturas(response.data);
+        })
+        opticaControlApi.get(`correlativo/bySucursal/${sucursal}`, '').then((response) => {
+            setListCorrelativo(response.data);
         })
         cleanForm();
     }, [])
@@ -55,8 +68,15 @@ export const RangoFacturas = () => {
         }
     };
 
+    const renderEditButtonCorrelativo = () => {
+        return <EditIcon color='primary' fontSize='medium' />
+    };
+
     const handleOpenDialog = () => {
         setOpenDialog(true);
+    };
+    const handleOpenDialogCorrelativo = () => {
+        setOpenDialogCorrelativo(true);
     };
 
     const handleCloseDialog = () => {
@@ -64,6 +84,17 @@ export const RangoFacturas = () => {
         setOpenDialog(false);
     };
 
+    const handleCloseDialogCorrelativo = () => {
+        cleanFormCorrelativo();
+        setOpenDialogCorrelativo(false);
+    };
+
+
+    const cleanFormCorrelativo = () => {
+        setFormCorrelativo(correlativoJSON);
+        setCorrelativoSelected('');
+        idCorrelativo = '';
+    };
     const cleanForm = () => {
         setFormFactura(facturaJSON);
         setfacturaSelected('');
@@ -82,11 +113,8 @@ export const RangoFacturas = () => {
         }
     };
 
-    const rowClass = (data) => {
-        return {
-            'bg-green-100': data.estado === true,
-            'bg-red-100': data.estado === false,
-        }
+    const renderDeleteButtonCorrelativo = () => {
+        return <CancelIcon color='error' fontSize='medium' />
     };
 
     const rendeEstado = (data) => {
@@ -97,7 +125,7 @@ export const RangoFacturas = () => {
         }
     }
 
-    const onCellSelect = (event) => {
+    const onCellSelectFactura = (event) => {
         idFactura = event.rowData._id;
         setfacturaSelected(event.rowData._id);
 
@@ -118,8 +146,82 @@ export const RangoFacturas = () => {
         }
     };
 
+    const onCellSelectCorrelativos = (event) => {
+        idCorrelativo = event.rowData._id;
+        setCorrelativoSelected(event.rowData._id);
+
+        setFormCorrelativo({
+            numCorrelativo: event.rowData.numCorrelativo,
+            nombre: event.rowData.nombre,
+            sucursales: event.rowData.sucursales,
+        });
+        if (event.cellIndex === 0) {
+            handleEditCorrelativo();
+        } else if (event.cellIndex === 1) {
+            handleDelete();
+        }
+    };
+
+    const handleDelete = () => {
+        confirmDialog({
+            message: `¿Desea eliminar este registro? `,
+            header: 'Eliminar',
+            icon: 'pi pi-info-circle',
+            defaultFocus: 'reject',
+            acceptClassName: 'p-button-danger',
+            accept: deleteCorrelativo,
+            reject: rejectDialogDelete
+        });
+    };
+
+    const deleteCorrelativo = () => {
+        if (textValidator(idCorrelativo)) {
+            opticaControlApi.delete(`correlativo/${idCorrelativo}`)
+                .then((response) => {
+                    if (response.status === 200) {
+                        createToast(
+                            'success',
+                            'Confirmado',
+                            'El registro ha sido eliminado'
+                        );
+                        setListCorrelativo(
+                            listCorrelativo.filter(i => i._id !== idCorrelativo)
+                        );
+                        cleanFormCorrelativo();
+                    }
+                })
+                .catch((err) => {
+                    createToast(
+                        'error',
+                        'Error',
+                        'Ha ocurrido un error al intentar eliminar el registro'
+                    );
+                    console.log(err);
+                    handleCloseDialogCorrelativo();
+                    cleanFormCorrelativo();
+                });
+        } else {
+            createToast(
+                'warn',
+                'Acción requerida',
+                'No se seleccionó el correlativo correctamente'
+            );
+        }
+    }
+
+    const rejectDialogDelete = () => {
+        createToast(
+            'warn',
+            'Cancelado',
+            'Acción cancelada'
+        );
+    }
+
     const handleEdit = () => {
         handleOpenDialog();
+    };
+    const handleEditCorrelativo = () => {
+        handleOpenDialogCorrelativo();
     };
 
     const handleDisable = () => {
@@ -270,30 +372,40 @@ export const RangoFacturas = () => {
         })
     };
 
+    const handleChangeTextCorrelativo = ({ target }, select) => {
+        setFormCorrelativo({
+            ...formCorrelativo,
+            [select]: target.value
+        })
+    };
+
+    const rowClass = (data) => {
+        return {
+            'bg-green-100': data.estado === true,
+            'bg-red-100': data.estado === false,
+        }
+    };
+
     return (
         <>
-            <h1>Informacion sobre facturas </h1>
-            <Button variant='outlined' startIcon={<AddIcon />} onClick={handleOpenDialog}>Agregar</Button>
-            <br />
-            <br />
+            <h1>Informacion sobre facturas / Recibo </h1>
             <Toast ref={toast} />
             <ConfirmDialog />
-
-            <div style={{ width: '65%' }}>
+            <h2>Facturas</h2>
+            <Button variant='outlined' startIcon={<AddIcon />} onClick={handleOpenDialog}>Agregar</Button>
+            <div style={{ width: '80%' }}>
                 <DataTable value={listFacturas}
                     showGridlines
                     stripedRows
                     size='small'
                     paginator
-                    rows={10}
-                    rowsPerPageOptions={[5, 10, 25, 50]}
+                    rows={5}
                     rowClassName={rowClass}
-                    // filters={filters}
-                    // filterDisplay='row'
+                    rowsPerPageOptions={[5, 10, 25, 50]}
                     selectionMode="single"
                     selection={facturaSelected}
                     cellSelection
-                    onCellSelect={onCellSelect}
+                    onCellSelect={onCellSelectFactura}
                     scrollable
                     columnResizeMode="expand"
                     resizableColumns                >
@@ -310,7 +422,7 @@ export const RangoFacturas = () => {
             <Dialog
                 open={openDialog}
                 disableEscapeKeyDown={true}
-                maxWidth="sm"
+                maxWidth="md"
                 fullWidth={true}
                 onClose={handleCloseDialog}
                 PaperProps={{
@@ -437,6 +549,17 @@ export const RangoFacturas = () => {
                             variant="standard"
                             size="medium"
                         />
+                        <TextField
+                            value={formFactura.ultimaUtilizada}
+                            onChange={(event) => handleChangeText(event, 'ultimaUtilizada')}
+                            margin="dense"
+                            id="ultimaUtilizada"
+                            name="ultimaUtilizada"
+                            label="Ultima Utilizada"
+                            sx={{ width: "70%" }}
+                            variant="standard"
+                            size="medium"
+                        />
                     </div>
                     <div>
                         <p style={{ color: '#696969' }}>Fecha limite emisión</p>
@@ -453,7 +576,6 @@ export const RangoFacturas = () => {
                             variant="standard"
                             size="medium"
                         />
-               
                     </div>
                     <br />
                     <br />
@@ -461,6 +583,146 @@ export const RangoFacturas = () => {
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleCloseDialog} >Cancelar</Button>
+                    <Button variant='contained' type="submit">Guardar</Button>
+                </DialogActions>
+            </Dialog>
+            <h2>Correlativos</h2>
+            <Button variant='outlined' startIcon={<AddIcon />} onClick={handleOpenDialogCorrelativo}>Agregar</Button>
+            <div style={{ width: '55%' }}>
+                <DataTable value={listCorrelativo}
+                    showGridlines
+                    stripedRows
+                    size='small'
+                    paginator
+                    rows={5}
+                    rowsPerPageOptions={[5, 10, 25, 50]}
+                    selectionMode="single"
+                    selection={correlativoSelected}
+                    cellSelection
+                    onCellSelect={onCellSelectCorrelativos}
+                    scrollable
+                    columnResizeMode="expand"
+                    resizableColumns                >
+                    <Column body={renderEditButtonCorrelativo} style={{ textAlign: 'center' }}></Column>
+                    <Column body={renderDeleteButtonCorrelativo} style={{ textAlign: 'center' }}></Column>
+                    <Column field="numCorrelativo" header="Ultimo utilizado"></Column>
+                    <Column field="nombre" header="Nombre"></Column>
+                </DataTable>
+            </div>
+            <Dialog
+                open={openDialogCorrelativo}
+                disableEscapeKeyDown={true}
+                maxWidth="sm"
+                fullWidth={true}
+                onClose={handleCloseDialogCorrelativo}
+                PaperProps={{
+                    component: 'form',
+                    onSubmit: (event) => {
+                        event.preventDefault();
+                        if (!textValidator(formCorrelativo.nombre) && !textValidator(formCorrelativo.numCorrelativo)) {
+                            createToast(
+                                'warn',
+                                'Acción requerida',
+                                'Favor ingrese los datos necesarios'
+                            );
+                            return;
+                        }
+                        if (textValidator(correlativoSelected)) {
+                            opticaControlApi.put(`correlativo/${correlativoSelected}`, formCorrelativo)
+                                .then((response) => {
+                                    if (response.status === 202) {
+                                        createToast(
+                                            'success',
+                                            'Confirmado',
+                                            'El registro fue editado correctamente'
+                                        );
+                                        handleCloseDialogCorrelativo();
+                                        setListCorrelativo(
+                                            listCorrelativo.map((i) =>
+                                                i._id === correlativoSelected ? { ...i, ...formCorrelativo } : i
+                                            )
+                                        );
+                                        cleanFormCorrelativo();
+                                    }
+                                })
+                                .catch((err) => {
+                                    createToast(
+                                        'error',
+                                        'Error',
+                                        'Ha ocurrido un error'
+                                    );
+                                    console.log(err);
+                                    handleCloseDialogCorrelativo();
+                                    cleanFormCorrelativo();
+                                });
+                        } else {
+                            opticaControlApi.post('correlativo', formCorrelativo)
+                                .then((response) => {
+                                    if (response.status === 201) {
+                                        createToast(
+                                            'success',
+                                            'Confirmado',
+                                            'El registro fue creado correctamente'
+                                        );
+                                        handleCloseDialogCorrelativo();
+                                        setListCorrelativo([...listCorrelativo, response.data]);
+                                        console.log(response);
+                                        cleanFormCorrelativo();
+                                    }
+                                })
+                                .catch((err) => {
+                                    createToast(
+                                        'error',
+                                        'Error',
+                                        'Ha ocurrido un error'
+                                    );
+                                    console.log(err);
+                                    handleCloseDialogCorrelativo();
+                                    cleanFormCorrelativo();
+                                });
+                        }
+                    },
+                }}
+            >
+                <DialogTitle>Datos sobre correlativo</DialogTitle>
+                <DialogContent                 >
+                    <div style={{
+                        display: 'flex',
+                        flexDirection: 'row',
+                        gap: '30px',
+                        marginBottom: '2%'
+                    }}>
+                        <TextField
+                            required
+                            value={formCorrelativo.nombre}
+                            onChange={(event) => handleChangeTextCorrelativo(event, 'nombre')}
+                            margin="dense"
+                            id="nombre"
+                            name="nombre"
+                            label="Nombre"
+                            sx={{ width: "70%" }}
+                            variant="standard"
+                            size="medium"
+                        />
+                        <TextField
+                            required
+                            value={formCorrelativo.numCorrelativo}
+                            onChange={(event) => handleChangeTextCorrelativo(event, 'numCorrelativo')}
+                            margin="dense"
+                            id="numCorrelativo"
+                            name="numCorrelativo"
+                            label="#Correlativo"
+                            sx={{ width: "70%" }}
+                            variant="standard"
+                            size="medium"
+                        />
+                    </div>
+                    <br />
+                    <br />
+
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleCloseDialogCorrelativo} >Cancelar</Button>
                     <Button variant='contained' type="submit">Guardar</Button>
                 </DialogActions>
             </Dialog>

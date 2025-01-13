@@ -1,13 +1,9 @@
-import React, { useState, useRef, useEffect } from 'react'
+import React, { useState, useRef } from 'react'
 import { Toast } from 'primereact/toast';
 
 import {
     Button,
     TextField,
-    InputLabel,
-    MenuItem,
-    Select,
-    FormControl
 }
     from '@mui/material';
 
@@ -30,28 +26,7 @@ export const CrearSucursal = () => {
         mensajeFactura: ''
     }
 
-    useEffect(() => {
-        document.body.style.zoom = '100%';
-
-        opticaControlApi.get('sucursal', '')
-            .then((response) => {
-                if (response.status === 200) {
-                    console.log(response.data);
-                    setSucursales(response.data);
-                }
-            })
-            .catch((err) => {
-                createToast(
-                    'error',
-                    'Error',
-                    err.response.data,
-                );
-            });
-
-    }, [])
-
     const [formSucursal, setFormSucursal] = useState(sucursalJSON);
-    const [sucursales, setSucursales] = useState([])
     const navigate = useNavigate();
     const toast = useRef(null);
 
@@ -213,7 +188,6 @@ export const CrearSucursal = () => {
                             variant='standard'
                         />
                         <TextField
-                            required
                             style={{ width: '100%' }}
                             id="paginaDigital"
                             label="Pagina Digital"

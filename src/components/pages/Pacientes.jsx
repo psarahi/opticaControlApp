@@ -143,7 +143,7 @@ export const Pacientes = () => {
   const [rtnenable, setrtnenable] = useState(false);
   const [datosRtn, setDatosRtn] = useState({ rtn: '', nombre: '' });
   const [listRangoFactura, setlistRangoFactura] = useState([]);
-  const [numReciboActual, setnumReciboActual] = useState(0);
+  const [numCorrelativoActual, setnumCorrelativoActual] = useState(0);
   const [detallePagos, setdetallePagos] = useState({
     fecha: dayjs().format('YYYY-MM-DD'),
     formaPago: '',
@@ -280,7 +280,7 @@ export const Pacientes = () => {
       }
 
       setlistRangoFactura(response.data.factura);
-      setnumReciboActual(response.data.correlativo[0]);
+      setnumCorrelativoActual(response.data.correlativo[0]);
     });
   };
 
@@ -977,7 +977,7 @@ export const Pacientes = () => {
         numFacRec = nuevaFactura(listRangoFactura[0].ultimaUtilizada);
       }
     } else {
-      numFacRec = parseInt(numReciboActual.numRecibo) + 1;
+      numFacRec = parseInt(numCorrelativoActual.numCorrelativo) + 1;
     }
 
     const facturaDatos = {
@@ -1077,7 +1077,7 @@ export const Pacientes = () => {
                       });
                   });
                 } else {
-                  opticaControlApi.put(`correlativo/${numReciboActual._id}`, { numRecibo: numFacRec }).then(() => {
+                  opticaControlApi.put(`correlativo/${numCorrelativoActual._id}`, { numCorrelativo: numFacRec }).then(() => {
                     opticaControlApi.post(`thermalPrinter/imprimirRecibo`, facturaDatos)
                       .then(() => {
                         createToast(
