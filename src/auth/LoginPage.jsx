@@ -85,9 +85,12 @@ export const LoginPage = () => {
     opticaControlApi.post(`usuario/login`, formValues)
       .then(async (response) => {
         if (response.status === 201) {
+          console.log(response.data);
+          
           localStorage.setItem('token', await response.data.token);
           localStorage.setItem('nombre', await response.data.nombre);
           localStorage.setItem('usuarioId', await response.data.uid);
+          localStorage.setItem('tipoUsuario', await response.data.tipoUsuario);
           localStorage.setItem('sucursalID', formValues.sucursal);
           const sucrsalFilter = sucursales.filter(s => s._id === formValues.sucursal);
           localStorage.setItem('sucursalNombre', sucrsalFilter[0].nombre);

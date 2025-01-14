@@ -7,7 +7,7 @@ import 'react-date-picker/dist/DatePicker.css';
 import 'react-calendar/dist/Calendar.css';
 import {
     Button, Chip, Dialog, DialogActions, DialogContent,
-    DialogTitle, FormControl, InputLabel, MenuItem, Select, TextField
+    DialogTitle, FormControl, FormControlLabel, InputLabel, MenuItem, Select, Switch, TextField
 }
     from '@mui/material';
 import PrintIcon from '@mui/icons-material/Print';
@@ -23,6 +23,7 @@ import { textValidator } from '../../helpers/validator';
 import { opticaControlApi } from '../../services/opticaControlApi';
 
 export const DetalleVentas = () => {
+    const [enableOp] = useState((localStorage.getItem('tipoUsuario') === 'Administrador') ? true : false);
     const [listPaciente, setListPaciente] = useState([]);
     const [activeIndex, setActiveIndex] = useState(0);
     const [listDetalleVentas, setListDetalleVentas] = useState([]);
@@ -32,6 +33,8 @@ export const DetalleVentas = () => {
     const [facturas, setfacturas] = useState([]);
     const [disabledVenta, setdisabledVenta] = useState(false);
     const [ventaView, setventaView] = useState();
+    const [rtnenable, setrtnenable] = useState(false);
+    const [datosRtn, setDatosRtn] = useState({ rtn: '', nombre: '' });
     const [formdetallePagos, setFormDetallePagos] = useState({
         fecha: dayjs().format('YYYY-MM-DD'),
         formaPago: '',
@@ -106,7 +109,7 @@ export const DetalleVentas = () => {
         toast.current.show({ severity: severity, summary: summary, detail: detail, life: 6000 });
     };
     const createToastForm = (severity, summary, detail) => {
-        toast.current.show({ severity: severity, summary: summary, detail: detail, life: 6000 });
+        toastForm.current.show({ severity: severity, summary: summary, detail: detail, life: 6000 });
     };
 
     const [filters] = useState({
@@ -157,6 +160,7 @@ export const DetalleVentas = () => {
 
     const handleCloseDialog = () => {
         setOpenDialog(false);
+        clearRTN();
     };
 
 
@@ -226,6 +230,11 @@ export const DetalleVentas = () => {
         return facturaDatos;
     };
 
+    const clearRTN = () => {
+        setrtnenable(false);
+        setDatosRtn({ rtn: '', nombre: '' })
+    };
+
     const generarFactura = (op) => {
         if (!textValidator(formdetallePagos.formaPago)) {
             createToastForm(
@@ -243,10 +252,21 @@ export const DetalleVentas = () => {
             );
             return;
         }
+
+        if (rtnenable && (!textValidator(datosRtn.nombre) || !textValidator(datosRtn.rtn))) {
+            createToastForm(
+                'warn',
+                'Acction requerida',
+                'Por favor ingrese los datos para el RTN'
+            );
+            return;
+        }
+
         let numFacRec = '';
         if (op === 'factura' && (parseFloat(formdetallePagos.monto) + parseFloat(ventaView.acuenta)) === parseFloat(ventaView.total)) {
             if (facturas[0].ultimaUtilizada === '') {
                 numFacRec = facturas[0].desde;
+
             } else {
                 numFacRec = nuevaFactura(facturas[0].ultimaUtilizada);
             }
@@ -254,25 +274,14 @@ export const DetalleVentas = () => {
             numFacRec = parseInt(correlativo.numCorrelativo) + 1;
         }
         const facturaDatos = obtenerDatosFactura(numFacRec);
-        console.log(facturaDatos);
 
-        // opticaControlApi.put(`facturas/imprimirRecibo`, facturaDatos)
-        //     .then(() => {
-        //         createToast(
-        //             'success',
-        //             'Confirmado',
-        //             'La factura a sido generada'
-        //         );
-        //     })
-        //     .catch((error) => {
-        //         createToast(
-        //             'error',
-        //             'Error',
-        //             'Hubo un error al generar la factura, favor revise la impresora'
-        //         );
-        //     });
-
-        opticaControlApi.put(`detalleVentas/detallePago/${selectedVentaId}`, { detallePago: formdetallePagos, numFacRec: numFacRec })
+        opticaControlApi.put(`detalleVentas/detallePago/${selectedVentaId}`,
+            {
+                detallePago: formdetallePagos,
+                numFacRec: numFacRec,
+                rtn: datosRtn.rtn,
+                nombreRtn: datosRtn.nombre
+            })
             .then((response) => {
                 if (response.status === 202) {
                     createToast(
@@ -289,6 +298,7 @@ export const DetalleVentas = () => {
                                         'Confirmado',
                                         'La factura a sido generada'
                                     );
+                                    clearRTN();
                                 })
                                 .catch((error) => {
                                     createToast(
@@ -297,6 +307,7 @@ export const DetalleVentas = () => {
                                         'Hubo un error al generar la factura, favor revise la impresora'
                                     );
                                 });
+                            clearRTN();
                         });
                     } else {
                         opticaControlApi.put(`correlativo/${correlativo._id}`, { numCorrelativo: numFacRec }).then(() => {
@@ -317,7 +328,6 @@ export const DetalleVentas = () => {
                                 });
                         });
                     }
-
                     setListDetalleVentas(
                         listDetalleVentas.map((i) =>
                             i._id === selectedVentaId ? {
@@ -336,6 +346,7 @@ export const DetalleVentas = () => {
                     }
                     )
                     cleanForm();
+                    clearRTN();
                     handleCloseDialog();
                 } else {
                     createToast(
@@ -345,6 +356,7 @@ export const DetalleVentas = () => {
                     );
                     console.log(response);
                     cleanForm();
+                    clearRTN();
                     handleCloseDialog();
                     return;
                 }
@@ -523,7 +535,7 @@ export const DetalleVentas = () => {
                                                         }}
                                                     >Entregado</Button>
                                                 }
-                                                {
+                                                {enableOp &&
                                                     !detalle.entregado &&
                                                     <Button
                                                         variant='outlined'
@@ -563,51 +575,53 @@ export const DetalleVentas = () => {
                                                         }}
                                                     >Cancelar venta</Button>
                                                 }
-                                                <Button
-                                                    variant='contained'
-                                                    color="secondary"
-                                                    startIcon={<PrintIcon />}
-                                                    onClick={(e) => {
-                                                        const facturaDatos = obtenerDatosFactura(ventaView.numFacRec);
-                                                        console.log(facturaDatos);
+                                                {enableOp &&
+                                                    <Button
+                                                        variant='contained'
+                                                        color="secondary"
+                                                        startIcon={<PrintIcon />}
+                                                        onClick={(e) => {
+                                                            const facturaDatos = obtenerDatosFactura(ventaView.numFacRec);
+                                                            console.log(facturaDatos);
 
-                                                        if (facturaDatos.numFacRec.length === 19) {
-                                                            opticaControlApi.post(`thermalPrinter/imprimirFactura`, facturaDatos)
-                                                                .then(() => {
-                                                                    createToast(
-                                                                        'success',
-                                                                        'Confirmado',
-                                                                        'La factura a sido generada'
-                                                                    );
-                                                                })
-                                                                .catch((error) => {
-                                                        console.log(error);
-                                                                    createToast(
-                                                                        'error',
-                                                                        'Error',
-                                                                        'Hubo un error al generar la factura, favor revise la impresora'
-                                                                    );
-                                                                });
-                                                        } else {
-                                                            opticaControlApi.post(`thermalPrinter/imprimirRecibo`, facturaDatos)
-                                                                .then(() => {
-                                                                    createToast(
-                                                                        'success',
-                                                                        'Confirmado',
-                                                                        'El recibo a sido generado'
-                                                                    );
-                                                                })
-                                                                .catch((error) => {
-                                                        console.log(error);
-                                                                    createToast(
-                                                                        'error',
-                                                                        'Error',
-                                                                        'Hubo un error al generar el recibo, favor revise la impresora'
-                                                                    );
-                                                                });
-                                                        }
-                                                    }}
-                                                >FACTURA/RECIBO</Button>
+                                                            if (facturaDatos.numFacRec.length === 19) {
+                                                                opticaControlApi.post(`thermalPrinter/imprimirFactura`, facturaDatos)
+                                                                    .then(() => {
+                                                                        createToast(
+                                                                            'success',
+                                                                            'Confirmado',
+                                                                            'La factura a sido generada'
+                                                                        );
+                                                                    })
+                                                                    .catch((error) => {
+                                                                        console.log(error);
+                                                                        createToast(
+                                                                            'error',
+                                                                            'Error',
+                                                                            'Hubo un error al generar la factura, favor revise la impresora'
+                                                                        );
+                                                                    });
+                                                            } else {
+                                                                opticaControlApi.post(`thermalPrinter/imprimirRecibo`, facturaDatos)
+                                                                    .then(() => {
+                                                                        createToast(
+                                                                            'success',
+                                                                            'Confirmado',
+                                                                            'El recibo a sido generado'
+                                                                        );
+                                                                    })
+                                                                    .catch((error) => {
+                                                                        console.log(error);
+                                                                        createToast(
+                                                                            'error',
+                                                                            'Error',
+                                                                            'Hubo un error al generar el recibo, favor revise la impresora'
+                                                                        );
+                                                                    });
+                                                            }
+                                                        }}
+                                                    >FACTURA/RECIBO</Button>
+                                                }
                                             </div>
                                         }
                                         <p style={{ fontSize: '30px' }}>{detalle.sucursales.nombre} - {detalle.tipoVenta} </p>
@@ -735,7 +749,7 @@ export const DetalleVentas = () => {
                                                 <div>
                                                     <p style={{ fontSize: '20px' }}>
                                                         <span style={{ fontWeight: 500 }}>Pagado un: </span>
-                                                        <span style={{ fontWeight: 200 }}>{(detalle.acuenta / detalle.total) * 100} %</span>
+                                                        <span style={{ fontWeight: 200 }}>{formatearNumero((detalle.acuenta / detalle.total) * 100)} %</span>
                                                     </p>
                                                     <p style={{ fontSize: '20px' }}>
                                                         <span style={{ fontWeight: 500 }}>Acuenta: </span>
@@ -789,17 +803,13 @@ export const DetalleVentas = () => {
             <Dialog
                 open={openDialog}
                 disableEscapeKeyDown={true}
-                //maxWidth="sm"
-
-                fullWidth
                 onClose={handleCloseDialog}
             >
                 <DialogTitle>Datos sobre pagos</DialogTitle>
                 <DialogContent>
-                    <Toast ref={toastForm} />
-
                     <div className='divColumn'>
                         <div>
+                        <Toast ref={toastForm} />
                             <p style={{ color: '#696969' }}>Fecha *</p>
                             <TextField
                                 required
@@ -869,6 +879,33 @@ export const DetalleVentas = () => {
                                 },
                             }}
                         />
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'center' }}>
+                        <FormControlLabel control={<Switch value={rtnenable}
+                            onChange={(e) => setrtnenable(e.target.checked)} />} label="RTN" />
+                        {
+                            rtnenable &&
+                            <>
+                                <TextField
+                                    id="rtn"
+                                    label="RTN"
+                                    type="text"
+                                    variant="standard"
+                                    sx={{ m: 1 }}
+                                    value={datosRtn.rtn}
+                                    onChange={(e) => setDatosRtn({ ...datosRtn, rtn: e.target.value })}
+                                />
+                                <TextField
+                                    id="rtNombre"
+                                    label="Nombre RTN"
+                                    type="text"
+                                    variant="standard"
+                                    sx={{ m: 1 }}
+                                    value={datosRtn.nombre}
+                                    onChange={(e) => setDatosRtn({ ...datosRtn, nombre: e.target.value })}
+                                />
+                            </>
+                        }
                     </div>
                     <br />
                     <br />

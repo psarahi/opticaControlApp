@@ -33,8 +33,6 @@ import './PacienteStyle.css';
 import { agudezaVisual, obtenerAdicion, obtenerGraduaciones } from '../../helpers/metricas';
 import { nuevaFactura } from '../../helpers/nuevaFactura';
 
-
-
 const pacienteJson = {
   nombre: '',
   edad: '',
@@ -113,6 +111,7 @@ const detalleVenta = {
 
 export const Pacientes = () => {
   let pacienteSeleccionado = '';
+  const [enableOp] = useState((localStorage.getItem('tipoUsuario') === 'Administrador') ? true : false);
   const [openDialogPaciente, setOpenDialogPaciente] = useState(false);
   const [openDialogReceta, setOpenDialogReceta] = useState(false);
   const [openDialogAddExpediente, setOpenDialogAddExpediente] = useState(false);
@@ -320,8 +319,6 @@ export const Pacientes = () => {
   };
 
   const toast = useRef(null);
-  const toastSaludo = useRef(null);
-
   const toastForm = useRef(null);
   const toastFormVenta = useRef(null);
 
@@ -385,8 +382,14 @@ export const Pacientes = () => {
     if (event.cellIndex === 0) {
       handleOpenDialogPost();
     } else if (event.cellIndex === 1) {
+      if (!enableOp) {
+        return;
+      }
       handleDisable();
     } else if (event.cellIndex === 2) {
+      if (!enableOp) {
+        return;
+      }
       handleEnable();
     } else if (event.cellIndex === 3) {
       if (listRangoFactura.length < 1) {
@@ -853,14 +856,23 @@ export const Pacientes = () => {
   };
 
   const renderDisable = (data) => {
-    if (data.estado === true) {
-      return <CancelIcon color='error' fontSize='medium' />
+    if (enableOp) {
+      if (data.estado === true) {
+        return <CancelIcon color='error' fontSize='medium' />
+      }
+    } else {
+      return <CancelIcon color='disabled' fontSize='medium' />
     }
+
   };
 
   const renderChangeStatus = (data) => {
-    if (data.estado === false) {
-      return <DoneIcon color='success' fontSize='medium' />
+    if (enableOp) {
+      if (data.estado === false) {
+        return <DoneIcon color='success' fontSize='medium' />
+      }
+    } else {
+      return <DoneIcon color='disabled' fontSize='medium' />
     }
   };
 
@@ -997,8 +1009,6 @@ export const Pacientes = () => {
       montoPagos: parseFloat(montoPagos, 2),
     }
 
-    console.log(facturaDatos);
-
     let detalleInv = [];
     let proteccionList = (textValidator(formVenta.proteccion)) ? formVenta.proteccion.map(p => p.label) : '';
     listInvExistente.forEach(inv => {
@@ -1018,7 +1028,7 @@ export const Pacientes = () => {
       })
     }
 
-    if (rtnenable && (!textValidator(datosRtn.nombre || !textValidator(datosRtn.rtn)))) {
+    if (rtnenable && (!textValidator(datosRtn.nombre) || !textValidator(datosRtn.rtn))) {
       createToastFormVenta(
         'warn',
         'Acction requerida',
@@ -1048,8 +1058,6 @@ export const Pacientes = () => {
       acuenta: acuenta,
       numFacRec: numFacRec
     };
-
-    console.log(datosSave);
 
     opticaControlApi.post('detalleVentas', datosSave)
       .then((response) => {
@@ -1142,8 +1150,6 @@ export const Pacientes = () => {
       <br />
       <br />
       <Toast ref={toast} />
-      <Toast ref={toastSaludo} />
-
       <ConfirmDialog />
 
       <div style={{ width: '97%' }}>
@@ -1366,8 +1372,8 @@ export const Pacientes = () => {
               size="small"
             />
           </div>
-          <div style={{ display: 'flex', flexDirection: 'row', width: '100%'}}>
-            <div style={{width: '100%'}}>
+          <div style={{ display: 'flex', flexDirection: 'row', width: '100%' }}>
+            <div style={{ width: '100%' }}>
               <p style={{ color: '#696969' }}>Registro *</p>
               <TextField
                 required
@@ -1400,7 +1406,7 @@ export const Pacientes = () => {
                 size='medium'
               />
             </div>
-            <div style={{width: '100%'}}>
+            <div style={{ width: '100%' }}>
               <p style={{ color: '#696969' }}>Utima cita *</p>
               <TextField
                 required
@@ -1420,7 +1426,7 @@ export const Pacientes = () => {
                 size='medium'
               />
             </div>
-            <div style={{width: '100%'}}>
+            <div style={{ width: '100%' }}>
               <p style={{ color: '#696969' }}>Proxima cita *</p>
               <TextField
                 required
@@ -2026,27 +2032,30 @@ export const Pacientes = () => {
                 {listExpedientePaciente.map(ex => {
                   return (
                     <TabPanel key={ex._id} header={formatearFecha(ex.fecha)}>
-                      <Button variant='contained'
-                        id={ex._id}
-                        onClick={(e) => {
-                          setexpedienteId(e.target.id);
-                          const expediente = {
-                            paciente: ex.paciente._id,
-                            optometrista: ex.optometrista._id,
-                            fecha: ex.fecha,
-                            antecedentes: ex.antecedentes,
-                            enfermedadBase: ex.enfermedadBase,
-                            observaciones: ex.observaciones,
-                            pruebasValoraciones: ex.pruebasValoraciones,
-                            recetaOjoDerecho: ex.recetaOjoDerecho,
-                            recetaOjoIzquierdo: ex.recetaOjoIzquierdo
-                          };
-                          setformExpedientes(expediente);
+                      {enableOp &&
+                        <Button variant='contained'
+                          id={ex._id}
+                          onClick={(e) => {
+                            setexpedienteId(e.target.id);
+                            const expediente = {
+                              paciente: ex.paciente._id,
+                              optometrista: ex.optometrista._id,
+                              fecha: ex.fecha,
+                              antecedentes: ex.antecedentes,
+                              enfermedadBase: ex.enfermedadBase,
+                              observaciones: ex.observaciones,
+                              pruebasValoraciones: ex.pruebasValoraciones,
+                              recetaOjoDerecho: ex.recetaOjoDerecho,
+                              recetaOjoIzquierdo: ex.recetaOjoIzquierdo
+                            };
+                            setformExpedientes(expediente);
 
-                          handleCloseDialogReceta();
-                          setOpenDialogAddExpediente(true);
-                        }}
-                      >Editar expediente</Button>
+                            handleCloseDialogReceta();
+                            setOpenDialogAddExpediente(true);
+                          }}
+                        >Editar expediente</Button>
+                      }
+
                       <div className='grid3Column'>
                         <p className='parrafoReceta'>
                           <span className='campo'>Optometrista: </span>
@@ -2533,7 +2542,7 @@ export const Pacientes = () => {
                     type="number"
                     variant="standard"
                     sx={{ m: 1 }}
-                    value={acuenta}
+                    value={detallePagos.monto}
                     onChange={(event) => {
                       if (parseFloat(event.target.value) > totalVenta) {
                         createToastFormVenta(
@@ -2544,11 +2553,12 @@ export const Pacientes = () => {
                       } else {
                         setdetallePagos({
                           ...detallePagos,
-                          monto: parseFloat(event.target.value, 2).toFixed(2),
+                          monto: parseFloat(event.target.value, 2),
                         })
-                        setacuenta(parseFloat(event.target.value, 2));
+                        // setacuenta(parseFloat(event.target.value, 2));
                       }
                     }}
+                    onBlur={(e) => setacuenta(parseFloat(e.target.value, 2))}
                     slotProps={{
                       inputLabel: {
                         shrink: true,
@@ -2597,6 +2607,14 @@ export const Pacientes = () => {
               <p style={{ fontSize: '25px' }}>
                 <span style={{ fontWeight: 200 }}>Total: </span>
                 <span>{formatearNumero(totalVenta)}</span>
+              </p>
+              <p style={{ fontSize: '25px' }}>
+                <span style={{ fontWeight: 200 }}>Acuenta: </span>
+                <span>{formatearNumero(acuenta)}</span>
+              </p>
+              <p style={{ fontSize: '25px', color: '#cc0404' }}>
+                <span style={{ fontWeight: 200 }}>Restante: </span>
+                <span>{formatearNumero(totalVenta - acuenta)}</span>
               </p>
             </div>
           </div>

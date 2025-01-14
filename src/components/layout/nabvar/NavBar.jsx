@@ -27,6 +27,7 @@ import PersonIcon from '@mui/icons-material/Person';
 const drawerWidth = 240;
 
 export const NavBar = () => {
+  const [enableOp] = useState((localStorage.getItem('tipoUsuario') === 'Administrador') ? true : false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
   const sucursal = localStorage.getItem('sucursalNombre');
@@ -68,17 +69,19 @@ export const NavBar = () => {
       />
       <Divider />
       <List >
-        <ListItem key='Inventario' disablePadding>
-          <ListItemButton
-            component={NavLink}
-            to='/inventario'
-          >
-            <ListItemIcon>
-              <EditNoteIcon />
-            </ListItemIcon>
-            <ListItemText primary='Inventario' />
-          </ListItemButton>
-        </ListItem>
+        {enableOp &&
+          <ListItem key='Inventario' disablePadding>
+            <ListItemButton
+              component={NavLink}
+              to='/inventario'
+            >
+              <ListItemIcon>
+                <EditNoteIcon />
+              </ListItemIcon>
+              <ListItemText primary='Inventario' />
+            </ListItemButton>
+          </ListItem>
+        }
         <ListItem key='Pacientes' disablePadding>
           <ListItemButton
             component={NavLink}
@@ -90,17 +93,19 @@ export const NavBar = () => {
             <ListItemText primary='Pacientes' />
           </ListItemButton>
         </ListItem>
-        <ListItem key='Pacientes' disablePadding>
-          <ListItemButton
-            component={NavLink}
-            to='/usuarios'
-          >
-            <ListItemIcon>
-              <PersonIcon />
-            </ListItemIcon>
-            <ListItemText primary='Usuarios' />
-          </ListItemButton>
-        </ListItem>
+        {enableOp &&
+          <ListItem key='Usuarios' disablePadding>
+            <ListItemButton
+              component={NavLink}
+              to='/usuarios'
+            >
+              <ListItemIcon>
+                <PersonIcon />
+              </ListItemIcon>
+              <ListItemText primary='Usuarios' />
+            </ListItemButton>
+          </ListItem>
+        }
       </List>
       <Divider />
       <List >
@@ -126,7 +131,9 @@ export const NavBar = () => {
             <ListItemText primary='Detalle Ventas' />
           </ListItemButton>
         </ListItem>
-        <Divider />
+      </List>
+      <Divider />
+      <List>
         <ListItemButton onClick={handleClickReporte}>
           <ListItemIcon>
             <FolderIcon />
@@ -158,59 +165,64 @@ export const NavBar = () => {
             </ListItemButton>
           </List>
         </Collapse>
-        <Divider />
-        <ListItemButton onClick={handleClickConfi}>
-          <ListItemIcon>
-            <SettingsIcon />
-          </ListItemIcon>
-          <ListItemText primary="Configuraciones" />
-          {openConfi ? <ExpandLess /> : <ExpandMore />}
-        </ListItemButton>
-        <Collapse in={openConfi} timeout="auto" unmountOnExit>
-          <List component="div" disablePadding>
-            <ListItemButton
-              sx={{ pl: 4 }}
-              component={NavLink}
-              to='/rangoFactura'
-            >
-              <ListItemIcon>
-                <NumbersIcon />
-              </ListItemIcon>
-              <ListItemText primary="Facturas/Recibo" />
-            </ListItemButton>
-            <ListItemButton
-              sx={{ pl: 4 }}
-              component={NavLink}
-              to='/importDatos'
-            >
-              <ListItemIcon>
-                <CloudUploadIcon />
-              </ListItemIcon>
-              <ListItemText primary="Importar datos" />
-            </ListItemButton>
-            <ListItemButton
-              sx={{ pl: 4 }}
-              component={NavLink}
-              to='/optometristas'
-            >
-              <ListItemIcon>
-                <TrackChangesIcon />
-              </ListItemIcon>
-              <ListItemText primary="Optometristas" />
-            </ListItemButton>
-            <ListItemButton
-              sx={{ pl: 4 }}
-              component={NavLink}
-              to='/sucursales'
-            >
-              <ListItemIcon>
-                <LocalConvenienceStoreIcon />
-              </ListItemIcon>
-              <ListItemText primary="Sucursales" />
-            </ListItemButton>
-          </List>
-        </Collapse>
       </List>
+      <Divider />
+      {
+        enableOp &&
+        <List>
+          <ListItemButton onClick={handleClickConfi}>
+            <ListItemIcon>
+              <SettingsIcon />
+            </ListItemIcon>
+            <ListItemText primary="Configuraciones" />
+            {openConfi ? <ExpandLess /> : <ExpandMore />}
+          </ListItemButton>
+          <Collapse in={openConfi} timeout="auto" unmountOnExit>
+            <List component="div" disablePadding>
+              <ListItemButton
+                sx={{ pl: 4 }}
+                component={NavLink}
+                to='/rangoFactura'
+              >
+                <ListItemIcon>
+                  <NumbersIcon />
+                </ListItemIcon>
+                <ListItemText primary="Facturas/Recibo" />
+              </ListItemButton>
+              <ListItemButton
+                sx={{ pl: 4 }}
+                component={NavLink}
+                to='/importDatos'
+              >
+                <ListItemIcon>
+                  <CloudUploadIcon />
+                </ListItemIcon>
+                <ListItemText primary="Importar datos" />
+              </ListItemButton>
+              <ListItemButton
+                sx={{ pl: 4 }}
+                component={NavLink}
+                to='/optometristas'
+              >
+                <ListItemIcon>
+                  <TrackChangesIcon />
+                </ListItemIcon>
+                <ListItemText primary="Optometristas" />
+              </ListItemButton>
+              <ListItemButton
+                sx={{ pl: 4 }}
+                component={NavLink}
+                to='/sucursales'
+              >
+                <ListItemIcon>
+                  <LocalConvenienceStoreIcon />
+                </ListItemIcon>
+                <ListItemText primary="Sucursales" />
+              </ListItemButton>
+            </List>
+          </Collapse>
+        </List>
+      }
       <Divider />
       <ListItem key='Logout' disablePadding
         sx={{

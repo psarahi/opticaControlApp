@@ -1,5 +1,5 @@
 import { React, useEffect, useState, useRef } from 'react'
-import { DataTable, Column } from 'primereact';
+import { DataTable, Tag, Column } from 'primereact';
 import { Toast } from 'primereact/toast';
 import { ConfirmDialog, confirmDialog } from 'primereact/confirmdialog';
 
@@ -8,7 +8,10 @@ import {
     DialogTitle, TextField, InputLabel,
     MenuItem,
     Select,
-    FormControl
+    FormControl,
+    Input,
+    InputAdornment,
+    IconButton
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
@@ -20,21 +23,17 @@ import dayjs from 'dayjs';
 import { opticaControlApi } from '../../services/opticaControlApi';
 import { textValidator } from '../../helpers/validator';
 import { formatearFecha } from '../../helpers/formato';
-
+import { Visibility, VisibilityOff } from '@mui/icons-material';
+const usuariosJSON = {
+    nombre: '',
+    usuario: '',
+    password: '',
+    tipoUsuario: '',
+    sucursales: '',
+    fechaRegistro: dayjs().format('YYYY-MM-DD'),
+    estado: true,
+}
 export const Usuarios = () => {
-    const usuariosJSON = {
-        nombre: '',
-        usuario: '',
-        password: '',
-        sucursales: '',
-        fechaRegistro: dayjs().format('YYYY-MM-DD'),
-        estado: true,
-    }
-
-    const estados = [
-        { id: true, name: 'Activo' },
-        { id: false, name: 'Inactivo' },
-    ];
     let idUsuario = '';
     const [listUsuarios, setListUsuarios] = useState([]);
     const [usuarioSelected, setUsuarioSelected] = useState(null);
@@ -42,18 +41,27 @@ export const Usuarios = () => {
     const [formUsuarios, setFormUsuarios] = useState(usuariosJSON);
     const [openDialog, setOpenDialog] = useState(false);
     const [changePass, setchangePass] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
+
+    const handleClickShowPassword = () => setShowPassword((show) => !show);
+    const handleMouseDownPassword = (event) => {
+        event.preventDefault();
+    };
+
+    const handleMouseUpPassword = (event) => {
+        event.preventDefault();
+    };
 
     useEffect(() => {
         if (window.innerWidth < 1900) {
             document.body.style.zoom = '80%'
-          } else {
+        } else {
             document.body.style.zoom = '100%'
-          }
-          
+        }
+
         opticaControlApi.get('sucursal', '')
             .then((response) => {
                 if (response.status === 200) {
-                    console.log(response.data);
                     setSucursales(response.data);
                 }
             })
@@ -100,6 +108,11 @@ export const Usuarios = () => {
         setOpenDialog(true);
     };
 
+    const handleOpenDialogAdd = () => {
+        setOpenDialog(true);
+        setchangePass(true);
+    };
+
     const onCellSelect = (event) => {
         idUsuario = event.rowData._id;
         setUsuarioSelected(event.rowData._id);
@@ -108,6 +121,7 @@ export const Usuarios = () => {
             nombre: event.rowData.nombre,
             usuario: event.rowData.usuario,
             password: event.rowData.password,
+            tipoUsuario: event.rowData.tipoUsuario,
             sucursales: event.rowData.sucursales ? event.rowData.sucursales._id : '',
             fechaRegistro: formatearFecha(event.rowData.fechaRegistro),
             estado: event.rowData.estado,
@@ -265,7 +279,6 @@ export const Usuarios = () => {
         );
     }
 
-
     const handleEdit = () => {
         handleOpenDialog();
     };
@@ -295,6 +308,13 @@ export const Usuarios = () => {
         }
     };
 
+    const rendeEstado = (data) => {
+        if (data.estado === true) {
+            return <Tag severity="success" value="Activo"></Tag>
+        } else {
+            return <Tag severity="danger" value="Inactivo"></Tag>
+        }
+    }
 
     const renderEditButton = (data) => {
         if (data.estado === true) {
@@ -325,10 +345,8 @@ export const Usuarios = () => {
         <>
             <h1>Usuarios</h1>
             <Toast ref={toast} />
-            <Toast ref={toastForm} />
-            <Toast ref={toast} />
             <ConfirmDialog />
-
+            <Button variant='outlined' startIcon={<AddIcon />} onClick={handleOpenDialogAdd}>Agregar</Button>
             <div style={{ width: '90%' }}>
                 <DataTable value={listUsuarios} tableStyle={{ minWidth: '50rem' }}
                     showGridlines
@@ -351,20 +369,11 @@ export const Usuarios = () => {
                     <Column body={renderStatusEnabled} style={{ textAlign: 'center' }}></Column>
                     <Column field="nombre" header="Nombre"></Column>
                     <Column field="usuario" header="Usuario"></Column>
+                    <Column field="tipoUsuario" header="Tipo Usuario"></Column>
                     <Column field="sucursales.nombre" header="Sucursal"></Column>
                     <Column field="fechaRegistro" header="Fecha de registro" body={(data) => (textValidator(data.fechaRegistro)) ? formatearFecha(data.fechaRegistro) : '-'}></Column>
-                    <Column
-                        field="estado"
-                        header="Estado"
-                        body={(data) => (
-                            <div style={{ display: 'flex', alignItems: 'center' }}>
-                                {data.estado
-                                    ? 'Activo'
-                                    : 'Inactivo'
-                                }
-                            </div>
-                        )}
-                    />
+                    <Column field="estado" header="Estado" body={rendeEstado}></Column>
+
                 </DataTable>
             </div>
             <Dialog
@@ -377,14 +386,14 @@ export const Usuarios = () => {
                     component: 'form',
                     onSubmit: (event) => {
                         event.preventDefault();
-                        console.log(formUsuarios);
                         if (!textValidator(formUsuarios.nombre)
-                            && !textValidator(formUsuarios.usuario)
-                            && !textValidator(formUsuarios.password)
-                            && !textValidator(formUsuarios.sucursales)
-                            && !textValidator(formUsuarios.fechaRegistro)
+                            || !textValidator(formUsuarios.usuario)
+                            || !textValidator(formUsuarios.password)
+                            || !textValidator(formUsuarios.tipoUsuario)
+                            || !textValidator(formUsuarios.sucursales)
+                            || !textValidator(formUsuarios.fechaRegistro)
                         ) {
-                            createToast(
+                            createToastForm(
                                 'warn',
                                 'Acción requerida',
                                 'Favor ingrese los datos necesarios'
@@ -451,6 +460,30 @@ export const Usuarios = () => {
                             }
 
 
+                        } else {
+                            opticaControlApi.post('usuario', formUsuarios)
+                                .then(async (response) => {
+                                    if (response.status === 201) {
+                                        createToast(
+                                            'success',
+                                            'Confirmado',
+                                            'El registro a sido creado'
+                                        );
+                                        cleanForm();
+                                        setListUsuarios([...listUsuarios, response.data])
+                                        handleCloseDialog();
+                                    }
+                                })
+                                .catch((err) => {
+                                    createToast(
+                                        'error',
+                                        'Error',
+                                        err.response?.data || 'Error desconocido',
+                                    );
+                                    console.log(err);
+                                    cleanForm();
+                                    handleCloseDialog()
+                                });
                         }
                     },
                 }}
@@ -461,9 +494,13 @@ export const Usuarios = () => {
                         display: 'flex',
                         flexDirection: 'column',
                         gap: '30px',
-                        marginBottom: '2%'
+                        marginBottom: '2%',
+                        alignItems: 'center'
                     }}>
-                        <Button variant='contained' onClick={handleChangePass}>Cambiar contraseña</Button>
+                        {!changePass &&
+                            <Button variant='contained' onClick={handleChangePass}>Cambiar contraseña</Button>
+                        }
+                        <Toast ref={toastForm} />
                         <TextField
                             required
                             value={formUsuarios.nombre}
@@ -489,22 +526,47 @@ export const Usuarios = () => {
                             size="medium"
                         />
                         {changePass &&
-                            <TextField
-                                required
-                                value={formUsuarios.password}
-                                onChange={(event) => handleChangeText(event, 'password')}
-                                margin="dense"
-                                id="password"
-                                name="password"
-                                label="Contraseña"
-                                sx={{ width: "70%" }}
-                                variant="standard"
-                                size="medium"
-                            />
+                            <FormControl variant="standard" style={{ width: '70%' }}>
+                                <InputLabel id="password">Password *</InputLabel>
+                                <Input
+                                    id="standard-adornment-password"
+                                    value={formUsuarios.password}
+                                    type={showPassword ? 'text' : 'password'}
+                                    onChange={(event) => handleChangeText(event, 'password')}
+                                    required
+                                    endAdornment={
+                                        <InputAdornment position="end">
+                                            <IconButton
+                                                aria-label="toggle password visibility"
+                                                onClick={handleClickShowPassword}
+                                                onMouseDown={handleMouseDownPassword}
+                                                onMouseUp={handleMouseUpPassword}
+                                            >
+                                                {showPassword ? <VisibilityOff /> : <Visibility />}
+                                            </IconButton>
+                                        </InputAdornment>
+                                    }
+                                />
+                            </FormControl>
                         }
-
                         <FormControl variant="standard">
-                            <InputLabel id="sucursales">Sucursal</InputLabel>
+                            <InputLabel id="tipoUsuario">Tipo Usuario *</InputLabel>
+                            <br />
+                            <Select
+                                style={{ width: '250px', marginBottom: '-100px' }}
+                                labelId="tipoUsuario"
+                                id="tipoUsuario"
+                                value={formUsuarios.tipoUsuario || ''}
+                                onChange={(event) => handleChangeText(event, 'tipoUsuario')}
+                                label="Tipo Usuario"
+                            >
+                                <MenuItem key="1" value="Administrador">Administrador</MenuItem>
+                                <MenuItem key="2" value="Usuario">Usuario</MenuItem>
+                            </Select>
+                        </FormControl>
+                        <br />
+                        <FormControl variant="standard">
+                            <InputLabel id="sucursales">Sucursal *</InputLabel>
                             <br />
                             <Select
                                 style={{ width: '250px', marginBottom: '-100px' }}
@@ -521,7 +583,7 @@ export const Usuarios = () => {
                         </FormControl>
                         <br />
                         <TextField
-                            style={{ width: '100%' }}
+                            style={{ width: '40%' }}
                             id="fechaRegistro"
                             name="fechaRegistro"
                             type='date'

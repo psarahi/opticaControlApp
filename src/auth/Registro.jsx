@@ -21,16 +21,16 @@ import { useNavigate } from 'react-router-dom';
 
 import { opticaControlApi } from '../services/opticaControlApi';
 import { textValidator } from '../helpers/validator';
-
+const usuariosJSON = {
+    nombre: '',
+    usuario: '',
+    password: '',
+    tipoUsuario: 'Usuario',
+    sucursales: '',
+    fechaRegistro: dayjs().format('YYYY-MM-DD'),
+}
 export const Registro = () => {
-    const usuariosJSON = {
-        nombre: '',
-        usuario: '',
-        password: '',
-        tipoUsuario: '',
-        sucursales: '',
-        fechaRegistro: dayjs().format('YYYY-MM-DD'),
-    }
+
     const [sucursales, setSucursales] = useState([]);
 
     useEffect(() => {
@@ -88,7 +88,6 @@ export const Registro = () => {
         event.preventDefault();
         if (!textValidator(formUsuarios.nombre) ||
             !textValidator(formUsuarios.usuario) ||
-            !textValidator(formUsuarios.tipoUsuario) ||
             !textValidator(formUsuarios.password) ||
             !textValidator(formUsuarios.sucursales) ||
             !formUsuarios.fechaRegistro) {
@@ -100,6 +99,9 @@ export const Registro = () => {
             );
             return;
         }
+
+        console.log(formUsuarios);
+        
 
         opticaControlApi.post('usuario', formUsuarios)
             .then(async (response) => {
@@ -194,7 +196,7 @@ export const Registro = () => {
                                 variant='standard'
                             />
                             <FormControl variant="standard">
-                                <InputLabel id="tipoUsuario">Password *</InputLabel>
+                                <InputLabel id="password">Password *</InputLabel>
                                 <Input
                                     id="standard-adornment-password"
                                     value={formUsuarios.password}
@@ -216,22 +218,6 @@ export const Registro = () => {
                                 />
                             </FormControl>
                         </div>
-                        <FormControl variant="standard">
-                            <InputLabel id="tipoUsuario">Tipo Usuario *</InputLabel>
-                            <br />
-                            <Select
-                                style={{ width: '250px', marginBottom: '-100px' }}
-                                labelId="tipoUsuario"
-                                id="tipoUsuario"
-                                value={formUsuarios.tipoUsuario || ''}
-                                onChange={(event) => handleChangeText(event, 'tipoUsuario')}
-                                label="Tipo Usuario"
-                            >
-                                <MenuItem key="1" value="Administrador">Administrador</MenuItem>
-                                <MenuItem key="2" value="Usuario">Usuario</MenuItem>
-                            </Select>
-                        </FormControl>
-                        <br />
                         <FormControl variant="standard">
                             <InputLabel id="sucursales">Sucursal *</InputLabel>
                             <br />
