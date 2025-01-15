@@ -72,7 +72,7 @@ export const DetalleVentas = () => {
             setCorrelativo(response.data.correlativo[0]);
         });
 
-        opticaControlApi.get('detalleVentas/pacientes', '').then((response) => {
+        opticaControlApi.get(`detalleVentas/pacientes/${sucursal}`, '').then((response) => {
             setListPaciente(response.data);
         });
 

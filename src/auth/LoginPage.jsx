@@ -8,15 +8,20 @@ import { textValidator } from '../helpers/validator';
 import { Toast } from 'primereact/toast';
 
 import { opticaControlApi } from '../services/opticaControlApi';
-
+import './LoginPageStyle.css'
 export const LoginPage = () => {
   const navigate = useNavigate();
   const [sucursales, setsucursales] = useState([]);
   const [addSucursal, setaddSucursal] = useState(false);
 
   useEffect(() => {
-    document.body.style.zoom = '100%';
+    console.log(window.innerWidth);
 
+    // if (window.innerWidth < 1900) {
+    //   document.body.style.zoom = '90%'
+    // } else {
+    document.body.style.zoom = '100%'
+    // }
     opticaControlApi.get('sucursal', '')
       .then((response) => {
         if (response.status === 200) {
@@ -82,11 +87,14 @@ export const LoginPage = () => {
       );
       return;
     }
+
+    console.log(formValues);
+
     opticaControlApi.post(`usuario/login`, formValues)
       .then(async (response) => {
         if (response.status === 201) {
           console.log(response.data);
-          
+
           localStorage.setItem('token', await response.data.token);
           localStorage.setItem('nombre', await response.data.nombre);
           localStorage.setItem('usuarioId', await response.data.uid);
@@ -127,13 +135,7 @@ export const LoginPage = () => {
   return (
     <>
       <Toast ref={toast} />
-      <div
-        style={{
-          height: '100vh',
-          backgroundColor: '#94d0ff6e',
-          position: 'relative',
-          margin: '0%',
-        }}>
+      <div className='containerPadre'>
         <Box
           sx={{
             display: 'grid',

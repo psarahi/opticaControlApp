@@ -1,4 +1,3 @@
-export * from './Clientes';
 export * from './Info';
 export * from './Pacientes';
 export * from './Usuarios';

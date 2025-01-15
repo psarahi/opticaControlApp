@@ -1,40 +1,49 @@
-import { React, useEffect, useState, useRef } from 'react'
-import { DataTable, Tag, Column } from 'primereact';
-import { Toast } from 'primereact/toast';
-import { ConfirmDialog, confirmDialog } from 'primereact/confirmdialog';
+import { React, useEffect, useState, useRef } from "react";
+import { DataTable, Tag, Column } from "primereact";
+import { Toast } from "primereact/toast";
+import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
 
 import {
-    Button, Dialog, DialogActions, DialogContent,
-    DialogTitle, TextField, InputLabel,
+    Button,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
+    TextField,
+    InputLabel,
     MenuItem,
     Select,
     FormControl,
     Input,
     InputAdornment,
-    IconButton
-} from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
-import EditIcon from '@mui/icons-material/Edit';
-import CancelIcon from '@mui/icons-material/Cancel';
-import DoneIcon from '@mui/icons-material/Done';
+    IconButton,
+    Chip,
+} from "@mui/material";
+import Stack from '@mui/material/Stack';
 
-import dayjs from 'dayjs';
+import AddIcon from "@mui/icons-material/Add";
+import EditIcon from "@mui/icons-material/Edit";
+import CancelIcon from "@mui/icons-material/Cancel";
+import DoneIcon from "@mui/icons-material/Done";
 
-import { opticaControlApi } from '../../services/opticaControlApi';
-import { textValidator } from '../../helpers/validator';
-import { formatearFecha } from '../../helpers/formato';
-import { Visibility, VisibilityOff } from '@mui/icons-material';
+import dayjs from "dayjs";
+import { Select as SelectReact } from "react-dropdown-select";
+
+import { opticaControlApi } from "../../services/opticaControlApi";
+import { textValidator } from "../../helpers/validator";
+import { formatearFecha } from "../../helpers/formato";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 const usuariosJSON = {
-    nombre: '',
-    usuario: '',
-    password: '',
-    tipoUsuario: '',
-    sucursales: '',
-    fechaRegistro: dayjs().format('YYYY-MM-DD'),
+    nombre: "",
+    usuario: "",
+    password: "",
+    tipoUsuario: "",
+    sucursales: [],
+    fechaRegistro: dayjs().format("YYYY-MM-DD"),
     estado: true,
-}
+};
 export const Usuarios = () => {
-    let idUsuario = '';
+    let idUsuario = "";
     const [listUsuarios, setListUsuarios] = useState([]);
     const [usuarioSelected, setUsuarioSelected] = useState(null);
     const [sucursales, setSucursales] = useState([]);
@@ -42,7 +51,6 @@ export const Usuarios = () => {
     const [openDialog, setOpenDialog] = useState(false);
     const [changePass, setchangePass] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
-
     const handleClickShowPassword = () => setShowPassword((show) => !show);
     const handleMouseDownPassword = (event) => {
         event.preventDefault();
@@ -54,54 +62,46 @@ export const Usuarios = () => {
 
     useEffect(() => {
         if (window.innerWidth < 1900) {
-            document.body.style.zoom = '80%'
+            document.body.style.zoom = "80%";
         } else {
-            document.body.style.zoom = '100%'
+            document.body.style.zoom = "100%";
         }
-
-        opticaControlApi.get('sucursal', '')
-            .then((response) => {
-                if (response.status === 200) {
-                    setSucursales(response.data);
-                }
-            })
-            .catch((err) => {
-                createToast(
-                    'error',
-                    'Error',
-                    err.response.data,
-                );
-            });
-
-    }, [])
-
-    useEffect(() => {
-        const sucursal = localStorage.getItem('sucursalID');
-        const fetchUsuarios = async () => {
-            try {
-                const response = await opticaControlApi.get('usuario', {
-                    params: {
-                        sucursalID: sucursal
-                    }
+        let sucursalesList = [];
+        opticaControlApi.get("sucursal", "").then((response) => {
+            response.data.forEach((s, index) => {
+                sucursalesList.push({
+                    value: s._id,
+                    label: s.nombre,
                 });
-                setListUsuarios(response.data);
-            } catch (error) {
-                console.error('Error fetching optometristas:', error);
-                toast.current?.show({ severity: 'error', summary: 'Error', detail: 'No se pudieron cargar los datos', life: 3000 });
-            }
-        };
+            });
+            setSucursales(sucursalesList);
+        });
 
-        fetchUsuarios();
+        opticaControlApi.get("usuario", {}).then((response) => {
+            setListUsuarios(response.data);
+            console.log(response.data);
+        });
     }, []);
+
     const toast = useRef(null);
     const toastForm = useRef(null);
 
     const createToast = (severity, summary, detail) => {
-        toast.current.show({ severity: severity, summary: summary, detail: detail, life: 6000 });
+        toast.current.show({
+            severity: severity,
+            summary: summary,
+            detail: detail,
+            life: 6000,
+        });
     };
 
     const createToastForm = (severity, summary, detail) => {
-        toastForm.current.show({ severity: severity, summary: summary, detail: detail, life: 6000 });
+        toastForm.current.show({
+            severity: severity,
+            summary: summary,
+            detail: detail,
+            life: 6000,
+        });
     };
 
     const handleOpenDialog = () => {
@@ -116,67 +116,71 @@ export const Usuarios = () => {
     const onCellSelect = (event) => {
         idUsuario = event.rowData._id;
         setUsuarioSelected(event.rowData._id);
+        console.log(event.rowData);
+        let sucursaleSelect = [];
+        event.rowData.sucursales.forEach((s) => {
+            sucursaleSelect.push({ value: s._id, label: s.nombre });
+        });
 
         setFormUsuarios({
             nombre: event.rowData.nombre,
             usuario: event.rowData.usuario,
             password: event.rowData.password,
             tipoUsuario: event.rowData.tipoUsuario,
-            sucursales: event.rowData.sucursales ? event.rowData.sucursales._id : '',
+            sucursales: sucursaleSelect,
             fechaRegistro: formatearFecha(event.rowData.fechaRegistro),
             estado: event.rowData.estado,
         });
         if (event.cellIndex === 0) {
             handleEdit();
-        };
+        }
         if (event.cellIndex === 1) {
             handleDisabled();
-        };
+        }
         if (event.cellIndex === 2) {
             handleEnabled();
-        };
-    }
+        }
+    };
 
     const handleDisabled = () => {
         confirmDialog({
             message: `¿Desea deshabilitar el registro? `,
-            header: 'Deshabilitar',
-            icon: 'pi pi-info-circle',
-            defaultFocus: 'reject',
-            acceptClassName: 'p-button-danger',
+            header: "Deshabilitar",
+            icon: "pi pi-info-circle",
+            defaultFocus: "reject",
+            acceptClassName: "p-button-danger",
             accept: acceptDialogDisable,
-            reject: rejectDialogDisable
+            reject: rejectDialogDisable,
         });
     };
 
     const acceptDialogDisable = () => {
         if (textValidator(idUsuario)) {
-            opticaControlApi.put(`usuario/cambiarEstado/${idUsuario}`, { estado: false })
+            opticaControlApi
+                .put(`usuario/cambiarEstado/${idUsuario}`, { estado: false })
                 .then((response) => {
                     if (response.status === 202) {
                         createToast(
-                            'success',
-                            'Confirmado',
-                            'El registro a sido deshabilitado'
+                            "success",
+                            "Confirmado",
+                            "El registro a sido deshabilitado"
                         );
 
                         setListUsuarios(
-                            listUsuarios.map(i =>
-                                i._id === idUsuario ? {
-                                    ...i,
-                                    estado: response.data.estado
-                                } : i
+                            listUsuarios.map((i) =>
+                                i._id === idUsuario
+                                    ? {
+                                        ...i,
+                                        estado: response.data.estado,
+                                    }
+                                    : i
                             )
                         );
 
                         console.log(response);
                         cleanForm();
                     } else {
-                        createToast(
-                            'error',
-                            'Error',
-                            response.statusText,
-                        );
+                        createToast("error", "Error", response.statusText);
                         console.log(response.data);
                         cleanForm();
                         return;
@@ -184,9 +188,9 @@ export const Usuarios = () => {
                 })
                 .catch((err) => {
                     createToast(
-                        'error',
-                        'Error',
-                        'Ha ocurrido un error al intentar deshabilitar el registro'
+                        "error",
+                        "Error",
+                        "Ha ocurrido un error al intentar deshabilitar el registro"
                     );
                     console.log(err);
                     handleCloseDialog();
@@ -194,59 +198,54 @@ export const Usuarios = () => {
                 });
         } else {
             createToast(
-                'warn',
-                'Acction requerida',
-                'No se selecciono el inventario correctamente'
+                "warn",
+                "Acction requerida",
+                "No se selecciono el inventario correctamente"
             );
         }
-    }
+    };
 
     const rejectDialogDisable = () => {
-        createToast(
-            'warn',
-            'Cancelado',
-            'Acción cancelada'
-        );
-    }
+        createToast("warn", "Cancelado", "Acción cancelada");
+    };
 
     const handleEnabled = () => {
         confirmDialog({
             message: `¿Desea habilitar el registro? `,
-            header: 'Habilitar',
-            icon: 'pi pi-info-circle',
-            defaultFocus: 'reject',
-            acceptClassName: 'p-button-danger',
+            header: "Habilitar",
+            icon: "pi pi-info-circle",
+            defaultFocus: "reject",
+            acceptClassName: "p-button-danger",
             accept: acceptDialogEnable,
-            reject: rejectDialogEnable
+            reject: rejectDialogEnable,
         });
     };
 
     const acceptDialogEnable = () => {
         if (textValidator(idUsuario)) {
-            opticaControlApi.put(`usuario/cambiarEstado/${idUsuario}`, { estado: true })
+            opticaControlApi
+                .put(`usuario/cambiarEstado/${idUsuario}`, { estado: true })
                 .then((response) => {
                     if (response.status === 202) {
                         createToast(
-                            'success',
-                            'Confirmado',
-                            'El registro a sido deshabilitado'
+                            "success",
+                            "Confirmado",
+                            "El registro a sido deshabilitado"
                         );
                         setListUsuarios(
-                            listUsuarios.map(i =>
-                                i._id === idUsuario ? {
-                                    ...i,
-                                    estado: response.data.estado
-                                } : i
+                            listUsuarios.map((i) =>
+                                i._id === idUsuario
+                                    ? {
+                                        ...i,
+                                        estado: response.data.estado,
+                                    }
+                                    : i
                             )
                         );
                         console.log(response);
                         cleanForm();
                     } else {
-                        createToast(
-                            'error',
-                            'Error',
-                            response.statusText,
-                        );
+                        createToast("error", "Error", response.statusText);
                         console.log(response.data);
                         cleanForm();
                         return;
@@ -254,9 +253,9 @@ export const Usuarios = () => {
                 })
                 .catch((err) => {
                     createToast(
-                        'error',
-                        'Error',
-                        'Ha ocurrido un error al intentar habilitar el registro'
+                        "error",
+                        "Error",
+                        "Ha ocurrido un error al intentar habilitar el registro"
                     );
                     console.log(err);
                     handleCloseDialog();
@@ -264,20 +263,16 @@ export const Usuarios = () => {
                 });
         } else {
             createToast(
-                'warn',
-                'Acction requerida',
-                'No se selecciono el inventario correctamente'
+                "warn",
+                "Acction requerida",
+                "No se selecciono el inventario correctamente"
             );
         }
-    }
+    };
 
     const rejectDialogEnable = () => {
-        createToast(
-            'warn',
-            'Cancelado',
-            'Acción cancelada'
-        );
-    }
+        createToast("warn", "Cancelado", "Acción cancelada");
+    };
 
     const handleEdit = () => {
         handleOpenDialog();
@@ -290,46 +285,57 @@ export const Usuarios = () => {
 
     const cleanForm = () => {
         setFormUsuarios(usuariosJSON);
-        setUsuarioSelected('');
-        idUsuario = '';
+        setUsuarioSelected("");
+        idUsuario = "";
         setchangePass(false);
     };
 
     const handleChangeText = ({ target }, select) => {
         setFormUsuarios({
             ...formUsuarios,
-            [select]: target.value
-        })
+            [select]: target.value,
+        });
     };
     const rowClass = (data) => {
         return {
-            'bg-green-100': data.estado === true,
-            'bg-red-100': data.estado === false,
-        }
+            "bg-green-100": data.estado === true,
+            "bg-red-100": data.estado === false,
+        };
     };
 
     const rendeEstado = (data) => {
         if (data.estado === true) {
-            return <Tag severity="success" value="Activo"></Tag>
+            return <Tag severity="success" value="Activo"></Tag>;
         } else {
-            return <Tag severity="danger" value="Inactivo"></Tag>
+            return <Tag severity="danger" value="Inactivo"></Tag>;
         }
-    }
+    };
+
+
+    const rendeSucursales = (data) => {
+        return (
+            <Stack direction="row" spacing={1}>
+                {data.sucursales.map((sucursal) => (
+                    <Chip key={sucursal._id} label={sucursal.nombre} color="primary"/>
+                ))}
+            </Stack>);
+
+    };
 
     const renderEditButton = (data) => {
         if (data.estado === true) {
-            return <EditIcon color='primary' fontSize='medium' />
+            return <EditIcon color="primary" fontSize="medium" />;
         }
     };
 
     const renderStatusEnabled = (data) => {
         if (data.estado === false) {
-            return <DoneIcon color='success' fontSize='medium' />
+            return <DoneIcon color="success" fontSize="medium" />;
         }
     };
     const renderStatusDisabled = (data) => {
         if (data.estado === true) {
-            return <CancelIcon color='error' fontSize='medium' />
+            return <CancelIcon color="error" fontSize="medium" />;
         }
     };
 
@@ -337,7 +343,7 @@ export const Usuarios = () => {
         setchangePass(true);
         setFormUsuarios({
             ...formUsuarios,
-            password: ''
+            password: "",
         });
     };
 
@@ -346,12 +352,20 @@ export const Usuarios = () => {
             <h1>Usuarios</h1>
             <Toast ref={toast} />
             <ConfirmDialog />
-            <Button variant='outlined' startIcon={<AddIcon />} onClick={handleOpenDialogAdd}>Agregar</Button>
-            <div style={{ width: '90%' }}>
-                <DataTable value={listUsuarios} tableStyle={{ minWidth: '50rem' }}
+            <Button
+                variant="outlined"
+                startIcon={<AddIcon />}
+                onClick={handleOpenDialogAdd}
+            >
+                Agregar
+            </Button>
+            <div style={{ width: "90%" }}>
+                <DataTable
+                    value={listUsuarios}
+                    tableStyle={{ minWidth: "50rem" }}
                     showGridlines
                     stripedRows
-                    size='small'
+                    size="small"
                     paginator
                     rows={10}
                     rowsPerPageOptions={[5, 10, 15]}
@@ -364,16 +378,32 @@ export const Usuarios = () => {
                     columnResizeMode="expand"
                     resizableColumns
                 >
-                    <Column body={renderEditButton} style={{ textAlign: 'center' }}></Column>
-                    <Column body={renderStatusDisabled} style={{ textAlign: 'center' }}></Column>
-                    <Column body={renderStatusEnabled} style={{ textAlign: 'center' }}></Column>
+                    <Column
+                        body={renderEditButton}
+                        style={{ textAlign: "center" }}
+                    ></Column>
+                    <Column
+                        body={renderStatusDisabled}
+                        style={{ textAlign: "center" }}
+                    ></Column>
+                    <Column
+                        body={renderStatusEnabled}
+                        style={{ textAlign: "center" }}
+                    ></Column>
                     <Column field="nombre" header="Nombre"></Column>
                     <Column field="usuario" header="Usuario"></Column>
                     <Column field="tipoUsuario" header="Tipo Usuario"></Column>
-                    <Column field="sucursales.nombre" header="Sucursal"></Column>
-                    <Column field="fechaRegistro" header="Fecha de registro" body={(data) => (textValidator(data.fechaRegistro)) ? formatearFecha(data.fechaRegistro) : '-'}></Column>
+                    <Column header="Sucursales" body={rendeSucursales}></Column>
+                    <Column
+                        field="fechaRegistro"
+                        header="Fecha de registro"
+                        body={(data) =>
+                            textValidator(data.fechaRegistro)
+                                ? formatearFecha(data.fechaRegistro)
+                                : "-"
+                        }
+                    ></Column>
                     <Column field="estado" header="Estado" body={rendeEstado}></Column>
-
                 </DataTable>
             </div>
             <Dialog
@@ -383,128 +413,143 @@ export const Usuarios = () => {
                 fullWidth={true}
                 onClose={handleCloseDialog}
                 PaperProps={{
-                    component: 'form',
+                    component: "form",
                     onSubmit: (event) => {
                         event.preventDefault();
-                        if (!textValidator(formUsuarios.nombre)
-                            || !textValidator(formUsuarios.usuario)
-                            || !textValidator(formUsuarios.password)
-                            || !textValidator(formUsuarios.tipoUsuario)
-                            || !textValidator(formUsuarios.sucursales)
-                            || !textValidator(formUsuarios.fechaRegistro)
+                        console.log(formUsuarios.sucursales);
+
+                        let arraySucursales = textValidator(formUsuarios.sucursales)
+                            ? formUsuarios.sucursales.map((p) => p.value)
+                            : "";
+                        let datosSave = {
+                            nombre: formUsuarios.nombre,
+                            usuario: formUsuarios.usuario,
+                            password: formUsuarios.password,
+                            tipoUsuario: formUsuarios.tipoUsuario,
+                            fechaRegistro: formUsuarios.fechaRegistro,
+                            sucursales: arraySucursales,
+                        };
+                        if (
+                            !textValidator(formUsuarios.nombre) ||
+                            !textValidator(formUsuarios.usuario) ||
+                            !textValidator(formUsuarios.password) ||
+                            !textValidator(formUsuarios.tipoUsuario) ||
+                            !textValidator(formUsuarios.fechaRegistro)
                         ) {
                             createToastForm(
-                                'warn',
-                                'Acción requerida',
-                                'Favor ingrese los datos necesarios'
+                                "warn",
+                                "Acción requerida",
+                                "Favor ingrese los datos necesarios"
                             );
                             return;
                         }
+
                         if (textValidator(usuarioSelected)) {
                             if (changePass) {
-                                opticaControlApi.put(`usuario/changePass/${usuarioSelected}`, formUsuarios)
+                                opticaControlApi
+                                    .put(`usuario/changePass/${usuarioSelected}`, datosSave)
                                     .then((response) => {
                                         if (response.status === 202) {
                                             createToast(
-                                                'success',
-                                                'Confirmado',
-                                                'El registro fue editado correctamente'
+                                                "success",
+                                                "Confirmado",
+                                                "El registro fue editado correctamente"
                                             );
                                             handleCloseDialog();
                                             setListUsuarios(
                                                 listUsuarios.map((i) =>
-                                                    i._id === usuarioSelected ? { ...i, ...response.data } : i
+                                                    i._id === usuarioSelected
+                                                        ? { ...i, ...response.data }
+                                                        : i
                                                 )
                                             );
                                             cleanForm();
                                         }
                                     })
                                     .catch((err) => {
-                                        createToast(
-                                            'error',
-                                            'Error',
-                                            'Ha ocurrido un error'
-                                        );
+                                        createToast("error", "Error", "Ha ocurrido un error");
                                         console.log(err);
                                         handleCloseDialog();
                                         cleanForm();
                                     });
                             } else {
-                                opticaControlApi.put(`usuario/${usuarioSelected}`, formUsuarios)
+                                opticaControlApi
+                                    .put(`usuario/${usuarioSelected}`, datosSave)
                                     .then((response) => {
                                         if (response.status === 202) {
                                             createToast(
-                                                'success',
-                                                'Confirmado',
-                                                'El registro fue editado correctamente'
+                                                "success",
+                                                "Confirmado",
+                                                "El registro fue editado correctamente"
                                             );
                                             handleCloseDialog();
                                             setListUsuarios(
                                                 listUsuarios.map((i) =>
-                                                    i._id === usuarioSelected ? { ...i, ...response.data } : i
+                                                    i._id === usuarioSelected
+                                                        ? { ...i, ...response.data }
+                                                        : i
                                                 )
                                             );
                                             cleanForm();
                                         }
                                     })
                                     .catch((err) => {
-                                        createToast(
-                                            'error',
-                                            'Error',
-                                            'Ha ocurrido un error'
-                                        );
+                                        createToast("error", "Error", "Ha ocurrido un error");
                                         console.log(err);
                                         handleCloseDialog();
                                         cleanForm();
                                     });
                             }
-
-
                         } else {
-                            opticaControlApi.post('usuario', formUsuarios)
+                            opticaControlApi
+                                .post("usuario", datosSave)
                                 .then(async (response) => {
                                     if (response.status === 201) {
                                         createToast(
-                                            'success',
-                                            'Confirmado',
-                                            'El registro a sido creado'
+                                            "success",
+                                            "Confirmado",
+                                            "El registro a sido creado"
                                         );
                                         cleanForm();
-                                        setListUsuarios([...listUsuarios, response.data])
+                                        setListUsuarios([...listUsuarios, response.data]);
                                         handleCloseDialog();
                                     }
                                 })
                                 .catch((err) => {
                                     createToast(
-                                        'error',
-                                        'Error',
-                                        err.response?.data || 'Error desconocido',
+                                        "error",
+                                        "Error",
+                                        err.response?.data || "Error desconocido"
                                     );
                                     console.log(err);
                                     cleanForm();
-                                    handleCloseDialog()
+                                    handleCloseDialog();
                                 });
                         }
                     },
                 }}
             >
                 <DialogTitle>Datos del usuario</DialogTitle>
-                <DialogContent                 >
-                    <div style={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: '30px',
-                        marginBottom: '2%',
-                        alignItems: 'center'
-                    }}>
-                        {!changePass &&
-                            <Button variant='contained' onClick={handleChangePass}>Cambiar contraseña</Button>
-                        }
+                <DialogContent>
+                    <div
+                        style={{
+                            display: "flex",
+                            flexDirection: "column",
+                            gap: "30px",
+                            marginBottom: "2%",
+                            alignItems: "center",
+                        }}
+                    >
+                        {!changePass && (
+                            <Button variant="contained" onClick={handleChangePass}>
+                                Cambiar contraseña
+                            </Button>
+                        )}
                         <Toast ref={toastForm} />
                         <TextField
                             required
                             value={formUsuarios.nombre}
-                            onChange={(event) => handleChangeText(event, 'nombre')}
+                            onChange={(event) => handleChangeText(event, "nombre")}
                             margin="dense"
                             id="nombre"
                             name="nombre"
@@ -516,7 +561,7 @@ export const Usuarios = () => {
                         <TextField
                             required
                             value={formUsuarios.usuario}
-                            onChange={(event) => handleChangeText(event, 'usuario')}
+                            onChange={(event) => handleChangeText(event, "usuario")}
                             margin="dense"
                             id="usuario"
                             name="usuario"
@@ -525,14 +570,14 @@ export const Usuarios = () => {
                             variant="standard"
                             size="medium"
                         />
-                        {changePass &&
-                            <FormControl variant="standard" style={{ width: '70%' }}>
+                        {changePass && (
+                            <FormControl variant="standard" style={{ width: "70%" }}>
                                 <InputLabel id="password">Password *</InputLabel>
                                 <Input
                                     id="standard-adornment-password"
                                     value={formUsuarios.password}
-                                    type={showPassword ? 'text' : 'password'}
-                                    onChange={(event) => handleChangeText(event, 'password')}
+                                    type={showPassword ? "text" : "password"}
+                                    onChange={(event) => handleChangeText(event, "password")}
                                     required
                                     endAdornment={
                                         <InputAdornment position="end">
@@ -548,82 +593,60 @@ export const Usuarios = () => {
                                     }
                                 />
                             </FormControl>
-                        }
+                        )}
                         <FormControl variant="standard">
                             <InputLabel id="tipoUsuario">Tipo Usuario *</InputLabel>
                             <br />
                             <Select
-                                style={{ width: '250px', marginBottom: '-100px' }}
+                                style={{ width: "250px", marginBottom: "-100px" }}
                                 labelId="tipoUsuario"
                                 id="tipoUsuario"
-                                value={formUsuarios.tipoUsuario || ''}
-                                onChange={(event) => handleChangeText(event, 'tipoUsuario')}
+                                value={formUsuarios.tipoUsuario || ""}
+                                onChange={(event) => handleChangeText(event, "tipoUsuario")}
                                 label="Tipo Usuario"
                             >
-                                <MenuItem key="1" value="Administrador">Administrador</MenuItem>
-                                <MenuItem key="2" value="Usuario">Usuario</MenuItem>
+                                <MenuItem key="1" value="Administrador">
+                                    Administrador
+                                </MenuItem>
+                                <MenuItem key="2" value="Usuario">
+                                    Usuario
+                                </MenuItem>
                             </Select>
                         </FormControl>
                         <br />
-                        <FormControl variant="standard">
-                            <InputLabel id="sucursales">Sucursal *</InputLabel>
-                            <br />
-                            <Select
-                                style={{ width: '250px', marginBottom: '-100px' }}
-                                labelId="sucursales"
-                                id="sucursales"
-                                value={formUsuarios.sucursales || ''} // Ensure this is the ID
-                                onChange={(event) => handleChangeText(event, 'sucursales')}
-                                label="Sucursales"
-                            >
-                                {sucursales.map((s, index) => (
-                                    <MenuItem key={index} value={s._id}>{s.nombre}</MenuItem>
-                                ))}
-                            </Select>
-                        </FormControl>
-                        <br />
-                        <TextField
-                            style={{ width: '40%' }}
-                            id="fechaRegistro"
-                            name="fechaRegistro"
-                            type='date'
-                            value={formUsuarios.fechaRegistro}
-                            onChange={(event) => handleChangeText(event, 'fechaRegistro')}
-                            variant='standard'
-                        />
-                        {/* <LocalizationProvider dateAdapter={AdapterDayjs}>
-                            <DatePicker
-                                label="Fecha de registro *"
-                                value={formUsuarios.fechaRegistro ? dayjs(formUsuarios.fechaRegistro) : null}
-                                onChange={(newValue) => {
-                                    if (newValue && newValue.isValid()) {
-                                        setFormUsuarios({
-                                            ...formUsuarios,
-                                            fechaRegistro: newValue.format('YYYY-MM-DD')
-                                        });
-                                    } else {
-                                        setFormUsuarios({
-                                            ...formUsuarios,
-                                            fechaRegistro: ''
-                                        });
-                                    }
-                                }}
-                                renderInput={(params) => <TextField {...params} variant="standard" />}
-                            />
-                        </LocalizationProvider> */}
-                    </div>
-                    <br />
-                    <div>
-                    </div>
-                    <br />
-                    <br />
+                        <div>
+                            <p>Sucursales *</p>
+                            <SelectReact
+                                options={sucursales}
+                                value={formUsuarios.sucursales}
+                                name="Sucursales"
+                                style={{ width: "400px" }}
+                                multi={true}
+                                labelField="label"
+                                valueField="value"
+                                onChange={(e) => {
+                                    console.log(e);
 
+                                    setFormUsuarios({
+                                        ...formUsuarios,
+                                        sucursales: e,
+                                    });
+                                }}
+                            />
+                        </div>
+                    </div>
+                    <br />
+                    <div></div>
+                    <br />
+                    <br />
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={handleCloseDialog} >Cancelar</Button>
-                    <Button variant='contained' type="submit">Guardar</Button>
+                    <Button onClick={handleCloseDialog}>Cancelar</Button>
+                    <Button variant="contained" type="submit">
+                        Guardar
+                    </Button>
                 </DialogActions>
             </Dialog>
         </>
-    )
-}
+    );
+};

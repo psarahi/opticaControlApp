@@ -29,21 +29,11 @@ export const Optometristas = () => {
 
   useEffect(() => {
     const sucursal = localStorage.getItem('sucursalID');
-    const fetchOptometristas = async () => {
-      try {
-        const response = await opticaControlApi.get('optometrista', {
-          params: {
-            sucursalID: sucursal
-          }
-        });
+    opticaControlApi.get(`optometrista/bySucursal/${sucursal}`, {})
+      .then((response) => {
         setListOptometristas(response.data);
-      } catch (error) {
-        console.error('Error fetching optometristas:', error);
-        toast.current?.show({ severity: 'error', summary: 'Error', detail: 'No se pudieron cargar los datos', life: 3000 });
-      }
-    };
 
-    fetchOptometristas();
+      })
   }, []);
   const toast = useRef(null);
 
@@ -58,7 +48,7 @@ export const Optometristas = () => {
   const onCellSelect = (event) => {
     idOptometrista = event.rowData._id;
     setOptometristasSelected(event.rowData._id);
-    
+
     setFormOptometrista({
       nombre: event.rowData.nombre,
       sucursales: event.rowData.sucursales._id,
@@ -137,7 +127,7 @@ export const Optometristas = () => {
         'No se seleccionó el optometrista correctamente'
       );
     }
-}
+  }
 
   const rejectDialogDelete = () => {
     createToast(
@@ -271,7 +261,7 @@ export const Optometristas = () => {
                     );
                     handleCloseDialog();
                     console.log(response.data);
-                    
+
                     setListOptometristas([...listOptometristas, response.data]);
                     console.log(response);
                     cleanForm();

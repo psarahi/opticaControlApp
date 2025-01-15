@@ -201,6 +201,7 @@ export const Sucursales = () => {
                     <Column field="telefono" header="Telefono"></Column>
                     <Column field="paginaDigital" header="Sitio Web"></Column>
                     <Column field="rtn" header="RTN"></Column>
+                    <Column field="mensajeFactura" header="Mensaje factura" style={{ minWidth: '25rem' }}></Column>
                 </DataTable>
             </div>
             <Dialog
