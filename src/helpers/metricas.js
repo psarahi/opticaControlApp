@@ -2,18 +2,25 @@ import { formatearNumero } from "./formato";
 
 export const obtenerGraduaciones = () => {
   let valores = [];
-    let graduacionesFinales = [];
-  for (let x = 0.0; x <= 20; ) {
+  let graduacionesFinales = [];
+  let valoresPositivos = [];
+  let valoresNegativos = [];
+
+  for (let x = 0.25; x <= 20; ) {
     valores.push(formatearNumero(x));
     x += 0.25;
   }
 
   for (let y = 0; y < valores.length; y++) {
-    graduacionesFinales.push(`-${valores[y]}`)
+    valoresNegativos.push(parseFloat(`-${valores[y]}`).toFixed(2));
   }
+
   for (let z = 0; z < valores.length; z++) {
-    graduacionesFinales.push(`+${valores[z]}`)
+    valoresPositivos.push(`+${valores[z]}`);
   }
+
+  graduacionesFinales = [...valoresNegativos.reverse(), "-0.00", ...valoresPositivos];
+
   return graduacionesFinales;
 };
 

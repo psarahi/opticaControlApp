@@ -57,6 +57,7 @@ const expedientes = {
   enfermedadBase: '',
   observaciones: '',
   pruebasValoraciones: '',
+  usuarios: localStorage.getItem('usuarioId'),
   recetaOjoDerecho: {
     esfera: '',
     cilindro: '',
@@ -217,7 +218,6 @@ export const Pacientes = () => {
     opticaControlApi.get('optometrista', '').then((response) => {
       setlistoptometrista(response.data);
     });
-
     cleanForm();
 
     setListGraduaciones(obtenerGraduaciones());
@@ -419,6 +419,8 @@ export const Pacientes = () => {
     } else if (event.cellIndex === 4) {
       opticaControlApi.get(`expediente/paciente/${event.rowData._id}`, '')
         .then(async (response) => {
+          console.log(response.data);
+          
           setlistExpedientePaciente(await response.data);
         });
 
@@ -1490,6 +1492,7 @@ export const Pacientes = () => {
               enfermedadBase: formExpedientes.enfermedadBase,
               observaciones: formExpedientes.observaciones,
               pruebasValoraciones: formExpedientes.pruebasValoraciones,
+              usuarios: localStorage.getItem('usuarioId'),
               recetaOjoDerecho: formExpedientes.recetaOjoDerecho,
               recetaOjoIzquierdo: formExpedientes.recetaOjoIzquierdo
             }
@@ -2041,10 +2044,13 @@ export const Pacientes = () => {
                               paciente: ex.paciente._id,
                               optometrista: ex.optometrista._id,
                               fecha: ex.fecha,
+                              tipoLente: ex.tipoLente,
+                              proteccion: [...ex.proteccion],
                               antecedentes: ex.antecedentes,
                               enfermedadBase: ex.enfermedadBase,
                               observaciones: ex.observaciones,
                               pruebasValoraciones: ex.pruebasValoraciones,
+                              usuarios: ex.usuarios,
                               recetaOjoDerecho: ex.recetaOjoDerecho,
                               recetaOjoIzquierdo: ex.recetaOjoIzquierdo
                             };
@@ -2089,6 +2095,10 @@ export const Pacientes = () => {
                       <p className='parrafoReceta'>
                         <span className='campo'>Pruebas y valoraciones: </span>
                         <span className='valor'>{ex.pruebasValoraciones}</span>
+                      </p>
+                      <p className='parrafoReceta'>
+                        <span className='campo'>Ingresado por: </span>
+                        <span className='valor'>{ex.usuarios.nombre}</span>
                       </p>
                       <br />
                       <p className='titulo'>Historial</p>
