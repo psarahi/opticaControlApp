@@ -19,7 +19,8 @@ import {
   Button, Chip, Dialog, DialogActions, DialogContent,
   DialogContentText, DialogTitle, FormControl, FormControlLabel, FormLabel, InputLabel,
   MenuItem, Radio, RadioGroup, TextField, Select,
-  Switch
+  Switch,
+  Autocomplete
 } from '@mui/material';
 
 import { Select as SelectReact } from "react-dropdown-select";
@@ -203,11 +204,6 @@ export const Pacientes = () => {
   ];
 
   useEffect(() => {
-    if (window.innerWidth < 1900) {
-      document.body.style.zoom = '80%'
-    } else {
-      document.body.style.zoom = '100%'
-    }
     // bienvenida();
     opticaControlApi.get('paciente', '').then((response) => {
       setListPaciente(response.data);
@@ -420,7 +416,7 @@ export const Pacientes = () => {
       opticaControlApi.get(`expediente/paciente/${event.rowData._id}`, '')
         .then(async (response) => {
           console.log(response.data);
-          
+
           setlistExpedientePaciente(await response.data);
         });
 
@@ -928,6 +924,12 @@ export const Pacientes = () => {
     setlistInvExistente(_inventario);
     calcularTotal(_inventario);
   };
+
+  const defaultProps = {
+    options: listGraduaciones,
+    getOptionLabel: (option) => option,
+  };
+
 
   const textEditor = (options) => {
     return <InputNumber type="text" value={options.value} onValueChange={(e) => options.editorCallback(e.value)} />;
@@ -1693,54 +1695,36 @@ export const Pacientes = () => {
           <br />
           <p className='subtitulo'> Ojo Derecho</p>
           <div className='containerEspecificaciones'>
-            <FormControl variant="standard" sx={{ m: 1, width: '80%' }}>
-              <InputLabel id="Esfera">Esfera</InputLabel>
-              <Select
-                labelId="Esfera"
-                id="Esfera"
-                value={formExpedientes.recetaOjoDerecho.esfera}
-                onChange={(event) => {
-                  setformExpedientes({
-                    ...formExpedientes,
-                    recetaOjoDerecho: {
-                      ...formExpedientes.recetaOjoDerecho,
-                      esfera: event.target.value
-                    }
-                  })
-                }
-                }
-                label="Esfera"
-              >
-                {listGraduaciones.map(op => (
-                  <MenuItem key={op} value={op}>{op}</MenuItem>
-                )
-                )}
-              </Select>
-            </FormControl>
-            <FormControl variant="standard" sx={{ m: 1, width: '80%' }}>
-              <InputLabel id="cilindro">Cilindro</InputLabel>
-              <Select
-                labelId="cilindro"
-                id="cilindro"
-                value={formExpedientes.recetaOjoDerecho.cilindro}
-                onChange={(event) => {
-                  setformExpedientes({
-                    ...formExpedientes,
-                    recetaOjoDerecho: {
-                      ...formExpedientes.recetaOjoDerecho,
-                      cilindro: event.target.value
-                    }
-                  });
-                }
-                }
-                label="Cilindro"
-              >
-                {listGraduaciones.map(op => (
-                  <MenuItem key={op} value={op}>{op}</MenuItem>
-                )
-                )}
-              </Select>
-            </FormControl>
+            <Autocomplete
+              {...defaultProps}
+              options={listGraduaciones}
+              value={formExpedientes.recetaOjoDerecho.esfera}
+              onChange={(event, newValue) => {
+                setformExpedientes({
+                  ...formExpedientes,
+                  recetaOjoDerecho: {
+                    ...formExpedientes.recetaOjoDerecho,
+                    esfera: newValue
+                  }
+                })
+              }}
+              renderInput={(params) => <TextField {...params} label="Esfera" variant="standard" />}
+            />
+            <Autocomplete
+              {...defaultProps}
+              options={listGraduaciones}
+              value={formExpedientes.recetaOjoDerecho.cilindro}
+              onChange={(event, newValue) => {
+                setformExpedientes({
+                  ...formExpedientes,
+                  recetaOjoDerecho: {
+                    ...formExpedientes.recetaOjoDerecho,
+                    cilindro: newValue
+                  }
+                });
+              }}
+              renderInput={(params) => <TextField {...params} label="Cilindro" variant="standard" />}
+            />
             <TextField
               value={formExpedientes.recetaOjoDerecho.eje}
               onChange={(event) => {
@@ -1853,54 +1837,36 @@ export const Pacientes = () => {
           </div>
           <p className='subtitulo'>Ojo Izquierdo</p>
           <div className='containerEspecificaciones'>
-            <FormControl variant="standard" sx={{ m: 1, width: '80%' }}>
-              <InputLabel id="Esfera">Esfera</InputLabel>
-              <Select
-                labelId="Esfera"
-                id="Esfera"
-                value={formExpedientes.recetaOjoIzquierdo.esfera}
-                onChange={(event) => {
-                  setformExpedientes({
-                    ...formExpedientes,
-                    recetaOjoIzquierdo: {
-                      ...formExpedientes.recetaOjoIzquierdo,
-                      esfera: event.target.value
-                    }
-                  });
-                }
-                }
-                label="Esfera"
-              >
-                {listGraduaciones.map(op => (
-                  <MenuItem key={op} value={op}>{op}</MenuItem>
-                )
-                )}
-              </Select>
-            </FormControl>
-            <FormControl variant="standard" sx={{ m: 1, width: '80%' }}>
-              <InputLabel id="cilindro">Cilindro</InputLabel>
-              <Select
-                labelId="cilindro"
-                id="cilindro"
-                value={formExpedientes.recetaOjoIzquierdo.cilindro}
-                onChange={(event) => {
-                  setformExpedientes({
-                    ...formExpedientes,
-                    recetaOjoIzquierdo: {
-                      ...formExpedientes.recetaOjoIzquierdo,
-                      cilindro: event.target.value
-                    }
-                  });
-                }
-                }
-                label="Cilindro"
-              >
-                {listGraduaciones.map(op => (
-                  <MenuItem key={op} value={op}>{op}</MenuItem>
-                )
-                )}
-              </Select>
-            </FormControl>
+            <Autocomplete
+              {...defaultProps}
+              options={listGraduaciones}
+              value={formExpedientes.recetaOjoIzquierdo.esfera}
+              onChange={(event, newValue) => {
+                setformExpedientes({
+                  ...formExpedientes,
+                  recetaOjoIzquierdo: {
+                    ...formExpedientes.recetaOjoIzquierdo,
+                    esfera: newValue
+                  }
+                });
+              }}
+              renderInput={(params) => <TextField {...params} label="Esfera" variant="standard" />}
+            />
+            <Autocomplete
+              {...defaultProps}
+              options={listGraduaciones}
+              value={formExpedientes.recetaOjoIzquierdo.cilindro}
+              onChange={(event, newValue) => {
+                setformExpedientes({
+                  ...formExpedientes,
+                  recetaOjoIzquierdo: {
+                    ...formExpedientes.recetaOjoIzquierdo,
+                    cilindro: newValue
+                  }
+                });
+              }}
+              renderInput={(params) => <TextField {...params} label="Cilindro" value={formExpedientes.recetaOjoIzquierdo.cilindro} variant="standard" />}
+            />
             <TextField
               value={formExpedientes.recetaOjoIzquierdo.eje}
               onChange={(event) => {

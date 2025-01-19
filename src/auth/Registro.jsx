@@ -21,6 +21,7 @@ import { useNavigate } from 'react-router-dom';
 
 import { opticaControlApi } from '../services/opticaControlApi';
 import { textValidator } from '../helpers/validator';
+import './RegistroStyle.css'
 const usuariosJSON = {
     nombre: '',
     usuario: '',
@@ -34,8 +35,6 @@ export const Registro = () => {
     const [sucursales, setSucursales] = useState([]);
 
     useEffect(() => {
-        document.body.style.zoom = '100%';
-
         opticaControlApi.get('sucursal', '')
             .then((response) => {
                 if (response.status === 200) {
@@ -101,7 +100,7 @@ export const Registro = () => {
         }
 
         console.log(formUsuarios);
-        
+
 
         opticaControlApi.post('usuario', formUsuarios)
             .then(async (response) => {
@@ -128,13 +127,7 @@ export const Registro = () => {
     return (
         <>
             <Toast ref={toast} />
-            <div style={{
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                height: '100vh',
-                backgroundColor: '#94d0ff6e',
-            }}>
+            <div className='containerPadre'>
                 <div
                     style={{
                         position: 'absolute',
@@ -163,6 +156,10 @@ export const Registro = () => {
                         backgroundColor: '#ffffff',
                         borderRadius: '10px',
                         boxShadow: '15px 14px 20px 0px #10294663',
+                        position: 'absolute',
+                        top: '50%',
+                        left: '50%',
+                        transform: 'translate(-50%, -50%)',
                     }}
                 >
                     <h1 style={{ textAlign: 'center' }}>Registrar usuario</h1>

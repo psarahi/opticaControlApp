@@ -15,13 +15,6 @@ export const LoginPage = () => {
   const [addSucursal, setaddSucursal] = useState(false);
 
   useEffect(() => {
-    console.log(window.innerWidth);
-
-    // if (window.innerWidth < 1900) {
-    //   document.body.style.zoom = '90%'
-    // } else {
-    document.body.style.zoom = '100%'
-    // }
     opticaControlApi.get('sucursal', '')
       .then((response) => {
         if (response.status === 200) {
@@ -29,14 +22,6 @@ export const LoginPage = () => {
           setsucursales(response.data);
         }
       })
-      .catch((err) => {
-        createToast(
-          'error',
-          'Error',
-          err.response.data,
-        );
-      });
-
   }, [])
 
 
@@ -87,8 +72,6 @@ export const LoginPage = () => {
       );
       return;
     }
-
-    console.log(formValues);
 
     opticaControlApi.post(`usuario/login`, formValues)
       .then(async (response) => {
@@ -228,17 +211,6 @@ export const LoginPage = () => {
                   </Button>
                 )
               }
-              {
-                !addSucursal && (
-                  <Link to='/registro' underline='hover' sx={{
-                    color: 'primary.main', fontWeight: 'bold', fontSize: '18px',
-                  }}
-                    onClick={handleRegistro}
-                  >
-                    {'Crear usuario'}
-                  </Link>
-                )}
-
             </Box>
             <br />
             <br />
@@ -247,7 +219,7 @@ export const LoginPage = () => {
               sx={{ width: '100%' }}
               onClick={handleSubmit}
               startIcon={<LoginIcon />} >
-              Login
+              Iniciar sesión
             </Button>
           </div>
         </Box>

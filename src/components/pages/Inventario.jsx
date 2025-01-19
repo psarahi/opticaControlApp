@@ -9,6 +9,7 @@ import CancelIcon from '@mui/icons-material/Cancel';
 import DoneIcon from '@mui/icons-material/Done';
 
 import {
+    Autocomplete,
     Button, Dialog, DialogActions, DialogContent, DialogContentText,
     DialogTitle, FormControl, InputLabel, MenuItem, Select, TextField
 }
@@ -68,17 +69,13 @@ export const Inventario = () => {
     ];
 
     useEffect(() => {
-        if (window.innerWidth < 1900) {
-            document.body.style.zoom = '80%'
-        } else {
-            document.body.style.zoom = '100%'
-        }
+
         const sucursal = localStorage.getItem('sucursalID');
         console.log(sucursal);
-        
+
         opticaControlApi.get(`inventario/bySucursal/${sucursal}`, '').then((response) => {
             console.log(response.data);
-            
+
             setListInventario(response.data);
         })
         cleanForm();
@@ -319,6 +316,11 @@ export const Inventario = () => {
             return <CancelIcon color='error' fontSize='medium' />
         }
 
+    };
+
+    const defaultProps = {
+        options: listGraduaciones,
+        getOptionLabel: (option) => option,
     };
 
     const [filters] = useState({
@@ -563,38 +565,35 @@ export const Inventario = () => {
                     </FormControl>
                     <div style={{
                         display: 'flex',
-                        flexDirection: 'row'
+                        flexDirection: 'row',
+                        gap: '30px'
                     }}>
-                        <FormControl variant="standard" sx={{ m: 1, width: '50%' }}>
-                            <InputLabel id="Esfera">Esfera</InputLabel>
-                            <Select
-                                labelId="Esfera"
-                                id="Esfera"
-                                value={formValues.esfera}
-                                onChange={(event) => handleChangeText(event, 'esfera')}
-                                label="Esfera"
-                            >
-                                {listGraduaciones.map(op => (
-                                    <MenuItem key={op} value={op}>{op}</MenuItem>
-                                )
-                                )}
-                            </Select>
-                        </FormControl>
-                        <FormControl variant="standard" sx={{ m: 1, width: '50%' }}>
-                            <InputLabel id="cilindro">Cilindro</InputLabel>
-                            <Select
-                                labelId="cilindro"
-                                id="cilindro"
-                                value={formValues.cilindro}
-                                onChange={(event) => handleChangeText(event, 'cilindro')}
-                                label="Cilindro"
-                            >
-                                {listGraduaciones.map(op => (
-                                    <MenuItem key={op} value={op}>{op}</MenuItem>
-                                )
-                                )}
-                            </Select>
-                        </FormControl>
+                        <Autocomplete
+                            {...defaultProps}
+                            options={listGraduaciones}
+                            value={formValues.esfera}
+                            onChange={(event, newValue) => {
+                                setFormValues({
+                                    ...formValues,
+                                    esfera: newValue
+                                })
+                            }}
+                            sx={{ width: '50%' }}
+                            renderInput={(params) => <TextField {...params} label="Esfera" variant="standard" />}
+                        />
+                        <Autocomplete
+                            {...defaultProps}
+                            options={listGraduaciones}
+                            value={formValues.esfera}
+                            onChange={(event, newValue) => {
+                                setFormValues({
+                                    ...formValues,
+                                    cilindro: newValue
+                                })
+                            }}
+                            sx={{ width: '50%' }}
+                            renderInput={(params) => <TextField {...params} label="Cilindro" variant="standard" />}
+                        />
                         <FormControl variant="standard" sx={{ m: 1, width: '50%' }}>
                             <InputLabel id="adicion">Adicion</InputLabel>
                             <Select

@@ -6,6 +6,16 @@ import { Registro } from '../auth/Registro';
 import { CrearSucursal } from '../auth/CrearSucursal';
 
 export const AppRouter = () => {
+  console.log(window.innerWidth, 'Width');
+  console.log(window.innerHeight, ' Height');
+
+  if (window.innerWidth > 1500 && window.innerWidth < 2000) {
+    document.body.style.zoom = '80%'
+  } else if (window.innerWidth < 1500) {
+    document.body.style.zoom = '75%'
+  } else {
+    document.body.style.zoom = '100%'
+  }
 
   return (
     <>

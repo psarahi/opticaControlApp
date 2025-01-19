@@ -61,11 +61,7 @@ export const Usuarios = () => {
     };
 
     useEffect(() => {
-        if (window.innerWidth < 1900) {
-            document.body.style.zoom = "80%";
-        } else {
-            document.body.style.zoom = "100%";
-        }
+
         let sucursalesList = [];
         opticaControlApi.get("sucursal", "").then((response) => {
             response.data.forEach((s, index) => {

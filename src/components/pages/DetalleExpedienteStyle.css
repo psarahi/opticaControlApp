@@ -1,17 +1,44 @@
-@media screen and (min-width: 1900px) {
-    .texto{
-        font-size: 13px;
-    }
-
-    .textoPequeño{
-        font-size: 10px;
-    }
-}
-
 .texto{
-    font-size: 15px;
+    font-size: 19px;
 }
 
 .textoPequeño{
-    font-size: 14px;
+    font-size: 18px;
+}
+
+.subTitulo {
+    text-align: center;
+    margin: 0%;
+    font-size: 23px;
+}
+
+@media (max-width: 1500px) {
+    .texto{
+        font-size: 13px;
+    }
+    
+    .textoPequeño{
+        font-size: 11px;
+    }
+    .subTitulo {
+        text-align: center;
+        margin: 0%;
+        font-size: 15px;
+    }
+}
+
+@media (min-width: 1500px) and (max-width: 1900px) {
+    .texto{
+        font-size: 19px;
+    }
+    
+    .textoPequeño{
+        font-size: 18px;
+    }
+
+    .subTitulo {
+        text-align: center;
+        margin: 0%;
+        font-size: 15px;
+    }
 }

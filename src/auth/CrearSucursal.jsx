@@ -90,13 +90,7 @@ export const CrearSucursal = () => {
     return (
         <>
             <Toast ref={toast} />
-            <div style={{
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                height: '100vh',
-                backgroundColor: '#94d0ff6e',
-            }}>
+            <div className='containerPadre'>
                 <div
                     style={{
                         position: 'absolute',
@@ -124,6 +118,10 @@ export const CrearSucursal = () => {
                         width: '50%',
                         backgroundColor: '#ffffff',
                         borderRadius: '10px',
+                        position: 'absolute',
+                        top: '50%',
+                        left: '50%',
+                        transform: 'translate(-50%, -50%)',
                         boxShadow: '15px 14px 20px 0px #10294663',
                     }}
                 >

@@ -1,24 +1,30 @@
 .containerPadre {
+    display: flex;
+    justify-content: center;
+    align-items: center;
     height: 100vh;
     background-color: #94d0ff6e;
     position: relative;
-    margin: 0%;
 }
 
 @media (max-width: 1500px) {
     .containerPadre {
-        height: 125vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 135vh;
         background-color: #94d0ff6e;
         position: relative;
-        margin: 0%;
     }
 }
 
 @media (min-width: 1500px) and (max-width: 1900px) {
     .containerPadre {
+        display: flex;
+        justify-content: center;
+        align-items: center;
         height: 125vh;
         background-color: #94d0ff6e;
         position: relative;
-        margin: 0%;
     }
 }

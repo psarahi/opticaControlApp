@@ -46,11 +46,6 @@ export const DetalleVentas = () => {
     const toastForm = useRef(null);
 
     useEffect(() => {
-        if (window.innerWidth < 1900) {
-            document.body.style.zoom = '80%'
-        } else {
-            document.body.style.zoom = '100%'
-        }
         const sucursal = localStorage.getItem('sucursalID');
         opticaControlApi.get(`facturas/facturaRecibo/${sucursal}`).then((response) => {
             if (response.data.factura.length > 0) {
