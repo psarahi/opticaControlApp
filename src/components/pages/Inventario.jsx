@@ -584,7 +584,7 @@ export const Inventario = () => {
                         <Autocomplete
                             {...defaultProps}
                             options={listGraduaciones}
-                            value={formValues.esfera}
+                            value={formValues.cilindro}
                             onChange={(event, newValue) => {
                                 setFormValues({
                                     ...formValues,
