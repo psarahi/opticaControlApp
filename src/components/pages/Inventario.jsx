@@ -94,12 +94,16 @@ export const Inventario = () => {
             precioVenta: '',
             precioCompra: '',
             existencia: '',
+            importe: '',
+            valorGravado: '',
             categoria: '',
             proveedor: '',
             telefono: '',
             moda: '',
+            material: '',
             diseno: '',
             color: '',
+            estado: true,
             sucursales: localStorage.getItem('sucursalID')
             //fechaRegistro: new Date()
         });

@@ -108,7 +108,7 @@ export const DetalleVentas = () => {
     };
 
     const [filters] = useState({
-        nombre: { value: '', matchMode: FilterMatchMode.STARTS_WITH },
+        paciente: { value: '', matchMode: FilterMatchMode.STARTS_WITH },
     });
 
     const tipoPago = [

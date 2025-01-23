@@ -39,7 +39,7 @@ export const DetalleExpediente = () => {
     }, []);
 
     const [filters] = useState({
-        nombre: { value: '', matchMode: FilterMatchMode.STARTS_WITH },
+        ['paciente.nombre']: { value: '', matchMode: FilterMatchMode.STARTS_WITH },
     });
 
     const onCellSelect = (e) => {

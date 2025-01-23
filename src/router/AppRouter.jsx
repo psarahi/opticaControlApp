@@ -9,7 +9,7 @@ export const AppRouter = () => {
   console.log(window.innerWidth, 'Width');
   console.log(window.innerHeight, ' Height');
 
-  if (window.innerWidth > 1500 && window.innerWidth < 2000) {
+  if (window.innerWidth > 1500 && window.innerWidth < 1900) {
     document.body.style.zoom = '80%'
   } else if (window.innerWidth < 1500) {
     document.body.style.zoom = '75%'

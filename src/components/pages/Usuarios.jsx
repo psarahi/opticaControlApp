@@ -33,6 +33,7 @@ import { opticaControlApi } from "../../services/opticaControlApi";
 import { textValidator } from "../../helpers/validator";
 import { formatearFecha } from "../../helpers/formato";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
+import { FilterMatchMode } from "primereact/api";
 const usuariosJSON = {
     nombre: "",
     usuario: "",
@@ -312,7 +313,7 @@ export const Usuarios = () => {
         return (
             <Stack direction="row" spacing={1}>
                 {data.sucursales.map((sucursal) => (
-                    <Chip key={sucursal._id} label={sucursal.nombre} color="primary"/>
+                    <Chip key={sucursal._id} label={sucursal.nombre} color="primary" />
                 ))}
             </Stack>);
 
@@ -343,6 +344,12 @@ export const Usuarios = () => {
         });
     };
 
+    const [filters] = useState({
+        nombre: { value: '', matchMode: FilterMatchMode.STARTS_WITH },
+        usuario: { value: '', matchMode: FilterMatchMode.STARTS_WITH },
+        tipoUsuario: { value: '', matchMode: FilterMatchMode.STARTS_WITH },
+    });
+
     return (
         <>
             <h1>Usuarios</h1>
@@ -362,6 +369,8 @@ export const Usuarios = () => {
                     showGridlines
                     stripedRows
                     size="small"
+                    filters={filters}
+                    filterDisplay='row'
                     paginator
                     rows={10}
                     rowsPerPageOptions={[5, 10, 15]}
@@ -374,21 +383,12 @@ export const Usuarios = () => {
                     columnResizeMode="expand"
                     resizableColumns
                 >
-                    <Column
-                        body={renderEditButton}
-                        style={{ textAlign: "center" }}
-                    ></Column>
-                    <Column
-                        body={renderStatusDisabled}
-                        style={{ textAlign: "center" }}
-                    ></Column>
-                    <Column
-                        body={renderStatusEnabled}
-                        style={{ textAlign: "center" }}
-                    ></Column>
-                    <Column field="nombre" header="Nombre"></Column>
-                    <Column field="usuario" header="Usuario"></Column>
-                    <Column field="tipoUsuario" header="Tipo Usuario"></Column>
+                    <Column body={renderEditButton} style={{ textAlign: "center" }}></Column>
+                    <Column body={renderStatusDisabled} style={{ textAlign: "center" }}></Column>
+                    <Column body={renderStatusEnabled} style={{ textAlign: "center" }}></Column>
+                    <Column field="nombre" header="Nombre" filter></Column>
+                    <Column field="usuario" header="Usuario" filter></Column>
+                    <Column field="tipoUsuario" header="Tipo Usuario" filter></Column>
                     <Column header="Sucursales" body={rendeSucursales}></Column>
                     <Column
                         field="fechaRegistro"
@@ -497,8 +497,7 @@ export const Usuarios = () => {
                                     });
                             }
                         } else {
-                            opticaControlApi
-                                .post("usuario", datosSave)
+                            opticaControlApi.post("usuario", datosSave)
                                 .then(async (response) => {
                                     if (response.status === 201) {
                                         createToast(

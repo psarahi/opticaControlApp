@@ -1184,8 +1184,8 @@ export const Pacientes = () => {
           <Column body={renderAgregarRecetaButton}></Column>
           <Column field="nombre" header="Nombre" sortable filter></Column>
           <Column field="edad" header="Edad" sortable bodyStyle={{ textAlign: 'center' }}></Column>
-          <Column field="genero" header="Genero" filter bodyStyle={{ textAlign: 'center' }}></Column>
-          <Column field="telefono" header="Telefono" filter bodyStyle={{ textAlign: 'center' }}></Column>
+          <Column field="genero" header="Genero" filter bodyStyle={{ textAlign: 'center', minWidth: '12rem' }}></Column>
+          <Column field="telefono" header="Telefono" filter bodyStyle={{ textAlign: 'center', minWidth: '12rem' }}></Column>
           <Column field="direccion" header="Direccion" filter></Column>
           <Column field="sucursales.nombre" header="Sucursal" filter></Column>
           <Column field="fechaRegistro" header="Registro" body={(data) => (textValidator(data.fechaRegistro)) ? formatearFecha(data.fechaRegistro) : '-'}></Column>
@@ -2304,7 +2304,7 @@ export const Pacientes = () => {
             resizableColumns
           >
             <Column body={renderAddButton}></Column>
-            <Column field="descripcion" header="Descripcion" sortable filter></Column>
+            <Column field="descripcion" header="Descripcion" sortable filter style={{ minWidth: '12rem' }}></Column>
             <Column field="esfera" header="Esfera" filter style={{ minWidth: '9rem' }}></Column>
             <Column field="cilindro" header="Cilindro" filter style={{ minWidth: '9rem' }}></Column>
             <Column field="adicion" header="Adición" filter style={{ minWidth: '9rem' }}></Column>
