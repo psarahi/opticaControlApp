@@ -7,6 +7,7 @@ import { FilterMatchMode, DataTable, Column, Tag } from 'primereact';
 import EditIcon from '@mui/icons-material/Edit';
 import CancelIcon from '@mui/icons-material/Cancel';
 import DoneIcon from '@mui/icons-material/Done';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 import {
     Autocomplete,
@@ -14,6 +15,7 @@ import {
     DialogTitle, FormControl, InputLabel, MenuItem, Select, TextField
 }
     from '@mui/material';
+
 //import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 
 import { opticaControlApi } from '../../services/opticaControlApi';
@@ -69,17 +71,11 @@ export const Inventario = () => {
     ];
 
     useEffect(() => {
-
         const sucursal = localStorage.getItem('sucursalID');
-        console.log(sucursal);
-
-        opticaControlApi.get(`inventario/bySucursal/${sucursal}`, '').then((response) => {
-            console.log(response.data);
-
+        opticaControlApi.get(`inventario/bySucursal/${sucursal}`, '').then((response) => {            
             setListInventario(response.data);
         })
         cleanForm();
-
         setListGraduaciones(obtenerGraduaciones());
         setListAdicion(obtenerAdicion());
     }, [])
@@ -133,12 +129,15 @@ export const Inventario = () => {
     };
 
     const onCellSelect = (event) => {
+
         if (event.cellIndex === 0) {
             handleEdit();
         } else if (event.cellIndex === 1) {
-            handleDelete();
+            handleDisabled();
         } else if (event.cellIndex === 2) {
             handleEnable();
+        } else if (event.cellIndex === 3) {
+            handleDelete();
         }
     };
 
@@ -161,19 +160,19 @@ export const Inventario = () => {
         handleOpenDialog();
     };
 
-    const handleDelete = () => {
+    const handleDisabled = () => {
         confirmDialog({
             message: `¿Desea deshabilitar el registro? `,
             header: 'Deshabilitar',
             icon: 'pi pi-info-circle',
             defaultFocus: 'reject',
             acceptClassName: 'p-button-danger',
-            accept: acceptDialogDisable,
-            reject: rejectDialogDisable
+            accept: acceptDialogDisabled,
+            reject: rejectDialogDisabled
         });
     };
 
-    const acceptDialogDisable = () => {
+    const acceptDialogDisabled = () => {
         if (textValidator(inventarioSeleccionado)) {
             opticaControlApi.put(`inventario/cambiarEstado/${inventarioSeleccionado}`, { estado: false })
                 .then((response) => {
@@ -192,18 +191,7 @@ export const Inventario = () => {
                                 } : i
                             )
                         );
-
-                        console.log(response);
                         cleanForm();
-                    } else {
-                        createToast(
-                            'error',
-                            'Error',
-                            response.statusText,
-                        );
-                        console.log(response.data);
-                        cleanForm();
-                        return;
                     }
                 })
                 .catch((err) => {
@@ -225,7 +213,7 @@ export const Inventario = () => {
         }
     }
 
-    const rejectDialogDisable = () => {
+    const rejectDialogDisabled = () => {
         createToast(
             'warn',
             'Cancelado',
@@ -263,17 +251,7 @@ export const Inventario = () => {
                                 } : i
                             )
                         );
-                        console.log(response);
                         cleanForm();
-                    } else {
-                        createToast(
-                            'error',
-                            'Error',
-                            response.statusText,
-                        );
-                        console.log(response.data);
-                        cleanForm();
-                        return;
                     }
                 })
                 .catch((err) => {
@@ -303,6 +281,60 @@ export const Inventario = () => {
         );
     }
 
+
+    const handleDelete = () => {
+        confirmDialog({
+            message: `¿Desea eliminar el registro? `,
+            header: 'Eliminar',
+            icon: 'pi pi-info-circle',
+            defaultFocus: 'reject',
+            acceptClassName: 'p-button-danger',
+            accept: acceptDialogDelete,
+            reject: rejectDialogDelete
+        });
+    };
+
+    const acceptDialogDelete = () => {
+        if (textValidator(inventarioSeleccionado)) {
+            opticaControlApi.delete(`inventario/${inventarioSeleccionado}`, {})
+                .then((response) => {
+                    if (response.status === 200) {
+                        createToast(
+                            'success',
+                            'Confirmado',
+                            'El registro a sido eliminado'
+                        );
+                        setListInventario(listInventario.filter(i => i._id !== inventarioSeleccionado));
+                        cleanForm();
+                    }
+                })
+                .catch((err) => {
+                    createToast(
+                        'error',
+                        'Error',
+                        err.response.data
+                    );
+                    console.log(err);
+                    handleCloseDialog();
+                    cleanForm();
+                });
+        } else {
+            createToast(
+                'warn',
+                'Acction requerida',
+                'No se selecciono el inventario correctamente'
+            );
+        }
+    }
+
+    const rejectDialogDelete = () => {
+        createToast(
+            'warn',
+            'Cancelado',
+            'Acción cancelada'
+        );
+    }
+
     const renderEditButton = (data) => {
         if (data.estado === true) {
             return <EditIcon color='primary' fontSize='medium' />
@@ -315,7 +347,7 @@ export const Inventario = () => {
         }
     };
 
-    const renderDeleteButton = (data) => {
+    const renderDisabledButton = (data) => {
         if (data.estado !== false) {
             return <CancelIcon color='error' fontSize='medium' />
         }
@@ -361,6 +393,17 @@ export const Inventario = () => {
         }
     }
 
+    const renderDeleteButton = () => {
+        return (
+            <DeleteIcon color='error' fontSize='medium' />
+        );
+    };
+
+    const defaultPropsAdicion = {
+        options: listAdicion,
+        getOptionLabel: (option) => option,
+    };
+
     return (
         <>
             <h1>Informacion sobre Inventario </h1>
@@ -386,7 +429,6 @@ export const Inventario = () => {
                     cellSelection
                     onCellSelect={onCellSelect}
                     onSelectionChange={(e) => {
-                        console.log(e);
                         const inventario = e.value.rowData;
                         setSelectedInventario(inventario._id);
                         inventarioSeleccionado = inventario._id;
@@ -417,15 +459,17 @@ export const Inventario = () => {
                     }}
                     scrollable
                     columnResizeMode="expand"
-                    resizableColumns                >
+                    resizableColumns
+                >
                     <Column body={renderEditButton}></Column>
-                    <Column body={renderDeleteButton}></Column>
+                    <Column body={renderDisabledButton}></Column>
                     <Column body={renderChangeStatus}></Column>
+                    <Column body={renderDeleteButton}></Column>
                     <Column field="descripcion" header="Descripcion" sortable filter></Column>
-                    <Column field="esfera" header="Esfera" filter style={{ minWidth: '9rem' }}></Column>
-                    <Column field="cilindro" header="Cilindro" filter style={{ minWidth: '9rem' }}></Column>
-                    <Column field="adicion" header="Adición" filter style={{ minWidth: '9rem' }}></Column>
-                    <Column field="linea" header="Linea" filter style={{ minWidth: '9rem' }}></Column>
+                    <Column field="esfera" header="Esfera" filter style={{ minWidth: '11rem' }}></Column>
+                    <Column field="cilindro" header="Cilindro" filter style={{ minWidth: '11rem' }}></Column>
+                    <Column field="adicion" header="Adición" filter style={{ minWidth: '11rem' }}></Column>
+                    <Column field="linea" header="Linea" filter style={{ minWidth: '11rem' }}></Column>
                     <Column field="existencia" header="Existencia" sortable ></Column>
                     <Column field="precioVenta" header="Precio Venta" sortable body={precioVentaBodyTemplate}></Column>
                     <Column field="precioCompra" header="Precio Compra" sortable body={precioCompraBodyTemplate}></Column>
@@ -451,9 +495,6 @@ export const Inventario = () => {
                     component: 'form',
                     onSubmit: (event) => {
                         event.preventDefault();
-                        console.log(formValues);
-
-
                         if (textValidator(selectedInventario)) {
                             opticaControlApi.put(`inventario/${selectedInventario}`, formValues)
                                 .then((response) => {
@@ -471,15 +512,6 @@ export const Inventario = () => {
                                         );
 
                                         cleanForm();
-                                    } else {
-                                        createToast(
-                                            'error',
-                                            'Error',
-                                            response.statusText,
-                                        );
-                                        console.log(response.data);
-                                        cleanForm();
-                                        return;
                                     }
                                 })
                                 .catch((err) => {
@@ -504,17 +536,7 @@ export const Inventario = () => {
                                         );
                                         handleCloseDialog();
                                         setListInventario([...listInventario, response.data]);
-                                        console.log(response);
                                         cleanForm();
-                                    } else {
-                                        createToast(
-                                            'error',
-                                            'Error',
-                                            response.statusText,
-                                        );
-                                        console.log(response.data);
-                                        cleanForm();
-                                        return;
                                     }
                                 })
                                 .catch((err) => {
@@ -598,21 +620,19 @@ export const Inventario = () => {
                             sx={{ width: '50%' }}
                             renderInput={(params) => <TextField {...params} label="Cilindro" variant="standard" />}
                         />
-                        <FormControl variant="standard" sx={{ m: 1, width: '50%' }}>
-                            <InputLabel id="adicion">Adicion</InputLabel>
-                            <Select
-                                labelId="adicion"
-                                id="adicion"
-                                value={formValues.adicion}
-                                onChange={(event) => handleChangeText(event, 'adicion')}
-                                label="Adicion"
-                            >
-                                {listAdicion.map(op => (
-                                    <MenuItem key={op} value={op}>{op}</MenuItem>
-                                )
-                                )}
-                            </Select>
-                        </FormControl>
+                        <Autocomplete
+                            {...defaultPropsAdicion}
+                            options={listAdicion}
+                            value={formValues.adicion}
+                            onChange={(event, newValue) => {
+                                setFormValues({
+                                    ...formValues,
+                                    adicion: newValue
+                                })
+                            }}
+                            sx={{ width: '50%' }}
+                            renderInput={(params) => <TextField {...params} label="Adición" variant="standard" />}
+                        />
                     </div>
                     <div style={{
                         display: 'flex',

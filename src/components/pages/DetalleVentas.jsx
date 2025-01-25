@@ -163,8 +163,6 @@ export const DetalleVentas = () => {
         if (e.cellIndex === 3) {
             opticaControlApi.get(`detalleVentas/idPaciente/${e.rowData.idPaciente}`, '')
                 .then((response) => {
-                    console.log(response.data);
-
                     setActiveIndex(0)
                     setListDetalleVentas(response.data);
                     setdisabledVenta(response.data[0].estado);
@@ -343,17 +341,6 @@ export const DetalleVentas = () => {
                     cleanForm();
                     clearRTN();
                     handleCloseDialog();
-                } else {
-                    createToast(
-                        'error',
-                        'Error',
-                        response.statusText,
-                    );
-                    console.log(response);
-                    cleanForm();
-                    clearRTN();
-                    handleCloseDialog();
-                    return;
                 }
             })
             .catch((err) => {
@@ -494,8 +481,6 @@ export const DetalleVentas = () => {
                                                                 opticaControlApi.put(`detalleVentas/${selectedVentaId}`,
                                                                     { entregado: true, trabajoHecho: true, fechaEntrega: dayjs().format('YYYY-MM-DD') })
                                                                     .then((response) => {
-                                                                        console.log(response);
-
                                                                         setventaView({
                                                                             ...ventaView,
                                                                             entregado: true,
@@ -577,8 +562,6 @@ export const DetalleVentas = () => {
                                                         startIcon={<PrintIcon />}
                                                         onClick={(e) => {
                                                             const facturaDatos = obtenerDatosFactura(ventaView.numFacRec);
-                                                            console.log(facturaDatos);
-
                                                             if (facturaDatos.numFacRec.length === 19) {
                                                                 opticaControlApi.post(`thermalPrinter/imprimirFactura`, facturaDatos)
                                                                     .then(() => {
@@ -804,7 +787,7 @@ export const DetalleVentas = () => {
                 <DialogContent>
                     <div className='divColumn'>
                         <div>
-                        <Toast ref={toastForm} />
+                            <Toast ref={toastForm} />
                             <p style={{ color: '#696969' }}>Fecha *</p>
                             <TextField
                                 required

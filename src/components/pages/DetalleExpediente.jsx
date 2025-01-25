@@ -46,7 +46,6 @@ export const DetalleExpediente = () => {
         if (e.cellIndex === 1) {
             opticaControlApi.get(`expediente/pacienteExpediente/${e.rowData.paciente._id}`, '')
                 .then((response) => {
-                    console.log(response.data);
                     setListDetalleExpediente(response.data.expedientes);
                 });
         }
@@ -59,11 +58,7 @@ export const DetalleExpediente = () => {
     };
 
     const handleTabChange = (e) => {
-        console.log(e);
         setActiveIndex(e.index);
-        //setventaView(listDetalleExpediente[e.index]);
-        console.log(listDetalleExpediente[e.index]);
-
     };
 
     const renderPDF = (paciente) => {

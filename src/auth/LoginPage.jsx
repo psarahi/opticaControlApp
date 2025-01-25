@@ -76,8 +76,6 @@ export const LoginPage = () => {
     opticaControlApi.post(`usuario/login`, formValues)
       .then(async (response) => {
         if (response.status === 201) {
-          console.log(response.data);
-
           localStorage.setItem('token', await response.data.token);
           localStorage.setItem('nombre', await response.data.nombre);
           localStorage.setItem('usuarioId', await response.data.uid);

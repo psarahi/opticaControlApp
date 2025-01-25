@@ -255,17 +255,7 @@ export const RangoFacturas = () => {
                                 } : i
                             )
                         );
-                        console.log(response);
                         cleanForm();
-                    } else {
-                        createToast(
-                            'error',
-                            'Error',
-                            response.statusText,
-                        );
-                        console.log(response.data);
-                        cleanForm();
-                        return;
                     }
                 })
                 .catch((err) => {
@@ -325,17 +315,7 @@ export const RangoFacturas = () => {
                                 } : i
                             )
                         );
-                        console.log(response);
                         cleanForm();
-                    } else {
-                        createToast(
-                            'error',
-                            'Error',
-                            response.statusText,
-                        );
-                        console.log(response.data);
-                        cleanForm();
-                        return;
                     }
                 })
                 .catch((err) => {
@@ -453,15 +433,6 @@ export const RangoFacturas = () => {
                                             )
                                         );
                                         cleanForm();
-                                    } else {
-                                        createToast(
-                                            'error',
-                                            'Error',
-                                            response.statusText,
-                                        );
-                                        console.log(response.data);
-                                        cleanForm();
-                                        return;
                                     }
                                 })
                                 .catch((err) => {
@@ -485,17 +456,7 @@ export const RangoFacturas = () => {
                                         );
                                         handleCloseDialog();
                                         setListFacturas([...listFacturas, response.data]);
-                                        console.log(response);
                                         cleanForm();
-                                    } else {
-                                        createToast(
-                                            'error',
-                                            'Error',
-                                            response.statusText,
-                                        );
-                                        console.log(response.data);
-                                        cleanForm();
-                                        return;
                                     }
                                 })
                                 .catch((err) => {
@@ -666,7 +627,6 @@ export const RangoFacturas = () => {
                                         );
                                         handleCloseDialogCorrelativo();
                                         setListCorrelativo([...listCorrelativo, response.data]);
-                                        console.log(response);
                                         cleanFormCorrelativo();
                                     }
                                 })

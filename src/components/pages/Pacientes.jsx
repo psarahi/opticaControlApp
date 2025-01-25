@@ -13,6 +13,7 @@ import CancelIcon from '@mui/icons-material/Cancel';
 import DoneIcon from '@mui/icons-material/Done';
 import ContactPageIcon from '@mui/icons-material/ContactPage';
 import AddShoppingCartIcon from '@mui/icons-material/AddShoppingCart';
+import DeleteIcon from '@mui/icons-material/Delete';
 //import AssignmentIndIcon from '@mui/icons-material/AssignmentInd';
 
 import {
@@ -111,6 +112,28 @@ const detalleVenta = {
   // estado: true,
 };
 
+const inventarioJson = {
+  descripcion: '',
+  esfera: '',
+  cilindro: '',
+  adicion: '',
+  linea: '',
+  precioVenta: '',
+  precioCompra: '',
+  existencia: '',
+  importe: '',
+  valorGravado: '',
+  categoria: '',
+  proveedor: '',
+  telefono: '',
+  moda: '',
+  material: '',
+  diseno: '',
+  color: '',
+  estado: true,
+  sucursales: localStorage.getItem('sucursalID')
+}
+
 export const Pacientes = () => {
   let pacienteSeleccionado = '';
   const [enableOp] = useState((localStorage.getItem('tipoUsuario') === 'Administrador') ? true : false);
@@ -118,6 +141,7 @@ export const Pacientes = () => {
   const [openDialogReceta, setOpenDialogReceta] = useState(false);
   const [openDialogAddExpediente, setOpenDialogAddExpediente] = useState(false);
   const [openDialogVenta, setOpenDialogVenta] = useState(false);
+  const [openDialogInv, setOpenDialogInv] = useState(false);
   const [listPaciente, setListPaciente] = useState([]);
   const [pacienteDatos, setPacienteDatos] = useState(pacienteJson);
   const [selectedPaciente, setSelectedPaciente] = useState(null);
@@ -151,6 +175,10 @@ export const Pacientes = () => {
     monto: 0,
     usuarios: localStorage.getItem('usuarioId')
   });
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [invFiltradoExp, setinvFiltradoExp] = useState([])
+  const [formValuesInv, setFormValuesInv] = useState(inventarioJson);
+  const [disabledGravado, setdisabledGravado] = useState(true);
 
   const tipoVenta = [
     'Cambio de aro',
@@ -182,6 +210,10 @@ export const Pacientes = () => {
     {
       value: 6,
       label: 'Foto Rosa'
+    },
+    {
+      value: 7,
+      label: 'Blue'
     }
   ];
 
@@ -203,15 +235,31 @@ export const Pacientes = () => {
     'Tarjeta',
   ];
 
+  const lineas = [
+    'Marca',
+    'Delux',
+    'Media',
+    'Economica'
+  ];
+
+  const importe = [
+    'Exento',
+    'Gravado'
+  ];
+  const valorGravado = [
+    '15%',
+    '18%'
+  ];
+
   useEffect(() => {
-    // bienvenida();
+    const sucursal = localStorage.getItem('sucursalID');
     opticaControlApi.get('paciente', '').then((response) => {
       setListPaciente(response.data);
     });
     opticaControlApi.get('sucursal', '').then((response) => {
       setlistSucursal(response.data);
     });
-    opticaControlApi.get('optometrista', '').then((response) => {
+    opticaControlApi.get(`optometrista/bySucursal/${sucursal}`, '').then((response) => {
       setlistoptometrista(response.data);
     });
     cleanForm();
@@ -222,12 +270,34 @@ export const Pacientes = () => {
 
   }, [])
 
+  const handleTabChange = (e) => {
+    setActiveIndex(e.index);
+    let receta = [...listExpedientePaciente];
+
+    let inventario = [...listInventario];
+    let invExp = inventario.filter((i) =>
+      (
+        i.esfera === ((receta[e.index].recetaOjoDerecho.esfera === null) ? '' : receta[e.index].recetaOjoDerecho.esfera).toString() &&
+        i.cilindro === ((receta[e.index].recetaOjoDerecho.cilindro === null) ? '' : receta[e.index].recetaOjoDerecho.cilindro).toString() &&
+        i.adicion === ((receta[e.index].recetaOjoDerecho.adicion === null) ? '' : receta[e.index].recetaOjoDerecho.adicion).toString()
+      ) ||
+      (
+        i.esfera === ((receta[e.index].recetaOjoIzquierdo.esfera === null) ? '' : receta[e.index].recetaOjoIzquierdo.esfera).toString() &&
+        i.cilindro === ((receta[e.index].recetaOjoIzquierdo.cilindro === null) ? '' : receta[e.index].recetaOjoIzquierdo.cilindro).toString() &&
+        i.adicion === ((receta[e.index].recetaOjoIzquierdo.adicion === null) ? '' : receta[e.index].recetaOjoIzquierdo.adicion).toString()
+      )
+    )
+    setinvFiltradoExp(invExp)
+
+  };
+
   const cleanForm = () => {
     setFormPaciente(pacienteJson);
     setSelectedPaciente(null);
     setformExpedientes(expedientes);
     setlistExpedientePaciente([]);
     setPacienteDatos(pacienteJson);
+    setFormValuesInv(inventarioJson);
     setlistInvExistente([]);
     setlistInvPedido([]);
     setformVenta(detalleVenta);
@@ -247,13 +317,12 @@ export const Pacientes = () => {
     setDatosRtn([]);
     setrtnenable(false);
     const sucursal = localStorage.getItem('sucursalID');
-
     opticaControlApi.get(`inventario/activos/${sucursal}`, '').then((response) => {
+      console.log(response.data);
       setListInventario(response.data);
     });
 
     opticaControlApi.get(`facturas/facturaRecibo/${sucursal}`).then((response) => {
-      console.log(response);
       if (response.data.factura.length < 1) {
         createToast(
           'error',
@@ -296,6 +365,10 @@ export const Pacientes = () => {
     setOpenDialogVenta(true);
   };
 
+  const handleOpenDialogInv = () => {
+    setOpenDialogInv(true);
+  };
+
   const handleCloseDialogPaciente = () => {
     setOpenDialogPaciente(false);
     cleanForm();
@@ -312,6 +385,10 @@ export const Pacientes = () => {
   const handleCloseDialogVenta = () => {
     cleanForm();
     setOpenDialogVenta(false);
+  };
+
+  const handleCloseDialogInv = () => {
+    setOpenDialogInv(false);
   };
 
   const toast = useRef(null);
@@ -345,8 +422,6 @@ export const Pacientes = () => {
     });
 
     setSelectedPaciente(paciente._id);
-    console.log(paciente);
-
 
     setFormPaciente({
       nombre: paciente.nombre,
@@ -412,6 +487,26 @@ export const Pacientes = () => {
       }
 
       handleOpenDialogVenta();
+      opticaControlApi.get(`expediente/paciente/${event.rowData._id}`, '')
+        .then(async (response) => {
+          setActiveIndex(0);
+          let receta = response.data[0];
+          let inventario = [...listInventario] || [];
+          let invExp = inventario.filter((i) =>
+            (
+              i.esfera === ((receta.recetaOjoDerecho.esfera === null) ? '' : receta.recetaOjoDerecho.esfera).toString() &&
+              i.cilindro === ((receta.recetaOjoDerecho.cilindro === null) ? '' : receta.recetaOjoDerecho.cilindro).toString() &&
+              i.adicion === ((receta.recetaOjoDerecho.adicion === null) ? '' : receta.recetaOjoDerecho.adicion).toString()
+            ) ||
+            (
+              i.esfera === ((receta.recetaOjoIzquierdo.esfera === null) ? '' : receta.recetaOjoIzquierdo.esfera).toString() &&
+              i.cilindro === ((receta.recetaOjoIzquierdo.cilindro === null) ? '' : receta.recetaOjoIzquierdo.cilindro).toString() &&
+              i.adicion === ((receta.recetaOjoIzquierdo.adicion === null) ? '' : receta.recetaOjoIzquierdo.adicion).toString()
+            )
+          )
+          setinvFiltradoExp(invExp);
+          setlistExpedientePaciente(await response.data);
+        });
     } else if (event.cellIndex === 4) {
       opticaControlApi.get(`expediente/paciente/${event.rowData._id}`, '')
         .then(async (response) => {
@@ -728,15 +823,6 @@ export const Pacientes = () => {
               )
             );
             cleanForm();
-          } else {
-            createToast(
-              'error',
-              'Error',
-              response.statusText,
-            );
-            console.log(response.data);
-            cleanForm();
-            return;
           }
         })
         .catch((err) => {
@@ -849,7 +935,7 @@ export const Pacientes = () => {
 
   const renderDeleteButton = () => {
     return (
-      <CancelIcon color='error' fontSize='medium' />
+      <DeleteIcon color='error' fontSize='medium' />
     );
   };
 
@@ -930,6 +1016,10 @@ export const Pacientes = () => {
     getOptionLabel: (option) => option,
   };
 
+  const defaultPropsAdicion = {
+    options: listAdicion,
+    getOptionLabel: (option) => option,
+  };
 
   const textEditor = (options) => {
     return <InputNumber type="text" value={options.value} onValueChange={(e) => options.editorCallback(e.value)} />;
@@ -1063,81 +1153,82 @@ export const Pacientes = () => {
       numFacRec: numFacRec
     };
 
-    opticaControlApi.post('detalleVentas', datosSave)
-      .then((response) => {
-        if (response.status === 201) {
-          opticaControlApi.put('inventario/actualizarInventario', { detalleInventario: listInvExistente })
-            .then((response) => {
-              if (response.status === 202) {
-                if (op === 'factura' && parseFloat(acuenta) === parseFloat(totalVenta)) {
-                  opticaControlApi.put(`facturas/${listRangoFactura[0]._id}`, { ultimaUtilizada: numFacRec }).then(() => {
-                    console.log(facturaDatos);
-                    opticaControlApi.post(`thermalPrinter/imprimirFactura`, facturaDatos)
-                      .then(() => {
-                        createToast(
-                          'success',
-                          'Confirmado',
-                          'La factura a sido generada'
-                        );
-                      })
-                      .catch((error) => {
-                        createToast(
-                          'error',
-                          'Error',
-                          'Hubo un error al generar la factura, favor revise la impresora'
-                        );
-                      });
-                  });
-                } else {
-                  opticaControlApi.put(`correlativo/${numCorrelativoActual._id}`, { numCorrelativo: numFacRec }).then(() => {
-                    opticaControlApi.post(`thermalPrinter/imprimirRecibo`, facturaDatos)
-                      .then(() => {
-                        createToast(
-                          'success',
-                          'Confirmado',
-                          'El recibo a sido generado'
-                        );
-                      })
-                      .catch((error) => {
-                        createToast(
-                          'error',
-                          'Error',
-                          'Hubo un error al generar el recibo, favor revise la impresora'
-                        );
-                      });
-                  });
-                }
-                createToast(
-                  'success',
-                  'Confirmado',
-                  'El inventario ha sido actualizado'
-                );
-              }
-            });
+    console.log(datosSave);
 
-          cleanForm();
-          handleCloseDialogVenta();
-        } else {
-          createToast(
-            'error',
-            'Error',
-            response.statusText,
-          );
-          console.log(response.data);
-          cleanForm();
-          handleCloseDialogVenta();
-          return;
-        }
-      })
-      .catch((err) => {
-        createToast(
-          'error',
-          'Error',
-          'Ha ocurrido un error'
-        );
-        handleCloseDialogVenta();
-      })
+    // opticaControlApi.post('detalleVentas', datosSave)
+    //   .then((response) => {
+    //     if (response.status === 201) {
+    //       opticaControlApi.put('inventario/actualizarInventario', { detalleInventario: listInvExistente })
+    //         .then((response) => {
+    //           if (response.status === 202) {
+    //             if (op === 'factura' && parseFloat(acuenta) === parseFloat(totalVenta)) {
+    //               opticaControlApi.put(`facturas/${listRangoFactura[0]._id}`, { ultimaUtilizada: numFacRec }).then(() => {
+    //                 console.log(facturaDatos);
+    //                 opticaControlApi.post(`thermalPrinter/imprimirFactura`, facturaDatos)
+    //                   .then(() => {
+    //                     createToast(
+    //                       'success',
+    //                       'Confirmado',
+    //                       'La factura a sido generada'
+    //                     );
+    //                   })
+    //                   .catch((error) => {
+    //                     createToast(
+    //                       'error',
+    //                       'Error',
+    //                       'Hubo un error al generar la factura, favor revise la impresora'
+    //                     );
+    //                   });
+    //               });
+    //             } else {
+    //               opticaControlApi.put(`correlativo/${numCorrelativoActual._id}`, { numCorrelativo: numFacRec }).then(() => {
+    //                 opticaControlApi.post(`thermalPrinter/imprimirRecibo`, facturaDatos)
+    //                   .then(() => {
+    //                     createToast(
+    //                       'success',
+    //                       'Confirmado',
+    //                       'El recibo a sido generado'
+    //                     );
+    //                   })
+    //                   .catch((error) => {
+    //                     createToast(
+    //                       'error',
+    //                       'Error',
+    //                       'Hubo un error al generar el recibo, favor revise la impresora'
+    //                     );
+    //                   });
+    //               });
+    //             }
+    //             createToast(
+    //               'success',
+    //               'Confirmado',
+    //               'El inventario ha sido actualizado'
+    //             );
+    //           }
+    //         });
 
+    //       cleanForm();
+    //       handleCloseDialogVenta();
+    //     } else {
+    //       createToast(
+    //         'error',
+    //         'Error',
+    //         response.statusText,
+    //       );
+    //       console.log(response.data);
+    //       cleanForm();
+    //       handleCloseDialogVenta();
+    //       return;
+    //     }
+    //   })
+    //   .catch((err) => {
+    //     createToast(
+    //       'error',
+    //       'Error',
+    //       'Ha ocurrido un error'
+    //     );
+    //     handleCloseDialogVenta();
+    //   })
   };
 
   const rowClass = (data) => {
@@ -1146,10 +1237,25 @@ export const Pacientes = () => {
     }
   };
 
+  const handleChangeText = ({ target }, select) => {
+    setFormValuesInv({
+      ...formValuesInv,
+      [select]: target.value
+    })
+
+    if (target.value === 'Exento') {
+      setFormValuesInv({
+        ...formValuesInv,
+        valorGravado: '',
+        [select]: target.value
+      })
+    }
+  };
+
 
   return (
     <>
-      <h1>Informacion sobre Pacientes </h1>
+      <h1>Información sobre Pacientes </h1>
       <Button variant='contained' startIcon={<AddIcon />} onClick={handleOpenDialogPost}>Agregar Paciente</Button>
       <br />
       <br />
@@ -1626,7 +1732,7 @@ export const Pacientes = () => {
                 id="tipoLente"
                 value={formExpedientes.tipoLente}
                 onChange={(event) => handleChangeTextExpediente(event, 'tipoLente')}
-                label="Adicion"
+                label="Tipo Lente"
               >
                 {tipoLente.map(op => (
                   <MenuItem key={op} value={op}>{op}</MenuItem>
@@ -1790,30 +1896,21 @@ export const Pacientes = () => {
               variant="standard"
               size="small"
             />
-            <FormControl variant="standard" sx={{ m: 1, minWidth: 120 }}>
-              <InputLabel id="adicion">Adicion</InputLabel>
-              <Select
-                labelId="adicion"
-                id="adicion"
-                value={formExpedientes.recetaOjoDerecho.adicion}
-                onChange={(event) => {
-                  setformExpedientes({
-                    ...formExpedientes,
-                    recetaOjoDerecho: {
-                      ...formExpedientes.recetaOjoDerecho,
-                      adicion: event.target.value
-                    }
-                  });
-                }
-                }
-                label="Adicion"
-              >
-                {listAdicion.map(op => (
-                  <MenuItem key={op} value={op}>{op}</MenuItem>
-                )
-                )}
-              </Select>
-            </FormControl>
+            <Autocomplete
+              {...defaultPropsAdicion}
+              options={listAdicion}
+              value={formExpedientes.recetaOjoDerecho.adicion}
+              onChange={(event, newValue) => {
+                setformExpedientes({
+                  ...formExpedientes,
+                  recetaOjoDerecho: {
+                    ...formExpedientes.recetaOjoDerecho,
+                    adicion: newValue
+                  }
+                })
+              }}
+              renderInput={(params) => <TextField {...params} label="Adición" variant="standard" />}
+            />
             <TextField
               value={formExpedientes.recetaOjoDerecho.defRefraccion}
               onChange={(event) => {
@@ -1931,30 +2028,21 @@ export const Pacientes = () => {
               variant="standard"
               size="small"
             />
-            <FormControl variant="standard" sx={{ m: 1, minWidth: 120 }}>
-              <InputLabel id="adicion">Adicion</InputLabel>
-              <Select
-                labelId="adicion"
-                id="adicion"
-                value={formExpedientes.recetaOjoIzquierdo.adicion}
-                onChange={(event) => {
-                  setformExpedientes({
-                    ...formExpedientes,
-                    recetaOjoIzquierdo: {
-                      ...formExpedientes.recetaOjoIzquierdo,
-                      adicion: event.target.value
-                    }
-                  });
-                }
-                }
-                label="Adicion"
-              >
-                {listAdicion.map(op => (
-                  <MenuItem key={op} value={op}>{op}</MenuItem>
-                )
-                )}
-              </Select>
-            </FormControl>
+            <Autocomplete
+              {...defaultPropsAdicion}
+              options={listAdicion}
+              value={formExpedientes.recetaOjoIzquierdo.adicion}
+              onChange={(event, newValue) => {
+                setformExpedientes({
+                  ...formExpedientes,
+                  recetaOjoIzquierdo: {
+                    ...formExpedientes.recetaOjoIzquierdo,
+                    adicion: newValue
+                  }
+                })
+              }}
+              renderInput={(params) => <TextField {...params} label="Adición" variant="standard" />}
+            />
             <TextField
               value={formExpedientes.recetaOjoIzquierdo.defRefraccion}
               onChange={(event) => {
@@ -2162,130 +2250,189 @@ export const Pacientes = () => {
           <Toast ref={toastFormVenta} />
           <p style={{ fontSize: '26px', textAlign: 'center', fontWeight: 'bold' }}>{pacienteDatos.nombre}</p>
           <br />
-          <div style={{ display: 'flex', justifyContent: 'center' }}>
-            <FormControl>
-              <FormLabel id="tipoVenta">Tipo de Venta</FormLabel>
-              <RadioGroup
-                row
-                autoFocus
-                required
-                value={formVenta.tipoVenta}
-                onChange={(event) => handleChangeTextVenta(event, 'tipoVenta')}
-                id="tipoVenta"
-                name="tipoVenta"
-                size="small"
-              >
-                {tipoVenta.map(op => {
-                  return (
-                    <FormControlLabel value={op} control={<Radio />} label={op} />
-                  )
-                }
-                )}
-              </RadioGroup>
-            </FormControl>
+          <div style={{
+            display: 'flex',
+            flexDirection: 'row',
+            justifyContent: 'center',
+            alignItems: 'center',
+            gap: '50px'
+          }}>
+            <div>
+              <h3>Información sobre el expediente</h3>
+              {
+                listExpedientePaciente &&
+                <TabView
+                  scrollable
+                  activeIndex={activeIndex}
+                  onTabChange={handleTabChange}
+                  onBeforeTabChange={handleTabChange}
+                >
+                  {listExpedientePaciente.map(ex => {
+                    return (
+                      <TabPanel key={ex._id} header={formatearFecha(ex.fecha)}>
+                        <div style={{
+                          display: 'flex',
+                          flexDirection: 'row',
+                          gap: '10px'
+                        }}>
+                          <div >
+                            <p className='subtitulo'>Ojo Derecho</p>
+                            <p className='campo'>Esfera: <span className='valor'>{ex.recetaOjoDerecho.esfera}</span></p>
+                            <p className='campo'>Cilindro: <span className='valor'>{ex.recetaOjoDerecho.cilindro}</span></p>
+                            <p className='campo'>Adición: <span className='valor'>{ex.recetaOjoDerecho.adicion}</span></p>
+                          </div>
+                          <div >
+                            <p className='subtitulo'>Ojo Izquierdo</p>
+                            <p className='campo'>Esfera: <span className='valor'>{ex.recetaOjoIzquierdo.esfera}</span></p>
+                            <p className='campo'>Cilindro: <span className='valor'>{ex.recetaOjoIzquierdo.cilindro}</span></p>
+                            <p className='campo'>Adición: <span className='valor'>{ex.recetaOjoIzquierdo.adicion}</span></p>
+                          </div>
+                        </div>
 
-          </div>
-          <br />
-          <div className='infoLentes'>
-            <div>
-              <p style={{ color: '#696969' }}>Entrega programada *</p>
-              <TextField
-                required
-                value={formVenta.entregaProgramada}
-                onChange={(event) => {
-                  if (validarFechaProxima(event.target.value)) {
-                    createToastFormVenta(
-                      'warn',
-                      'Acción requerida',
-                      'La fecha debe ser mayor'
-                    );
-                    setformVenta({
-                      ...formVenta,
-                      entregaProgramada: dayjs().format('YYYY-MM-DD')
-                    })
-                    return;
-                  } else {
-                    setformVenta({
-                      ...formVenta,
-                      entregaProgramada: event.target.value
-                    })
+                      </TabPanel>
+                    )
+                  })
                   }
-                }}
-                margin='dense'
-                id='entregaProgramada'
-                name='entregaProgramada'
-                type='date'
-                format='yyyy-MM-dd'
-                variant='standard'
-                size='medium'
-              />
+                </TabView>
+              }
+
+              {
+                listExpedientePaciente.length === 0 &&
+                <h3 style={{ color: '#cc0404' }}>No hay expedientes disponibles para este paciente</h3>
+              }
             </div>
-            <FormControl variant="standard" sx={{ m: 1, minWidth: 120 }}>
-              <InputLabel id="tipoLente">Tipo de Lente</InputLabel>
-              <Select
-                labelId="tipoLente"
-                id="tipoLente"
-                value={formVenta.tipoLente}
-                onChange={(event) => handleChangeTextVenta(event, 'tipoLente')}
-                label="Adicion"
-              >
-                {tipoLente.map(op => (
-                  <MenuItem key={op} value={op}>{op}</MenuItem>
-                )
-                )}
-              </Select>
-            </FormControl>
             <div>
-              <p>Protección</p>
-              <SelectReact
-                options={proteccion}
-                value={formVenta.proteccion}
-                name='Proteccion'
-                multi={true}
-                style={{ width: '300px' }}
-                labelField="label"
-                valueField="value"
-                onChange={(e) => {
-                  setformVenta({
-                    ...formVenta,
-                    proteccion: e
-                  });
-                  // setvalue(e)
+              <div style={{ display: 'flex', justifyContent: 'center' }}>
+                <FormControl>
+                  <FormLabel id="tipoVenta">Tipo de Venta</FormLabel>
+                  <RadioGroup
+                    row
+                    autoFocus
+                    required
+                    value={formVenta.tipoVenta}
+                    onChange={(event) => handleChangeTextVenta(event, 'tipoVenta')}
+                    id="tipoVenta"
+                    name="tipoVenta"
+                    size="small"
+                  >
+                    {tipoVenta.map(op => {
+                      return (
+                        <FormControlLabel value={op} control={<Radio />} label={op} />
+                      )
+                    }
+                    )}
+                  </RadioGroup>
+                </FormControl>
+
+              </div>
+              <br />
+              <div className='infoLentes'>
+                <div>
+                  <p style={{ color: '#696969' }}>Entrega programada *</p>
+                  <TextField
+                    required
+                    value={formVenta.entregaProgramada}
+                    onChange={(event) => {
+                      if (validarFechaProxima(event.target.value)) {
+                        createToastFormVenta(
+                          'warn',
+                          'Acción requerida',
+                          'La fecha debe ser mayor'
+                        );
+                        setformVenta({
+                          ...formVenta,
+                          entregaProgramada: dayjs().format('YYYY-MM-DD')
+                        })
+                        return;
+                      } else {
+                        setformVenta({
+                          ...formVenta,
+                          entregaProgramada: event.target.value
+                        })
+                      }
+                    }}
+                    margin='dense'
+                    id='entregaProgramada'
+                    name='entregaProgramada'
+                    type='date'
+                    format='yyyy-MM-dd'
+                    variant='standard'
+                    size='medium'
+                  />
+                </div>
+                <FormControl variant="standard" sx={{ m: 1, minWidth: 120 }}>
+                  <InputLabel id="tipoLente">Tipo de Lente</InputLabel>
+                  <Select
+                    labelId="tipoLente"
+                    id="tipoLente"
+                    value={formVenta.tipoLente}
+                    onChange={(event) => handleChangeTextVenta(event, 'tipoLente')}
+                    label="Tipo Lente"
+                  >
+                    {tipoLente.map(op => (
+                      <MenuItem key={op} value={op}>{op}</MenuItem>
+                    )
+                    )}
+                  </Select>
+                </FormControl>
+                <div>
+                  <p>Protección</p>
+                  <SelectReact
+                    options={proteccion}
+                    value={formVenta.proteccion}
+                    name='Proteccion'
+                    multi={true}
+                    style={{ width: '300px' }}
+                    labelField="label"
+                    valueField="value"
+                    onChange={(e) => {
+                      setformVenta({
+                        ...formVenta,
+                        proteccion: e
+                      });
+                      // setvalue(e)
+                    }
+                    }
+                  />
+                </div>
+                {(formVenta.tipoVenta === 'Cambio de aro' || formVenta.tipoVenta === 'Cambio de lente') &&
+                  <TextField
+                    value={formVenta.material}
+                    onChange={(event) => handleChangeTextVenta(event, 'material')}
+                    margin="dense"
+                    id="material"
+                    name="material"
+                    label="Material"
+                    type="text"
+                    sx={{ m: 1 }}
+                    variant="standard"
+                    size="small"
+                  />
                 }
+                {formVenta.tipoVenta === 'Cambio de lente' &&
+                  <TextField
+                    value={formVenta.moda}
+                    onChange={(event) => handleChangeTextVenta(event, 'moda')}
+                    margin="dense"
+                    id="moda"
+                    name="moda"
+                    label="Moda"
+                    type="text"
+                    sx={{ m: 1 }}
+                    variant="standard"
+                    size="small"
+                  />
                 }
-              />
+              </div>
             </div>
-            {(formVenta.tipoVenta === 'Cambio de aro' || formVenta.tipoVenta === 'Cambio de lente') &&
-              <TextField
-                value={formVenta.material}
-                onChange={(event) => handleChangeTextVenta(event, 'material')}
-                margin="dense"
-                id="material"
-                name="material"
-                label="Material"
-                type="text"
-                sx={{ m: 1 }}
-                variant="standard"
-                size="small"
-              />
-            }
-            {formVenta.tipoVenta === 'Cambio de lente' &&
-              <TextField
-                value={formVenta.moda}
-                onChange={(event) => handleChangeTextVenta(event, 'moda')}
-                margin="dense"
-                id="moda"
-                name="moda"
-                label="Moda"
-                type="text"
-                sx={{ m: 1 }}
-                variant="standard"
-                size="small"
-              />
-            }
           </div>
+
           <p className='titulo'>Seleccione el inventario</p>
-          <DataTable value={listInventario}
+          {
+            invFiltradoExp.length <= 0 &&
+            <Button variant='contained' onClick={handleOpenDialogInv}>Ingresar pedido</Button>
+          }
+          <DataTable value={invFiltradoExp}
             showGridlines
             stripedRows
             size='small'
@@ -2296,7 +2443,6 @@ export const Pacientes = () => {
             filterDisplay='row'
             selectionMode="single"
             rowClassName={rowClassInventario}
-            //selection={setSelectedPaciente}
             cellSelection
             onCellSelect={onCellSelectedInventario}
             scrollable
@@ -2305,10 +2451,10 @@ export const Pacientes = () => {
           >
             <Column body={renderAddButton}></Column>
             <Column field="descripcion" header="Descripcion" sortable filter style={{ minWidth: '12rem' }}></Column>
-            <Column field="esfera" header="Esfera" filter style={{ minWidth: '9rem' }}></Column>
-            <Column field="cilindro" header="Cilindro" filter style={{ minWidth: '9rem' }}></Column>
-            <Column field="adicion" header="Adición" filter style={{ minWidth: '9rem' }}></Column>
-            <Column field="linea" header="Linea" filter style={{ minWidth: '9rem' }}></Column>
+            <Column field="esfera" header="Esfera" filter style={{ minWidth: '15rem' }}></Column>
+            <Column field="cilindro" header="Cilindro" filter style={{ minWidth: '10rem' }}></Column>
+            <Column field="adicion" header="Adición" filter style={{ minWidth: '10rem' }}></Column>
+            <Column field="linea" header="Linea" filter style={{ minWidth: '10em' }}></Column>
             <Column field="importe" header="Importe"></Column>
             <Column field="valorGravado" header="Gravado"></Column>
             <Column field="existencia" header="Existencia" sortable ></Column>
@@ -2358,7 +2504,8 @@ export const Pacientes = () => {
           {listInvPedido.length > 0 &&
             <>
               <p className='titulo'>Lista para pedido</p>
-              <DataTable value={listInvPedido}
+              <DataTable
+                value={listInvPedido}
                 showGridlines
                 stripedRows
                 size='small'
@@ -2610,6 +2757,343 @@ export const Pacientes = () => {
         </DialogContent>
         <DialogActions>
           <Button variant='contained' onClick={handleCloseDialogVenta}>Cancelar</Button>
+        </DialogActions>
+      </Dialog>
+      <Dialog
+        open={openDialogInv}
+        disableEscapeKeyDown={true}
+        maxWidth="md"
+        fullWidth={true}
+        onClose={handleCloseDialogInv}
+        PaperProps={{
+          component: 'form',
+          onSubmit: (event) => {
+            event.preventDefault();
+            opticaControlApi.post('inventario', formValuesInv)
+              .then((response) => {
+                if (response.status === 201) {
+                  createToast(
+                    'success',
+                    'Confirmado',
+                    'El registro fue creado correctamente'
+                  );
+                  handleCloseDialogInv();
+                  setlistInvPedido([
+                    ...listInvPedido,
+                    {
+                      descripcion: response.data[0].descripcion,
+                      esfera: response.data[0].esfera,
+                      cilindro: response.data[0].cilindro,
+                      adicion: response.data[0].adicion,
+                      linea: response.data[0].linea,
+                      inventario: response.data[0]._id,
+                      cantidad: 1,
+                      importe: response.data[0].importe,
+                      valorGravado: response.data[0].valorGravado,
+                      existencia: response.data[0].existencia,
+                      precioVenta: response.data[0].precioVenta,
+                      // descuento: 0,
+                      moda: response.data[0].moda
+                    }]);
+                  setinvFiltradoExp([...setinvFiltradoExp, response.data]);
+                }
+              })
+              .catch((err) => {
+                createToast(
+                  'error',
+                  'Error',
+                  'Ha ocurrido un error'
+                );
+                console.log(err);
+                handleCloseDialogInv();
+              });
+          },
+        }}
+      >
+        <DialogTitle>Datos sobre inventario</DialogTitle>
+        <DialogContent                 >
+          <DialogContentText>
+            Por favor rellene los campos sobre la informacion de su inventario
+          </DialogContentText>
+          <Toast ref={toastForm} />
+          <TextField
+            autoFocus
+            required
+            value={formValuesInv.descripcion}
+            onChange={(event) => handleChangeText(event, 'descripcion')}
+            margin="dense"
+            id="descripcion"
+            name="descripcion"
+            label="Descripcion"
+            type="text"
+            sx={{ width: "70%" }}
+            variant="standard"
+            size="medium"
+          />
+          <FormControl variant="standard" sx={{ m: 1, minWidth: 120 }}>
+            <InputLabel id="linea">Linea</InputLabel>
+            <Select
+              labelId="linea"
+              id="linea"
+              value={formValuesInv.linea}
+              onChange={(event) => handleChangeText(event, 'linea')}
+              label="linea"
+            >
+              {lineas.map(op => {
+                return (
+                  <MenuItem key={op} value={op}>{op}</MenuItem>
+                )
+              })}
+            </Select>
+          </FormControl>
+          <div style={{
+            display: 'flex',
+            flexDirection: 'row',
+            gap: '30px'
+          }}>
+            <Autocomplete
+              {...defaultProps}
+              options={listGraduaciones}
+              value={formValuesInv.esfera}
+              onChange={(event, newValue) => {
+                setFormValuesInv({
+                  ...formValuesInv,
+                  esfera: newValue
+                })
+              }}
+              sx={{ width: '50%' }}
+              renderInput={(params) => <TextField {...params} label="Esfera" variant="standard" />}
+            />
+            <Autocomplete
+              {...defaultProps}
+              options={listGraduaciones}
+              value={formValuesInv.cilindro}
+              onChange={(event, newValue) => {
+                setFormValuesInv({
+                  ...formValuesInv,
+                  cilindro: newValue
+                })
+              }}
+              sx={{ width: '50%' }}
+              renderInput={(params) => <TextField {...params} label="Cilindro" variant="standard" />}
+            />
+            <Autocomplete
+              {...defaultPropsAdicion}
+              options={listAdicion}
+              value={formValuesInv.adicion}
+              onChange={(event, newValue) => {
+                setFormValuesInv({
+                  ...formValuesInv,
+                  adicion: newValue
+                })
+              }}
+              sx={{ width: '50%' }}
+              renderInput={(params) => <TextField {...params} label="Adición" variant="standard" />}
+            />
+          </div>
+          <div style={{
+            display: 'flex',
+            flexDirection: 'row',
+            gap: '15px'
+          }}>
+            <TextField
+              required
+              value={formValuesInv.precioVenta}
+              onChange={(event) => {
+                if (event.target.value <= 0) {
+                  createToastForm(
+                    'error',
+                    'Error',
+                    'No se puede ingresar una cantidad negativa'
+                  );
+                  setFormValuesInv({ ...formValuesInv, precioVenta: 0 });
+                  return;
+                }
+                else {
+                  handleChangeText(event, 'precioVenta');
+                }
+              }} margin="dense"
+              id="precioVenta"
+              name="precioVenta"
+              label="Precio Venta"
+              type="number"
+              fullWidth
+              variant="standard"
+              size="medium"
+            />
+            <TextField
+              required
+              value={formValuesInv.precioCompra}
+              onChange={(event) => {
+                if (event.target.value <= 0) {
+                  createToastForm(
+                    'error',
+                    'Error',
+                    'No se puede ingresar una cantidad negativa'
+                  );
+                  setFormValuesInv({ ...formValuesInv, precioCompra: 0 });
+                  return;
+                }
+                else {
+                  handleChangeText(event, 'precioCompra');
+                }
+              }}
+              margin="dense"
+              id="precioCompra"
+              name="precioCompra"
+              label="Precio Compra"
+              type="number"
+              fullWidth
+              variant="standard"
+              size="medium"
+            />
+            <TextField
+              required
+              value={formValuesInv.existencia}
+              onChange={(event) => {
+                setFormValuesInv({
+                  ...formValuesInv,
+                  existencia: parseInt(event.target.value)
+                })
+              }}
+              margin="dense"
+              id="existencia"
+              name="existencia"
+              label="Existencia"
+              type="number"
+              fullWidth
+              variant="standard"
+              size="medium"
+            />
+            <FormControl variant="standard" sx={{ m: 1, minWidth: 120 }}>
+              <InputLabel id="importe">Importe</InputLabel>
+              <Select
+                labelId="importe"
+                id="importe"
+                value={formValuesInv.importe}
+                onChange={(event) => {
+                  setdisabledGravado(event.target.value === 'Exento' ? true : false);
+                  handleChangeText(event, 'importe')
+                }}
+                label="importe"
+              >
+                {importe.map(op => {
+                  return (
+                    <MenuItem key={op} value={op}>{op}</MenuItem>
+                  )
+                })}
+              </Select>
+            </FormControl>
+            <FormControl variant="standard" sx={{ m: 1, minWidth: 120 }}>
+              <InputLabel id="valorGravado">Valor Gravado</InputLabel>
+              <Select
+                disabled={disabledGravado}
+                labelId="valorGravado"
+                id="valorGravado"
+                value={formValuesInv.valorGravado}
+                onChange={(event) => handleChangeText(event, 'valorGravado')}
+                label="valorGravado"
+              >
+                {valorGravado.map(op => {
+                  return (
+                    <MenuItem key={op} value={op}>{op}</MenuItem>
+                  )
+                })}
+              </Select>
+            </FormControl>
+          </div>
+          <div className='container'>
+            <TextField
+              value={formValuesInv.categoria}
+              onChange={(event) => handleChangeText(event, 'categoria')}
+              margin="dense"
+              id="categoria"
+              name="categoria"
+              label="Categoria"
+              type="text"
+              fullWidth
+              variant="standard"
+              size="medium"
+            />
+            <TextField
+              required
+              value={formValuesInv.proveedor}
+              onChange={(event) => handleChangeText(event, 'proveedor')}
+              margin="dense"
+              id="proveedor"
+              name="proveedor"
+              label="Proveedor"
+              type="text"
+              fullWidth
+              variant="standard"
+              size="medium"
+            />
+            <TextField
+              value={formValuesInv.telefono}
+              onChange={(event) => handleChangeText(event, 'telefono')}
+              margin="dense"
+              id="telefono"
+              name="telefono"
+              label="Telefono "
+              type="text"
+              fullWidth
+              variant="standard"
+              size="medium"
+            />
+            <TextField
+              value={formValuesInv.moda}
+              onChange={(event) => handleChangeText(event, 'moda')}
+              margin="dense"
+              id="moda"
+              name="moda"
+              label="Moda"
+              type="text"
+              fullWidth
+              variant="standard"
+              size="medium"
+            />
+            <TextField
+              value={formValuesInv.material}
+              onChange={(event) => handleChangeText(event, 'material')}
+              margin="dense"
+              id="material"
+              name="material"
+              label="Material"
+              type="text"
+              fullWidth
+              variant="standard"
+              size="medium"
+            />
+            <TextField
+              value={formValuesInv.diseno}
+              onChange={(event) => handleChangeText(event, 'diseno')}
+              margin="dense"
+              id="diseno"
+              name="diseno"
+              label="Diseño"
+              type="text"
+              fullWidth
+              variant="standard"
+              size="medium"
+            />
+            <TextField
+              value={formValuesInv.color}
+              onChange={(event) => handleChangeText(event, 'color')}
+              margin="dense"
+              id="color"
+              name="color"
+              label="Color"
+              type="text"
+              fullWidth
+              variant="standard"
+              size="medium"
+            />
+          </div>
+          <br />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDialogInv} >Cancelar</Button>
+          <Button variant='contained' type="submit">Guardar</Button>
         </DialogActions>
       </Dialog>
     </>

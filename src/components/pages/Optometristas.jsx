@@ -32,7 +32,6 @@ export const Optometristas = () => {
     opticaControlApi.get(`optometrista/bySucursal/${sucursal}`, {})
       .then((response) => {
         setListOptometristas(response.data);
-
       })
   }, []);
   const toast = useRef(null);
@@ -99,13 +98,6 @@ export const Optometristas = () => {
             );
             setListOptometristas(
               listOptometristas.filter(i => i._id !== idOptometrista)
-            );
-            cleanForm();
-          } else {
-            createToast(
-              'error',
-              'Error',
-              response.statusText,
             );
             cleanForm();
           }
@@ -204,7 +196,6 @@ export const Optometristas = () => {
           component: 'form',
           onSubmit: (event) => {
             event.preventDefault();
-            console.log(formOptometrista);
             if (!textValidator(formOptometrista.nombre) && !textValidator(formOptometrista.sucursales)) {
               createToast(
                 'warn',
@@ -229,15 +220,6 @@ export const Optometristas = () => {
                       )
                     );
                     cleanForm();
-                  } else {
-                    createToast(
-                      'error',
-                      'Error',
-                      response.statusText,
-                    );
-                    console.log(response.data);
-                    cleanForm();
-                    return;
                   }
                 })
                 .catch((err) => {
@@ -260,20 +242,9 @@ export const Optometristas = () => {
                       'El registro fue creado correctamente'
                     );
                     handleCloseDialog();
-                    console.log(response.data);
 
                     setListOptometristas([...listOptometristas, response.data]);
-                    console.log(response);
                     cleanForm();
-                  } else {
-                    createToast(
-                      'error',
-                      'Error',
-                      response.statusText,
-                    );
-                    console.log(response.data);
-                    cleanForm();
-                    return;
                   }
                 })
                 .catch((err) => {

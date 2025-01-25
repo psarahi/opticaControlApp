@@ -76,7 +76,6 @@ export const Usuarios = () => {
 
         opticaControlApi.get("usuario", {}).then((response) => {
             setListUsuarios(response.data);
-            console.log(response.data);
         });
     }, []);
 
@@ -113,7 +112,6 @@ export const Usuarios = () => {
     const onCellSelect = (event) => {
         idUsuario = event.rowData._id;
         setUsuarioSelected(event.rowData._id);
-        console.log(event.rowData);
         let sucursaleSelect = [];
         event.rowData.sucursales.forEach((s) => {
             sucursaleSelect.push({ value: s._id, label: s.nombre });
@@ -173,14 +171,7 @@ export const Usuarios = () => {
                                     : i
                             )
                         );
-
-                        console.log(response);
                         cleanForm();
-                    } else {
-                        createToast("error", "Error", response.statusText);
-                        console.log(response.data);
-                        cleanForm();
-                        return;
                     }
                 })
                 .catch((err) => {
@@ -239,13 +230,7 @@ export const Usuarios = () => {
                                     : i
                             )
                         );
-                        console.log(response);
                         cleanForm();
-                    } else {
-                        createToast("error", "Error", response.statusText);
-                        console.log(response.data);
-                        cleanForm();
-                        return;
                     }
                 })
                 .catch((err) => {
@@ -412,8 +397,6 @@ export const Usuarios = () => {
                     component: "form",
                     onSubmit: (event) => {
                         event.preventDefault();
-                        console.log(formUsuarios.sucursales);
-
                         let arraySucursales = textValidator(formUsuarios.sucursales)
                             ? formUsuarios.sucursales.map((p) => p.value)
                             : "";
@@ -620,8 +603,6 @@ export const Usuarios = () => {
                                 labelField="label"
                                 valueField="value"
                                 onChange={(e) => {
-                                    console.log(e);
-
                                     setFormUsuarios({
                                         ...formUsuarios,
                                         sucursales: e,

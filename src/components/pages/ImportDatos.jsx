@@ -112,8 +112,6 @@ export const ImportDatos = () => {
                 const worksheetName = workbook.SheetNames[0];
                 const worksheet = workbook.Sheets[worksheetName];
                 const jsonData = XLSX.utils.sheet_to_json(worksheet);
-                console.log(jsonData);
-
                 jsonData.forEach(f => {
                     dataSave.push({
                         nombre: (textValidator(f.nombre)) ? f.nombre : '',
@@ -129,8 +127,6 @@ export const ImportDatos = () => {
                         estado: true,
                     });
                 });
-                console.log(dataSave);
-
                 createToast(
                     'success',
                     'Confirmado',
@@ -154,21 +150,18 @@ export const ImportDatos = () => {
                 const worksheetName = workbook.SheetNames[0];
                 const worksheet = workbook.Sheets[worksheetName];
                 const jsonData = XLSX.utils.sheet_to_json(worksheet);
-                console.log(jsonData);
-
-
                 jsonData.forEach(f => {
                     dataSave.push({
                         descripcion: (textValidator(f.descripcion)) ? f.descripcion : '',
-                        esfera: (textValidator(f.esfera.toString())) ?
+                        esfera: (textValidator(f.esfera)) ?
                             (f.esfera.toString().substring(0, 1) === '-') ?
-                                f.esfera.toFixed(2) : `+${f.esfera.toFixed(2)}` : '',
-                        cilindro: (textValidator(f.cilindro.toString())) ?
+                                f.esfera.toFixed(2) : (f.esfera == 0) ?
+                                    `-${f.esfera.toFixed(2)}` : `+${f.esfera.toFixed(2)}` : '',
+                        cilindro: (textValidator(f.cilindro)) ?
                             (f.cilindro.toString().substring(0, 1) === '-') ?
-                                f.cilindro.toFixed(2) : `+${f.cilindro.toFixed(2)}` : '',
-                        adicion: (textValidator(f.adicion.toString())) ?
-                            (f.adicion.toString().substring(0, 1) === '-') ?
-                                f.adicion.toFixed(2) : `+${f.adicion.toFixed(2)}` : '',
+                                f.cilindro.toFixed(2) : (f.cilindro == 0) ?
+                                    `-${f.cilindro.toFixed(2)}` : `+${f.cilindro.toFixed(2)}` : '',
+                        adicion: (textValidator(f.adicion)) ? `+${f.adicion.toFixed(2)}` : '',
                         linea: (textValidator(f.linea)) ? f.linea : '',
                         precioVenta: (textValidator(f.precioVenta)) ? f.precioVenta : '',
                         precioCompra: (textValidator(f.precioCompra)) ? f.precioCompra : '',
@@ -191,8 +184,6 @@ export const ImportDatos = () => {
                     'Confirmado',
                     `Se cargaron ${dataSave.length} registros exitosamente`
                 );
-                console.log(dataSave);
-
                 setDataImportInv(dataSave);
                 setdisableSaveInv(false);
             };
