@@ -8,3 +8,4 @@ export * from './DetalleExpediente'
 export * from './ImportDatos';
 export * from './Optometristas';
 export * from './Sucursales';
+export * from './Cliente'

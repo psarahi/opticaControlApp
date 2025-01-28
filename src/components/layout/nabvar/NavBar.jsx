@@ -23,6 +23,7 @@ import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import TrackChangesIcon from '@mui/icons-material/TrackChanges';
 import LocalConvenienceStoreIcon from '@mui/icons-material/LocalConvenienceStore';
 import PersonIcon from '@mui/icons-material/Person';
+import GroupIcon from '@mui/icons-material/Group';
 
 const drawerWidth = 240;
 
@@ -103,6 +104,19 @@ export const NavBar = () => {
                 <PersonIcon />
               </ListItemIcon>
               <ListItemText primary='Usuarios' />
+            </ListItemButton>
+          </ListItem>
+        }
+        {enableOp &&
+          <ListItem key='Cliente' disablePadding>
+            <ListItemButton
+              component={NavLink}
+              to='/clientes'
+            >
+              <ListItemIcon>
+                <GroupIcon />
+              </ListItemIcon>
+              <ListItemText primary='Cliente' />
             </ListItemButton>
           </ListItem>
         }

@@ -119,12 +119,12 @@ const inventarioJson = {
   adicion: '',
   linea: '',
   precioVenta: '',
-  precioCompra: '',
+  precioCompra: 1,
   existencia: 0,
-  importe: '',
+  importe: 'Exento',
   valorGravado: '',
-  categoria: '',
-  proveedor: '',
+  categoria: 'LENTES',
+  proveedor: 'ECHEVERRIA',
   telefono: '',
   moda: '',
   material: '',
@@ -178,12 +178,24 @@ export const Pacientes = () => {
   const [activeIndex, setActiveIndex] = useState(0);
   const [invFiltradoExp, setinvFiltradoExp] = useState([])
   const [formValuesInv, setFormValuesInv] = useState(inventarioJson);
-  const [disabledGravado, setdisabledGravado] = useState(true);
 
   const tipoVenta = [
     'Cambio de aro',
     'Cambio de lente',
     'Compra total'
+  ]
+
+  const descripcionLente = [
+    'L.MONOFOCAL AR',
+    'LENTE INVISIBLE FOTO AR',
+    'L.MONOFOCAL BLANCO',
+    'L.MONOFOCAL FOTO AR',
+    'LENTE PROGRESIVO  AR',
+    'LENTE PROGRESIVO FOTO AR',
+    'BIFOCAL K.FOTO',
+    'BIFOCAL K.BLANCO',
+    'PROGRESIVO BLANCO',
+    'INVISIBLE BLANCO',
   ]
 
   const proteccion = [
@@ -287,7 +299,7 @@ export const Pacientes = () => {
         i.adicion === ((receta[e.index].recetaOjoIzquierdo.adicion === null) ? '' : receta[e.index].recetaOjoIzquierdo.adicion).toString()
       ) ||
       (
-        textValidator(i.linea)
+        i.categoria !== "LENTES"
       )
     )
     setinvFiltradoExp(invExp)
@@ -510,7 +522,7 @@ export const Pacientes = () => {
                 i.adicion === ((receta.recetaOjoIzquierdo.adicion === null) ? '' : receta.recetaOjoIzquierdo.adicion).toString()
               ) ||
               (
-                textValidator(i.linea)
+                i.categoria !== "LENTES"
               )
             )
           } else {
@@ -551,7 +563,7 @@ export const Pacientes = () => {
             )
           );
           sumarTotales(precioVenta);
-          if (textValidator(event.rowData.linea)) {
+          if (event.rowData.categoria !== "LENTES") {
             setListInventario(
               listInventario.map((i) =>
                 i._id === event.rowData._id ? { ...i, existencia: i.existencia - 1 } : i
@@ -573,6 +585,7 @@ export const Pacientes = () => {
                 cilindro: event.rowData.cilindro,
                 adicion: event.rowData.adicion,
                 linea: event.rowData.linea,
+                categoria: event.rowData.categoria,
                 inventario: event.rowData._id,
                 cantidad: 1,
                 importe: event.rowData.importe,
@@ -603,6 +616,7 @@ export const Pacientes = () => {
               cilindro: event.rowData.cilindro,
               adicion: event.rowData.adicion,
               linea: event.rowData.linea,
+              categoria: event.rowData.categoria,
               inventario: event.rowData._id,
               cantidad: 1,
               importe: event.rowData.importe,
@@ -614,7 +628,7 @@ export const Pacientes = () => {
             }
           ]);
         } else {
-          if (textValidator(event.rowData.linea)) {
+          if (event.rowData.categoria !== "LENTES") {
             setListInventario(
               listInventario.map((i) =>
                 i._id === event.rowData._id ? { ...i, existencia: i.existencia - 1 } : i
@@ -634,6 +648,7 @@ export const Pacientes = () => {
               cilindro: event.rowData.cilindro,
               adicion: event.rowData.adicion,
               linea: event.rowData.linea,
+              categoria: event.rowData.categoria,
               inventario: event.rowData._id,
               cantidad: 1,
               importe: event.rowData.importe,
@@ -744,7 +759,7 @@ export const Pacientes = () => {
         setlistInvExistente([...inventarioFiltrado]);
         restarTotales(precioVenta);
 
-        if (textValidator(event.rowData.linea)) {
+        if (event.rowData.categoria !== "LENTES") {
           setListInventario(
             listInventario.map((i) =>
               i._id === event.rowData.inventario ? { ...i, existencia: i.existencia + 1 } : i
@@ -766,7 +781,7 @@ export const Pacientes = () => {
           )
         );
         restarTotales(precioVenta);
-        if (textValidator(event.rowData.linea)) {
+        if (event.rowData.categoria !== "LENTES") {
           setListInventario(
             listInventario.map((i) =>
               i._id === event.rowData.inventario ? { ...i, existencia: i.existencia + 1 } : i
@@ -1190,7 +1205,7 @@ export const Pacientes = () => {
       total: totalVenta,
       acuenta: acuenta,
       numFacRec: numFacRec
-    };    
+    };
 
     opticaControlApi.post('detalleVentas', datosSave)
       .then((response) => {
@@ -2820,6 +2835,7 @@ export const Pacientes = () => {
                       cilindro: response.data.cilindro,
                       adicion: response.data.adicion,
                       linea: response.data.linea,
+                      categoria: response.data.categoria,
                       inventario: response.data._id,
                       cantidad: 1,
                       importe: response.data.importe,
@@ -2881,260 +2897,98 @@ export const Pacientes = () => {
             }
           </TabView>
           <Toast ref={toastForm} />
-          <TextField
-            autoFocus
-            required
-            value={formValuesInv.descripcion}
-            onChange={(event) => handleChangeText(event, 'descripcion')}
-            margin="dense"
-            id="descripcion"
-            name="descripcion"
-            label="Descripcion"
-            type="text"
-            sx={{ width: "70%" }}
-            variant="standard"
-            size="medium"
-          />
-          <FormControl variant="standard" sx={{ m: 1, minWidth: 120 }}>
-            <InputLabel id="linea">Linea</InputLabel>
-            <Select
-              labelId="linea"
-              id="linea"
-              value={formValuesInv.linea}
-              onChange={(event) => handleChangeText(event, 'linea')}
-              label="linea"
-            >
-              {lineas.map(op => {
-                return (
-                  <MenuItem key={op} value={op}>{op}</MenuItem>
-                )
-              })}
-            </Select>
-          </FormControl>
           <div style={{
             display: 'flex',
             flexDirection: 'row',
             gap: '30px'
           }}>
-            <Autocomplete
-              {...defaultProps}
-              options={listGraduaciones}
-              value={formValuesInv.esfera}
-              onChange={(event, newValue) => {
-                setFormValuesInv({
-                  ...formValuesInv,
-                  esfera: newValue
-                })
-              }}
-              sx={{ width: '50%' }}
-              renderInput={(params) => <TextField {...params} label="Esfera" variant="standard" />}
-            />
-            <Autocomplete
-              {...defaultProps}
-              options={listGraduaciones}
-              value={formValuesInv.cilindro}
-              onChange={(event, newValue) => {
-                setFormValuesInv({
-                  ...formValuesInv,
-                  cilindro: newValue
-                })
-              }}
-              sx={{ width: '50%' }}
-              renderInput={(params) => <TextField {...params} label="Cilindro" variant="standard" />}
-            />
-            <Autocomplete
-              {...defaultPropsAdicion}
-              options={listAdicion}
-              value={formValuesInv.adicion}
-              onChange={(event, newValue) => {
-                setFormValuesInv({
-                  ...formValuesInv,
-                  adicion: newValue
-                })
-              }}
-              sx={{ width: '50%' }}
-              renderInput={(params) => <TextField {...params} label="Adición" variant="standard" />}
-            />
-          </div>
-          <div style={{
-            display: 'flex',
-            flexDirection: 'row',
-            gap: '15px'
-          }}>
-            <TextField
-              required
-              value={formValuesInv.precioVenta}
-              onChange={(event) => {
-                if (event.target.value <= 0) {
-                  createToastForm(
-                    'error',
-                    'Error',
-                    'No se puede ingresar una cantidad negativa'
-                  );
-                  setFormValuesInv({ ...formValuesInv, precioVenta: 0 });
-                  return;
-                }
-                else {
-                  handleChangeText(event, 'precioVenta');
-                }
-              }} margin="dense"
-              id="precioVenta"
-              name="precioVenta"
-              label="Precio Venta"
-              type="number"
-              fullWidth
-              variant="standard"
-              size="medium"
-            />
-            <TextField
-              required
-              value={formValuesInv.precioCompra}
-              onChange={(event) => {
-                if (event.target.value <= 0) {
-                  createToastForm(
-                    'error',
-                    'Error',
-                    'No se puede ingresar una cantidad negativa'
-                  );
-                  setFormValuesInv({ ...formValuesInv, precioCompra: 0 });
-                  return;
-                }
-                else {
-                  handleChangeText(event, 'precioCompra');
-                }
-              }}
-              margin="dense"
-              id="precioCompra"
-              name="precioCompra"
-              label="Precio Compra"
-              type="number"
-              fullWidth
-              variant="standard"
-              size="medium"
-            />
-            <FormControl variant="standard" sx={{ m: 1, minWidth: 120 }}>
-              <InputLabel id="importe">Importe</InputLabel>
-              <Select
-                labelId="importe"
-                id="importe"
-                value={formValuesInv.importe}
+            <div>
+              <FormControl variant="standard" sx={{ m: 1, width: 300 }}>
+                <InputLabel id="descripcion">Descripcion</InputLabel>
+                <Select
+                  labelId="descripcion"
+                  id="descripcion"
+                  sx={{ width: '100%' }}
+                  value={formValuesInv.descripcion}
+                  onChange={(event) => handleChangeText(event, 'descripcion')}
+                  label="linea"
+                >
+                  {descripcionLente.map(op => {
+                    return (
+                      <MenuItem key={op} value={op}>{op}</MenuItem>
+                    )
+                  })}
+                </Select>
+              </FormControl>
+              <TextField
+                required
+                value={formValuesInv.precioVenta}
                 onChange={(event) => {
-                  setdisabledGravado(event.target.value === 'Exento' ? true : false);
-                  handleChangeText(event, 'importe')
+                  if (event.target.value <= 0) {
+                    createToastForm(
+                      'error',
+                      'Error',
+                      'No se puede ingresar una cantidad negativa'
+                    );
+                    setFormValuesInv({ ...formValuesInv, precioVenta: 0 });
+                    return;
+                  }
+                  else {
+                    handleChangeText(event, 'precioVenta');
+                  }
                 }}
-                label="importe"
-              >
-                {importe.map(op => {
-                  return (
-                    <MenuItem key={op} value={op}>{op}</MenuItem>
-                  )
-                })}
-              </Select>
-            </FormControl>
-            <FormControl variant="standard" sx={{ m: 1, minWidth: 120 }}>
-              <InputLabel id="valorGravado">Valor Gravado</InputLabel>
-              <Select
-                disabled={disabledGravado}
-                labelId="valorGravado"
-                id="valorGravado"
-                value={formValuesInv.valorGravado}
-                onChange={(event) => handleChangeText(event, 'valorGravado')}
-                label="valorGravado"
-              >
-                {valorGravado.map(op => {
-                  return (
-                    <MenuItem key={op} value={op}>{op}</MenuItem>
-                  )
-                })}
-              </Select>
-            </FormControl>
-          </div>
-          <div className='containerText'>
-            <TextField
-              value={formValuesInv.categoria}
-              onChange={(event) => handleChangeText(event, 'categoria')}
-              margin="dense"
-              id="categoria"
-              name="categoria"
-              label="Categoria"
-              type="text"
-              fullWidth
-              variant="standard"
-              size="medium"
-            />
-            <TextField
-              required
-              value={formValuesInv.proveedor}
-              onChange={(event) => handleChangeText(event, 'proveedor')}
-              margin="dense"
-              id="proveedor"
-              name="proveedor"
-              label="Proveedor"
-              type="text"
-              fullWidth
-              variant="standard"
-              size="medium"
-            />
-            <TextField
-              value={formValuesInv.telefono}
-              onChange={(event) => handleChangeText(event, 'telefono')}
-              margin="dense"
-              id="telefono"
-              name="telefono"
-              label="Telefono "
-              type="text"
-              fullWidth
-              variant="standard"
-              size="medium"
-            />
-            <TextField
-              value={formValuesInv.moda}
-              onChange={(event) => handleChangeText(event, 'moda')}
-              margin="dense"
-              id="moda"
-              name="moda"
-              label="Moda"
-              type="text"
-              fullWidth
-              variant="standard"
-              size="medium"
-            />
-            <TextField
-              value={formValuesInv.material}
-              onChange={(event) => handleChangeText(event, 'material')}
-              margin="dense"
-              id="material"
-              name="material"
-              label="Material"
-              type="text"
-              fullWidth
-              variant="standard"
-              size="medium"
-            />
-            <TextField
-              value={formValuesInv.diseno}
-              onChange={(event) => handleChangeText(event, 'diseno')}
-              margin="dense"
-              id="diseno"
-              name="diseno"
-              label="Diseño"
-              type="text"
-              fullWidth
-              variant="standard"
-              size="medium"
-            />
-            <TextField
-              value={formValuesInv.color}
-              onChange={(event) => handleChangeText(event, 'color')}
-              margin="dense"
-              id="color"
-              name="color"
-              label="Color"
-              type="text"
-              fullWidth
-              variant="standard"
-              size="medium"
-            />
+                margin="dense"
+                id="precioVenta"
+                name="precioVenta"
+                label="Precio Venta"
+                type="number"
+                sx={{ width: '50%' }}
+                fullWidth
+                variant="standard"
+                size="medium"
+              />
+            </div>
+            <div>
+              <Autocomplete
+                {...defaultProps}
+                options={listGraduaciones}
+                value={formValuesInv.esfera}
+                onChange={(event, newValue) => {
+                  setFormValuesInv({
+                    ...formValuesInv,
+                    esfera: newValue
+                  })
+                }}
+                sx={{ width: '150px' }}
+                renderInput={(params) => <TextField {...params} label="Esfera" variant="standard" />}
+              />
+              <Autocomplete
+                {...defaultProps}
+                options={listGraduaciones}
+                value={formValuesInv.cilindro}
+                onChange={(event, newValue) => {
+                  setFormValuesInv({
+                    ...formValuesInv,
+                    cilindro: newValue
+                  })
+                }}
+                sx={{ width: '150px' }}
+                renderInput={(params) => <TextField {...params} label="Cilindro" variant="standard" />}
+              />
+              <Autocomplete
+                {...defaultPropsAdicion}
+                options={listAdicion}
+                value={formValuesInv.adicion}
+                onChange={(event, newValue) => {
+                  setFormValuesInv({
+                    ...formValuesInv,
+                    adicion: newValue
+                  })
+                }}
+                sx={{ width: '150px' }}
+                renderInput={(params) => <TextField {...params} label="Adición" variant="standard" />}
+              />
+            </div>
           </div>
         </DialogContent>
         <DialogActions>
