@@ -120,7 +120,7 @@ const inventarioJson = {
   linea: '',
   precioVenta: '',
   precioCompra: '',
-  existencia: '',
+  existencia: 0,
   importe: '',
   valorGravado: '',
   categoria: '',
@@ -285,6 +285,9 @@ export const Pacientes = () => {
         i.esfera === ((receta[e.index].recetaOjoIzquierdo.esfera === null) ? '' : receta[e.index].recetaOjoIzquierdo.esfera).toString() &&
         i.cilindro === ((receta[e.index].recetaOjoIzquierdo.cilindro === null) ? '' : receta[e.index].recetaOjoIzquierdo.cilindro).toString() &&
         i.adicion === ((receta[e.index].recetaOjoIzquierdo.adicion === null) ? '' : receta[e.index].recetaOjoIzquierdo.adicion).toString()
+      ) ||
+      (
+        textValidator(i.linea)
       )
     )
     setinvFiltradoExp(invExp)
@@ -318,7 +321,6 @@ export const Pacientes = () => {
     setrtnenable(false);
     const sucursal = localStorage.getItem('sucursalID');
     opticaControlApi.get(`inventario/activos/${sucursal}`, '').then((response) => {
-      console.log(response.data);
       setListInventario(response.data);
     });
 
@@ -389,6 +391,7 @@ export const Pacientes = () => {
 
   const handleCloseDialogInv = () => {
     setOpenDialogInv(false);
+    setFormValuesInv(inventarioJson);
   };
 
   const toast = useRef(null);
@@ -490,28 +493,36 @@ export const Pacientes = () => {
       opticaControlApi.get(`expediente/paciente/${event.rowData._id}`, '')
         .then(async (response) => {
           setActiveIndex(0);
+          let invExp = []
+          let inventario = [];
           let receta = response.data[0];
-          let inventario = [...listInventario] || [];
-          let invExp = inventario.filter((i) =>
-            (
-              i.esfera === ((receta.recetaOjoDerecho.esfera === null) ? '' : receta.recetaOjoDerecho.esfera).toString() &&
-              i.cilindro === ((receta.recetaOjoDerecho.cilindro === null) ? '' : receta.recetaOjoDerecho.cilindro).toString() &&
-              i.adicion === ((receta.recetaOjoDerecho.adicion === null) ? '' : receta.recetaOjoDerecho.adicion).toString()
-            ) ||
-            (
-              i.esfera === ((receta.recetaOjoIzquierdo.esfera === null) ? '' : receta.recetaOjoIzquierdo.esfera).toString() &&
-              i.cilindro === ((receta.recetaOjoIzquierdo.cilindro === null) ? '' : receta.recetaOjoIzquierdo.cilindro).toString() &&
-              i.adicion === ((receta.recetaOjoIzquierdo.adicion === null) ? '' : receta.recetaOjoIzquierdo.adicion).toString()
+          inventario = [...listInventario] || [];
+          if (receta) {
+            invExp = inventario.filter((i) =>
+              (
+                i.esfera === ((receta.recetaOjoDerecho.esfera === null) ? '' : receta.recetaOjoDerecho.esfera).toString() &&
+                i.cilindro === ((receta.recetaOjoDerecho.cilindro === null) ? '' : receta.recetaOjoDerecho.cilindro).toString() &&
+                i.adicion === ((receta.recetaOjoDerecho.adicion === null) ? '' : receta.recetaOjoDerecho.adicion).toString()
+              ) ||
+              (
+                i.esfera === ((receta.recetaOjoIzquierdo.esfera === null) ? '' : receta.recetaOjoIzquierdo.esfera).toString() &&
+                i.cilindro === ((receta.recetaOjoIzquierdo.cilindro === null) ? '' : receta.recetaOjoIzquierdo.cilindro).toString() &&
+                i.adicion === ((receta.recetaOjoIzquierdo.adicion === null) ? '' : receta.recetaOjoIzquierdo.adicion).toString()
+              ) ||
+              (
+                textValidator(i.linea)
+              )
             )
-          )
+          } else {
+            invExp = inventario;
+          }
+
           setinvFiltradoExp(invExp);
           setlistExpedientePaciente(await response.data);
         });
     } else if (event.cellIndex === 4) {
       opticaControlApi.get(`expediente/paciente/${event.rowData._id}`, '')
         .then(async (response) => {
-          console.log(response.data);
-
           setlistExpedientePaciente(await response.data);
         });
 
@@ -540,11 +551,18 @@ export const Pacientes = () => {
             )
           );
           sumarTotales(precioVenta);
-          setListInventario(
-            listInventario.map((i) =>
-              i._id === event.rowData._id ? { ...i, existencia: i.existencia - 1 } : i
-            )
-          );
+          if (textValidator(event.rowData.linea)) {
+            setListInventario(
+              listInventario.map((i) =>
+                i._id === event.rowData._id ? { ...i, existencia: i.existencia - 1 } : i
+              )
+            );
+            setinvFiltradoExp(
+              invFiltradoExp.map((i) =>
+                i._id === event.rowData._id ? { ...i, existencia: i.existencia - 1 } : i
+              )
+            );
+          }
         } else {
           if (existePedido.length === 0) {
             setlistInvPedido([
@@ -576,7 +594,6 @@ export const Pacientes = () => {
           }
         }
       } else {
-
         if (event.rowData.existencia === 0) {
           setlistInvPedido([
             ...listInvPedido,
@@ -597,11 +614,18 @@ export const Pacientes = () => {
             }
           ]);
         } else {
-          setListInventario(
-            listInventario.map((i) =>
-              i._id === event.rowData._id ? { ...i, existencia: i.existencia - 1 } : i
-            )
-          );
+          if (textValidator(event.rowData.linea)) {
+            setListInventario(
+              listInventario.map((i) =>
+                i._id === event.rowData._id ? { ...i, existencia: i.existencia - 1 } : i
+              )
+            );
+            setinvFiltradoExp(
+              invFiltradoExp.map((i) =>
+                i._id === event.rowData._id ? { ...i, existencia: i.existencia - 1 } : i
+              )
+            );
+          }
           setlistInvExistente([
             ...listInvExistente,
             {
@@ -719,11 +743,19 @@ export const Pacientes = () => {
         const inventarioFiltrado = listInvExistente.filter((inv) => (inv.inventario !== event.rowData.inventario));
         setlistInvExistente([...inventarioFiltrado]);
         restarTotales(precioVenta);
-        setListInventario(
-          listInventario.map((i) =>
-            i._id === event.rowData.inventario ? { ...i, existencia: i.existencia + 1 } : i
-          )
-        );
+
+        if (textValidator(event.rowData.linea)) {
+          setListInventario(
+            listInventario.map((i) =>
+              i._id === event.rowData.inventario ? { ...i, existencia: i.existencia + 1 } : i
+            )
+          );
+          setinvFiltradoExp(
+            invFiltradoExp.map((i) =>
+              i._id === event.rowData.inventario ? { ...i, existencia: i.existencia + 1 } : i
+            )
+          );
+        }
       }
 
       if (seleccionado[0].cantidad > 1) {
@@ -734,11 +766,18 @@ export const Pacientes = () => {
           )
         );
         restarTotales(precioVenta);
-        setListInventario(
-          listInventario.map((i) =>
-            i._id === event.rowData.inventario ? { ...i, existencia: i.existencia + 1 } : i
-          )
-        );
+        if (textValidator(event.rowData.linea)) {
+          setListInventario(
+            listInventario.map((i) =>
+              i._id === event.rowData.inventario ? { ...i, existencia: i.existencia + 1 } : i
+            )
+          );
+          setinvFiltradoExp(
+            invFiltradoExp.map((i) =>
+              i._id === event.rowData.inventario ? { ...i, existencia: i.existencia + 1 } : i
+            )
+          );
+        }
       }
     }
   };
@@ -749,9 +788,9 @@ export const Pacientes = () => {
       const seleccionado = listInvPedido.filter(
         (item) => item.inventario === event.rowData.inventario
       );
+
       if (seleccionado[0].cantidad === 1) {
-        const inventarioFiltrado = listInvPedido.filter((inv) => (inv.inventario !== event.rowData.inventario));
-        setlistInvPedido([...inventarioFiltrado]);
+        setlistInvPedido([...listInvPedido.filter((inv) => (inv.inventario !== event.rowData.inventario))]);
         restarTotales(precioVenta);
       }
 
@@ -991,7 +1030,7 @@ export const Pacientes = () => {
   });
 
   const [filtersInventario] = useState({
-    descripcion: { value: '', matchMode: FilterMatchMode.STARTS_WITH },
+    descripcion: { value: '', matchMode: FilterMatchMode.CONTAINS },
     esfera: { value: '', matchMode: FilterMatchMode.STARTS_WITH },
     cilindro: { value: '', matchMode: FilterMatchMode.STARTS_WITH },
     adicion: { value: '', matchMode: FilterMatchMode.STARTS_WITH },
@@ -1151,84 +1190,82 @@ export const Pacientes = () => {
       total: totalVenta,
       acuenta: acuenta,
       numFacRec: numFacRec
-    };
+    };    
 
-    console.log(datosSave);
+    opticaControlApi.post('detalleVentas', datosSave)
+      .then((response) => {
+        if (response.status === 201) {
+          opticaControlApi.put('inventario/actualizarInventario', { detalleInventario: listInvExistente })
+            .then((response) => {
+              if (response.status === 202) {
+                if (op === 'factura' && parseFloat(acuenta) === parseFloat(totalVenta)) {
+                  opticaControlApi.put(`facturas/${listRangoFactura[0]._id}`, { ultimaUtilizada: numFacRec }).then(() => {
+                    console.log(facturaDatos);
+                    opticaControlApi.post(`thermalPrinter/imprimirFactura`, facturaDatos)
+                      .then(() => {
+                        createToast(
+                          'success',
+                          'Confirmado',
+                          'La factura a sido generada'
+                        );
+                      })
+                      .catch((error) => {
+                        createToast(
+                          'error',
+                          'Error',
+                          'Hubo un error al generar la factura, favor revise la impresora'
+                        );
+                      });
+                  });
+                } else {
+                  opticaControlApi.put(`correlativo/${numCorrelativoActual._id}`, { numCorrelativo: numFacRec }).then(() => {
+                    opticaControlApi.post(`thermalPrinter/imprimirRecibo`, facturaDatos)
+                      .then(() => {
+                        createToast(
+                          'success',
+                          'Confirmado',
+                          'El recibo a sido generado'
+                        );
+                      })
+                      .catch((error) => {
+                        createToast(
+                          'error',
+                          'Error',
+                          'Hubo un error al generar el recibo, favor revise la impresora'
+                        );
+                      });
+                  });
+                }
+                createToast(
+                  'success',
+                  'Confirmado',
+                  'El inventario ha sido actualizado'
+                );
+              }
+            });
 
-    // opticaControlApi.post('detalleVentas', datosSave)
-    //   .then((response) => {
-    //     if (response.status === 201) {
-    //       opticaControlApi.put('inventario/actualizarInventario', { detalleInventario: listInvExistente })
-    //         .then((response) => {
-    //           if (response.status === 202) {
-    //             if (op === 'factura' && parseFloat(acuenta) === parseFloat(totalVenta)) {
-    //               opticaControlApi.put(`facturas/${listRangoFactura[0]._id}`, { ultimaUtilizada: numFacRec }).then(() => {
-    //                 console.log(facturaDatos);
-    //                 opticaControlApi.post(`thermalPrinter/imprimirFactura`, facturaDatos)
-    //                   .then(() => {
-    //                     createToast(
-    //                       'success',
-    //                       'Confirmado',
-    //                       'La factura a sido generada'
-    //                     );
-    //                   })
-    //                   .catch((error) => {
-    //                     createToast(
-    //                       'error',
-    //                       'Error',
-    //                       'Hubo un error al generar la factura, favor revise la impresora'
-    //                     );
-    //                   });
-    //               });
-    //             } else {
-    //               opticaControlApi.put(`correlativo/${numCorrelativoActual._id}`, { numCorrelativo: numFacRec }).then(() => {
-    //                 opticaControlApi.post(`thermalPrinter/imprimirRecibo`, facturaDatos)
-    //                   .then(() => {
-    //                     createToast(
-    //                       'success',
-    //                       'Confirmado',
-    //                       'El recibo a sido generado'
-    //                     );
-    //                   })
-    //                   .catch((error) => {
-    //                     createToast(
-    //                       'error',
-    //                       'Error',
-    //                       'Hubo un error al generar el recibo, favor revise la impresora'
-    //                     );
-    //                   });
-    //               });
-    //             }
-    //             createToast(
-    //               'success',
-    //               'Confirmado',
-    //               'El inventario ha sido actualizado'
-    //             );
-    //           }
-    //         });
-
-    //       cleanForm();
-    //       handleCloseDialogVenta();
-    //     } else {
-    //       createToast(
-    //         'error',
-    //         'Error',
-    //         response.statusText,
-    //       );
-    //       console.log(response.data);
-    //       cleanForm();
-    //       handleCloseDialogVenta();
-    //       return;
-    //     }
-    //   })
-    //   .catch((err) => {
-    //     createToast(
-    //       'error',
-    //       'Error',
-    //       'Ha ocurrido un error'
-    //     );
-    //     handleCloseDialogVenta();
-    //   })
+          cleanForm();
+          handleCloseDialogVenta();
+        } else {
+          createToast(
+            'error',
+            'Error',
+            response.statusText,
+          );
+          console.log(response.data);
+          cleanForm();
+          handleCloseDialogVenta();
+          return;
+        }
+      })
+      .catch((err) => {
+        createToast(
+          'error',
+          'Error',
+          'Ha ocurrido un error'
+        );
+        handleCloseDialogVenta();
+      })
   };
 
   const rowClass = (data) => {
@@ -1385,10 +1422,10 @@ export const Pacientes = () => {
         <DialogTitle>Datos sobre el Paciente</DialogTitle>
         <DialogContent                 >
           <DialogContentText>
-            Por favor rellene los campos sobre la informacion de su paciente
+            Por favor rellene los campos sobre la información de su paciente
           </DialogContentText>
           <Toast ref={toastForm} />
-          <div className='container'>
+          <div className='containerFormPaciente'>
             <TextField
               autoFocus
               fullWidth
@@ -2426,12 +2463,8 @@ export const Pacientes = () => {
               </div>
             </div>
           </div>
-
           <p className='titulo'>Seleccione el inventario</p>
-          {
-            invFiltradoExp.length <= 0 &&
-            <Button variant='contained' onClick={handleOpenDialogInv}>Ingresar pedido</Button>
-          }
+          <Button variant='contained' onClick={handleOpenDialogInv}>Ingresar pedido</Button>
           <DataTable value={invFiltradoExp}
             showGridlines
             stripedRows
@@ -2777,25 +2810,27 @@ export const Pacientes = () => {
                     'Confirmado',
                     'El registro fue creado correctamente'
                   );
-                  handleCloseDialogInv();
+
+                  setinvFiltradoExp([response.data, ...invFiltradoExp]);
                   setlistInvPedido([
                     ...listInvPedido,
                     {
-                      descripcion: response.data[0].descripcion,
-                      esfera: response.data[0].esfera,
-                      cilindro: response.data[0].cilindro,
-                      adicion: response.data[0].adicion,
-                      linea: response.data[0].linea,
-                      inventario: response.data[0]._id,
+                      descripcion: response.data.descripcion,
+                      esfera: response.data.esfera,
+                      cilindro: response.data.cilindro,
+                      adicion: response.data.adicion,
+                      linea: response.data.linea,
+                      inventario: response.data._id,
                       cantidad: 1,
-                      importe: response.data[0].importe,
-                      valorGravado: response.data[0].valorGravado,
-                      existencia: response.data[0].existencia,
-                      precioVenta: response.data[0].precioVenta,
+                      importe: response.data.importe,
+                      valorGravado: response.data.valorGravado,
+                      existencia: response.data.existencia,
+                      precioVenta: response.data.precioVenta,
                       // descuento: 0,
-                      moda: response.data[0].moda
+                      moda: response.data.moda
                     }]);
-                  setinvFiltradoExp([...setinvFiltradoExp, response.data]);
+                  sumarTotales(response.data.precioVenta)
+                  handleCloseDialogInv();
                 }
               })
               .catch((err) => {
@@ -2812,9 +2847,39 @@ export const Pacientes = () => {
       >
         <DialogTitle>Datos sobre inventario</DialogTitle>
         <DialogContent                 >
-          <DialogContentText>
-            Por favor rellene los campos sobre la informacion de su inventario
-          </DialogContentText>
+          <TabView
+            scrollable
+            activeIndex={activeIndex}
+            onTabChange={handleTabChange}
+            onBeforeTabChange={handleTabChange}
+          >
+            {listExpedientePaciente.map(ex => {
+              return (
+                <TabPanel key={ex._id} header={formatearFecha(ex.fecha)}>
+                  <div style={{
+                    display: 'flex',
+                    flexDirection: 'row',
+                    gap: '10px'
+                  }}>
+                    <div >
+                      <p className='subtitulo'>Ojo Derecho</p>
+                      <p className='campo'>Esfera: <span className='valor'>{ex.recetaOjoDerecho.esfera}</span></p>
+                      <p className='campo'>Cilindro: <span className='valor'>{ex.recetaOjoDerecho.cilindro}</span></p>
+                      <p className='campo'>Adición: <span className='valor'>{ex.recetaOjoDerecho.adicion}</span></p>
+                    </div>
+                    <div >
+                      <p className='subtitulo'>Ojo Izquierdo</p>
+                      <p className='campo'>Esfera: <span className='valor'>{ex.recetaOjoIzquierdo.esfera}</span></p>
+                      <p className='campo'>Cilindro: <span className='valor'>{ex.recetaOjoIzquierdo.cilindro}</span></p>
+                      <p className='campo'>Adición: <span className='valor'>{ex.recetaOjoIzquierdo.adicion}</span></p>
+                    </div>
+                  </div>
+
+                </TabPanel>
+              )
+            })
+            }
+          </TabView>
           <Toast ref={toastForm} />
           <TextField
             autoFocus
@@ -2947,24 +3012,6 @@ export const Pacientes = () => {
               variant="standard"
               size="medium"
             />
-            <TextField
-              required
-              value={formValuesInv.existencia}
-              onChange={(event) => {
-                setFormValuesInv({
-                  ...formValuesInv,
-                  existencia: parseInt(event.target.value)
-                })
-              }}
-              margin="dense"
-              id="existencia"
-              name="existencia"
-              label="Existencia"
-              type="number"
-              fullWidth
-              variant="standard"
-              size="medium"
-            />
             <FormControl variant="standard" sx={{ m: 1, minWidth: 120 }}>
               <InputLabel id="importe">Importe</InputLabel>
               <Select
@@ -3002,7 +3049,7 @@ export const Pacientes = () => {
               </Select>
             </FormControl>
           </div>
-          <div className='container'>
+          <div className='containerText'>
             <TextField
               value={formValuesInv.categoria}
               onChange={(event) => handleChangeText(event, 'categoria')}
@@ -3089,7 +3136,6 @@ export const Pacientes = () => {
               size="medium"
             />
           </div>
-          <br />
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseDialogInv} >Cancelar</Button>

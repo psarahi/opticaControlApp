@@ -745,7 +745,7 @@ export const Inventario = () => {
                             </Select>
                         </FormControl>
                     </div>
-                    <div className='container'>
+                    <div className='containerText'>
                         <TextField
                             value={formValues.categoria}
                             onChange={(event) => handleChangeText(event, 'categoria')}

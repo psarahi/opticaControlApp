@@ -430,28 +430,45 @@ export const DetalleVentas = () => {
                                                         color="success"
                                                         startIcon={<ConstructionIcon />}
                                                         onClick={(e) => {
-                                                            opticaControlApi.put(`detalleVentas/${selectedVentaId}`, { trabajoHecho: true, fechaRealizado: dayjs().format('YYYY-MM-DD') })
+                                                            console.log(ventaView.detalleInventario);
+                                                            opticaControlApi.put('inventario/actualizarInvLente', { detalleInventario: ventaView.detalleInventario })
                                                                 .then((response) => {
-                                                                    setventaView({
-                                                                        ...ventaView,
-                                                                        trabajoHecho: true,
-                                                                        fechaRealizado: response.data.fechaRealizado
-                                                                    })
-                                                                    setListDetalleVentas(
-                                                                        listDetalleVentas.map((i) =>
-                                                                            i._id === selectedVentaId ? {
-                                                                                ...i,
-                                                                                trabajoHecho: true,
-                                                                                fechaRealizado: response.data.fechaRealizado
-                                                                            } : i
-                                                                        )
-                                                                    )
-
                                                                     createToast(
                                                                         'success',
                                                                         'Confirmado',
-                                                                        'Trabajo hecho'
+                                                                        'El inventario ha sido actualizado'
                                                                     );
+                                                                    opticaControlApi.put(`detalleVentas/${selectedVentaId}`, { trabajoHecho: true, fechaRealizado: dayjs().format('YYYY-MM-DD') })
+                                                                        .then((response) => {
+                                                                            setventaView({
+                                                                                ...ventaView,
+                                                                                trabajoHecho: true,
+                                                                                fechaRealizado: response.data.fechaRealizado
+                                                                            })
+                                                                            setListDetalleVentas(
+                                                                                listDetalleVentas.map((i) =>
+                                                                                    i._id === selectedVentaId ? {
+                                                                                        ...i,
+                                                                                        trabajoHecho: true,
+                                                                                        fechaRealizado: response.data.fechaRealizado
+                                                                                    } : i
+                                                                                )
+                                                                            )
+
+                                                                            createToast(
+                                                                                'success',
+                                                                                'Confirmado',
+                                                                                'Trabajo hecho'
+                                                                            );
+                                                                        })
+                                                                        .catch((error) => {
+                                                                            console.log(error);
+                                                                            createToast(
+                                                                                'error',
+                                                                                'Error',
+                                                                                'Ocurrio un error'
+                                                                            );
+                                                                        });
                                                                 })
                                                                 .catch((error) => {
                                                                     console.log(error);

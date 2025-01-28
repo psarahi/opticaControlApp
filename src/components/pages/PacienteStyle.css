@@ -1,4 +1,4 @@
-.container {
+.containerFormPaciente {
     display: grid;
     grid-template-columns: 1fr 1fr;
     grid-template-rows: 1fr 1fr 1fr 1fr;
@@ -9,6 +9,18 @@
         ". ."
         ". .";
 }
+
+.containerText {  
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: 1fr 1fr 1fr;
+    gap: 0px 10px;
+    grid-auto-flow: row;
+    grid-template-areas:
+      ". . ."
+      ". . ."
+      ". . .";
+  }
 
 .containerEspecificaciones {
     display: grid;
