@@ -19,7 +19,7 @@ import {
 
 import { opticaControlApi } from '../../services/opticaControlApi';
 import { textValidator } from '../../helpers/validator';
-import { formatearFecha } from '../../helpers/formato';
+import { formatearFecha, formatearNumero } from '../../helpers/formato';
 import './ClienteStyle.css'
 export const Cliente = () => {
     const ventaClienteJSON = {
@@ -50,11 +50,17 @@ export const Cliente = () => {
     const [ClienteSelected, setClienteSelected] = useState('');
     const [openDialogCliente, setOpenDialogCliente] = useState(false);
     const [openDialogVenta, setOpenDialogVenta] = useState(false);
-const [detalleInv, setdetalleInv] = useState({})
+    const [detalleInv, setdetalleInv] = useState({});
+    const [listInventario, setListInventario] = useState([]);
+    const [listInvSeleccionado, setListInvSeleccionado] = useState([]);
+
     useEffect(() => {
         const sucursal = localStorage.getItem('sucursalID');
         opticaControlApi.get(`cliente/bySucursal/${sucursal}`, '').then((response) => {
             setListClientes(response.data);
+        })
+        opticaControlApi.get(`inventario/inventarioExistente/${sucursal}`, '').then((response) => {
+            setListInventario(response.data);
         })
         cleanForm();
     }, [])
@@ -136,7 +142,7 @@ const [detalleInv, setdetalleInv] = useState({})
         if (event.cellIndex === 0) {
             handleEdit();
         } else if (event.cellIndex === 1) {
-            handleOpenDialogVenta();
+           // handleOpenDialogVenta();
         } else if (event.cellIndex === 2) {
             handleDisable();
         } else if (event.cellIndex === 2) {
@@ -276,7 +282,11 @@ const [detalleInv, setdetalleInv] = useState({})
         })
     };
 
-
+    const renderAddButton = () => {
+        return (
+          <AddIcon color='primary' fontSize='medium' />
+        );
+      };
 
     return (
         <>
@@ -492,6 +502,68 @@ const [detalleInv, setdetalleInv] = useState({})
                 <DialogTitle>Venta</DialogTitle>
                 <DialogContent                 >
                     <div className='formContainer'>
+                        <p>Seleccione inventario</p>
+                        <DataTable value={listInventario}
+                            showGridlines
+                            stripedRows
+                            size='small'
+                            sortMode="multiple"
+                            paginator
+                            rows={5}
+                            // filters={filtersInventario}
+                            filterDisplay='row'
+                            selectionMode="single"
+                            cellSelection
+                            // onCellSelect={onCellSelectedInventario}
+                            scrollable
+                            columnResizeMode="expand"
+                            resizableColumns
+                        >
+                            <Column body={renderAddButton}></Column>
+                            <Column field="descripcion" header="Descripcion" sortable filter style={{ minWidth: '12rem' }}></Column>
+                            <Column field="esfera" header="Esfera" filter style={{ minWidth: '15rem' }}></Column>
+                            <Column field="cilindro" header="Cilindro" filter style={{ minWidth: '10rem' }}></Column>
+                            <Column field="adicion" header="Adición" filter style={{ minWidth: '10rem' }}></Column>
+                            <Column field="linea" header="Linea" filter style={{ minWidth: '10em' }}></Column>
+                            <Column field="importe" header="Importe"></Column>
+                            <Column field="valorGravado" header="Gravado"></Column>
+                            <Column field="existencia" header="Existencia" sortable ></Column>
+                            <Column field="precioVenta" header="Precio Venta" sortable body={(data) => formatearNumero(data.precioVenta)}></Column>
+                            <Column field="moda" header="Moda" filter></Column>
+                            <Column field="color" header="Color"></Column>
+                            <Column field="diseno" header="Diseño"></Column>
+                            <Column field="proveedor" header="Proveedor" filter></Column>
+                        </DataTable>
+                        <br />
+                        <p>Inventario seleccionado</p>
+                        <DataTable value={listInvSeleccionado}
+                            showGridlines
+                            stripedRows
+                            size='small'
+                            sortMode="multiple"
+                            paginator
+                            rows={5}
+                            selectionMode="single"
+                            cellSelection
+                            // onCellSelect={onCellInvSeleccionado}
+                            scrollablev
+                            columnResizeMode="expand"
+                            resizableColumns
+                  
+                        >
+                            <Column body={renderDeleteButton} style={{ textAlign: 'center' }}></Column>
+                            <Column field="descripcion" header="Descripcion" ></Column>
+                            <Column field="esfera" header="Esfera"></Column>
+                            <Column field="cilindro" header="Cilindro"></Column>
+                            <Column field="adicion" header="Adición"></Column>
+                            <Column field="linea" header="Linea"></Column>
+                            <Column field="importe" header="Importe"></Column>
+                            <Column field="valorGravado" header="Gravado"></Column>
+                            <Column field="cantidad" header="Cantidad"></Column>
+                            <Column field="precioVenta" header="Precio Venta" body={(data) => formatearNumero(data.precioVenta)}></Column>
+                            {/* <Column field="descuento" header="Descuento" editor={(options) => textEditor(options)}></Column> */}
+                            {/* <Column rowEditor={allowEdit} headerStyle={{ width: '10%', minWidth: '8rem' }} bodyStyle={{ textAlign: 'center' }}></Column> */}
+                        </DataTable>
                         {/* <TextField
                             required
                             value={formCliente.nombre}

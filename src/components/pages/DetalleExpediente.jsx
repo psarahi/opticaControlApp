@@ -14,7 +14,8 @@ import {
     from '@mui/material';
 
 import './DetalleExpedienteStyle.css';
-import logoOptica from '../../assets/logoOptica.png';
+import logoOpticaEcheverria from '../../assets/logoOpticaEcheverria.png';
+import logoCentroVisualCris from '../../assets/logoCentroVisualCris.png';
 import transportador from '../../assets/transportador.jpg';
 import qrWhatsApp from '../../assets/qrWhatsApp.jpeg';
 
@@ -25,6 +26,7 @@ export const DetalleExpediente = () => {
     const [listPaciente, setListPaciente] = useState([]);
     const [activeIndex, setActiveIndex] = useState(0);
     const [listDetalleExpediente, setListDetalleExpediente] = useState([]);
+    const [infoSucursal, setinfoSucursal] = useState({});
     const toast = useRef(null);
 
     const createToast = (severity, summary, detail) => {
@@ -35,11 +37,19 @@ export const DetalleExpediente = () => {
         opticaControlApi.get('expediente/pacientes', '').then((response) => {
             setListPaciente(response.data);
         });
+        let sucursal = localStorage.getItem('sucursalID')
+        opticaControlApi.get(`sucursal/${sucursal}`, '').then((response) => {
+            console.log(response.data);
+            
+            setinfoSucursal(response.data);
+        });
+
+
 
     }, []);
 
     const [filters] = useState({
-        ['paciente.nombre']: { value: '', matchMode: FilterMatchMode.STARTS_WITH },
+        ['paciente.nombre']: { value: '', matchMode: FilterMatchMode.CONTAINS },
     });
 
     const onCellSelect = (e) => {
@@ -144,7 +154,7 @@ export const DetalleExpediente = () => {
                                                 gridTemplateAreas: ". ."
                                             }}>
                                                 <div>
-                                                    <img src={logoOptica} alt='Logo' />
+                                                    <img src={logoOpticaEcheverria} alt='Logo' />
                                                     <p className='texto'>
                                                         <span style={{ fontWeight: 500 }}>Paciente: </span>
                                                         <span style={{ fontWeight: 200 }}>{detalle.paciente.nombre}</span>
@@ -232,9 +242,9 @@ export const DetalleExpediente = () => {
                                             </p>
                                             <hr />
                                             <div>
-                                                <p className='textoPequeño'>Sucursal {detalle.optometrista.sucursales.nombre} Dirección {detalle.optometrista.sucursales.direccion}</p>
-                                                <p className='textoPequeño'>Telefono {detalle.optometrista.sucursales.telefono} {detalle.optometrista.sucursales.celular} {detalle.optometrista.sucursales.email} </p>
-                                                <p className='textoPequeño'>{detalle.optometrista.sucursales.paginaDigital}</p>
+                                                <p className='textoPequeño'>Sucursal {infoSucursal.nombre} Dirección {infoSucursal.direccion}</p>
+                                                <p className='textoPequeño'>Telefono {infoSucursal.telefono} {infoSucursal.celular} {infoSucursal.email} </p>
+                                                <p className='textoPequeño'>{infoSucursal.paginaDigital}</p>
                                                 <br />
                                             </div>
                                         </div>

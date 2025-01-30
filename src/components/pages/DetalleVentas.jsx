@@ -108,12 +108,13 @@ export const DetalleVentas = () => {
     };
 
     const [filters] = useState({
-        paciente: { value: '', matchMode: FilterMatchMode.STARTS_WITH },
+        paciente: { value: '', matchMode: FilterMatchMode.CONTAINS },
     });
 
     const tipoPago = [
         'Efectivo',
         'Tarjeta',
+        'Transferencia'
     ];
 
     const cleanForm = () => {

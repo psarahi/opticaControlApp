@@ -360,14 +360,14 @@ export const Inventario = () => {
     };
 
     const [filters] = useState({
-        descripcion: { value: '', matchMode: FilterMatchMode.STARTS_WITH },
-        esfera: { value: '', matchMode: FilterMatchMode.STARTS_WITH },
-        cilindro: { value: '', matchMode: FilterMatchMode.STARTS_WITH },
-        adicion: { value: '', matchMode: FilterMatchMode.STARTS_WITH },
-        categoria: { value: '', matchMode: FilterMatchMode.STARTS_WITH },
-        moda: { value: '', matchMode: FilterMatchMode.STARTS_WITH },
-        proveedor: { value: '', matchMode: FilterMatchMode.STARTS_WITH },
-        linea: { value: '', matchMode: FilterMatchMode.STARTS_WITH }
+        descripcion: { value: '', matchMode: FilterMatchMode.CONTAINS },
+        esfera: { value: '', matchMode: FilterMatchMode.CONTAINS },
+        cilindro: { value: '', matchMode: FilterMatchMode.CONTAINS },
+        adicion: { value: '', matchMode: FilterMatchMode.CONTAINS },
+        categoria: { value: '', matchMode: FilterMatchMode.CONTAINS },
+        moda: { value: '', matchMode: FilterMatchMode.CONTAINS },
+        proveedor: { value: '', matchMode: FilterMatchMode.CONTAINS },
+        linea: { value: '', matchMode: FilterMatchMode.CONTAINS }
     });
 
     const precioVentaBodyTemplate = ({ precioVenta }) => {

@@ -20,6 +20,7 @@ export const DetalleInventarioVendido = () => {
         { field: 'cilindro', header: 'cilindro' },
         { field: 'adicion', header: 'Adición' },
         { field: 'tipoVenta', header: 'Tipo Venta' },
+        { field: 'numFacRec', header: 'Fac/Rec' },
         { field: 'fecha', header: 'Fecha venta' },
         { field: 'cantidad', header: 'cantidad' },
         { field: 'linea', header: 'Linea' },
@@ -227,6 +228,7 @@ export const DetalleInventarioVendido = () => {
                     <Column field="cilindro" header="Cilindro"></Column>
                     <Column field="adicion" header="Adición"></Column>
                     <Column field="tipoVenta" header="Tipo venta" ></Column>
+                    <Column field="numFacRec" header="Fac/Rec" ></Column>
                     <Column field="fecha" header="Fecha Venta" body={(data) => dayjs(data.fecha).format('YYYY-MM-DD')}></Column>
                     <Column field="cantidad" header="Cantidad"></Column>
                     <Column field="linea" header="Linea"></Column>
@@ -262,6 +264,7 @@ export const DetalleInventarioVendido = () => {
                     <Column field="cilindro" header="Cilindro"></Column>
                     <Column field="adicion" header="Adición"></Column>
                     <Column field="tipoVenta" header="Tipo venta" ></Column>
+                    <Column field="numFacRec" header="Fac/Rec" ></Column>
                     <Column field="fecha" header="Fecha Venta" body={(data) => dayjs(data.fecha).format('YYYY-MM-DD')}></Column>
                     <Column field="cantidad" header="Cantidad"></Column>
                     <Column field="linea" header="Linea"></Column>

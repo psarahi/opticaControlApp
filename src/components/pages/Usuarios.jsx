@@ -330,9 +330,9 @@ export const Usuarios = () => {
     };
 
     const [filters] = useState({
-        nombre: { value: '', matchMode: FilterMatchMode.STARTS_WITH },
-        usuario: { value: '', matchMode: FilterMatchMode.STARTS_WITH },
-        tipoUsuario: { value: '', matchMode: FilterMatchMode.STARTS_WITH },
+        nombre: { value: '', matchMode: FilterMatchMode.CONTAINS },
+        usuario: { value: '', matchMode: FilterMatchMode.CONTAINS },
+        tipoUsuario: { value: '', matchMode: FilterMatchMode.CONTAINS },
     });
 
     return (

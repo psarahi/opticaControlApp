@@ -35,106 +35,106 @@ import './PacienteStyle.css';
 import { agudezaVisual, obtenerAdicion, obtenerGraduaciones } from '../../helpers/metricas';
 import { nuevaFactura } from '../../helpers/nuevaFactura';
 
-const pacienteJson = {
-  nombre: '',
-  edad: '',
-  genero: '',
-  telefono: '',
-  email: '',
-  direccion: '',
-  fechaRegistro: dayjs().format('YYYY-MM-DD'),
-  ultimaCita: dayjs().format('YYYY-MM-DD'),
-  sucursales: '',
-  citaProxima: dayjs().format('YYYY-MM-DD'),
-  estado: true
-};
-
-const expedientes = {
-  paciente: '',
-  tipoLente: '',
-  proteccion: null,
-  optometrista: '',
-  fecha: dayjs().format('YYYY-MM-DD'),
-  antecedentes: '',
-  enfermedadBase: '',
-  observaciones: '',
-  pruebasValoraciones: '',
-  usuarios: localStorage.getItem('usuarioId'),
-  recetaOjoDerecho: {
-    esfera: '',
-    cilindro: '',
-    eje: '',
-    agudezaVisual: '',
-    distanciaPupilar: '',
-    adicion: '',
-    defRefraccion: ''
-  },
-  recetaOjoIzquierdo: {
-    esfera: '',
-    cilindro: '',
-    eje: '',
-    agudezaVisual: '',
-    distanciaPupilar: '',
-    adicion: '',
-    defRefraccion: ''
-  }
-}
-
-const detalleVenta = {
-  tipoVenta: '',
-  tipoLente: '',
-  proteccion: null,
-  material: '',
-  moda: '',
-  paciente: '',
-  detalleInventario: [{
-    inventario: '',
-    cantidad: 0,
-    // descuento: 0,
-  }],
-  fecha: dayjs().format('YYYY-MM-DD'),
-  entregaProgramada: dayjs().format('YYYY-MM-DD'),
-  fechaEntrega: dayjs().format('YYYY-MM-DD'),
-  detallePagos: [{
-    fecha: dayjs().format('YYYY-MM-DD'),
-    formaPago: '',
-    monto: 0,
-    usuarios: localStorage.getItem('usuarioId')
-  }],
-  descuentoTotal: '',
-  cantPagos: 0,
-  montoPagos: 0,
-  total: 0,
-  acuenta: 0,
-  numFacRec: '',
-  // entregado: false,
-  // trabajoHecho: false,
-  // estado: true,
-};
-
-const inventarioJson = {
-  descripcion: '',
-  esfera: '',
-  cilindro: '',
-  adicion: '',
-  linea: '',
-  precioVenta: '',
-  precioCompra: 1,
-  existencia: 0,
-  importe: 'Exento',
-  valorGravado: '',
-  categoria: 'LENTES',
-  proveedor: 'ECHEVERRIA',
-  telefono: '',
-  moda: '',
-  material: '',
-  diseno: '',
-  color: '',
-  estado: true,
-  sucursales: localStorage.getItem('sucursalID')
-}
-
 export const Pacientes = () => {
+  const pacienteJson = {
+    nombre: '',
+    edad: '',
+    genero: '',
+    telefono: '',
+    email: '',
+    direccion: '',
+    fechaRegistro: dayjs().format('YYYY-MM-DD'),
+    ultimaCita: dayjs().format('YYYY-MM-DD'),
+    sucursales: '',
+    citaProxima: dayjs().format('YYYY-MM-DD'),
+    estado: true
+  };
+
+  const expedientes = {
+    paciente: '',
+    tipoLente: '',
+    proteccion: null,
+    optometrista: '',
+    fecha: dayjs().format('YYYY-MM-DD'),
+    antecedentes: '',
+    enfermedadBase: '',
+    observaciones: '',
+    pruebasValoraciones: '',
+    usuarios: localStorage.getItem('usuarioId'),
+    recetaOjoDerecho: {
+      esfera: '',
+      cilindro: '',
+      eje: '',
+      agudezaVisual: '',
+      distanciaPupilar: '',
+      adicion: '',
+      defRefraccion: ''
+    },
+    recetaOjoIzquierdo: {
+      esfera: '',
+      cilindro: '',
+      eje: '',
+      agudezaVisual: '',
+      distanciaPupilar: '',
+      adicion: '',
+      defRefraccion: ''
+    }
+  }
+
+  const detalleVenta = {
+    tipoVenta: '',
+    tipoLente: '',
+    proteccion: null,
+    material: '',
+    moda: '',
+    paciente: '',
+    detalleInventario: [{
+      inventario: '',
+      cantidad: 0,
+      // descuento: 0,
+    }],
+    fecha: dayjs().format('YYYY-MM-DD'),
+    entregaProgramada: dayjs().format('YYYY-MM-DD'),
+    fechaEntrega: dayjs().format('YYYY-MM-DD'),
+    detallePagos: [{
+      fecha: dayjs().format('YYYY-MM-DD'),
+      formaPago: '',
+      monto: 0,
+      usuarios: localStorage.getItem('usuarioId')
+    }],
+    descuentoTotal: '',
+    cantPagos: 0,
+    montoPagos: 0,
+    total: 0,
+    acuenta: 0,
+    numFacRec: '',
+    // entregado: false,
+    // trabajoHecho: false,
+    // estado: true,
+  };
+
+  const inventarioJson = {
+    descripcion: '',
+    esfera: '',
+    cilindro: '',
+    adicion: '',
+    linea: '',
+    precioVenta: '',
+    precioCompra: 1,
+    existencia: 0,
+    importe: 'Exento',
+    valorGravado: '',
+    categoria: 'LENTES',
+    proveedor: 'ECHEVERRIA',
+    telefono: '',
+    moda: '',
+    material: '',
+    diseno: '',
+    color: '',
+    estado: true,
+    sucursales: localStorage.getItem('sucursalID')
+  }
+
   let pacienteSeleccionado = '';
   const [enableOp] = useState((localStorage.getItem('tipoUsuario') === 'Administrador') ? true : false);
   const [openDialogPaciente, setOpenDialogPaciente] = useState(false);
@@ -245,22 +245,7 @@ export const Pacientes = () => {
   const tipoPago = [
     'Efectivo',
     'Tarjeta',
-  ];
-
-  const lineas = [
-    'Marca',
-    'Delux',
-    'Media',
-    'Economica'
-  ];
-
-  const importe = [
-    'Exento',
-    'Gravado'
-  ];
-  const valorGravado = [
-    '15%',
-    '18%'
+    'Transferencia'
   ];
 
   useEffect(() => {
@@ -289,14 +274,14 @@ export const Pacientes = () => {
     let inventario = [...listInventario];
     let invExp = inventario.filter((i) =>
       (
-        i.esfera === ((receta[e.index].recetaOjoDerecho.esfera === null) ? '' : receta[e.index].recetaOjoDerecho.esfera).toString() &&
-        i.cilindro === ((receta[e.index].recetaOjoDerecho.cilindro === null) ? '' : receta[e.index].recetaOjoDerecho.cilindro).toString() &&
-        i.adicion === ((receta[e.index].recetaOjoDerecho.adicion === null) ? '' : receta[e.index].recetaOjoDerecho.adicion).toString()
+        i.esfera === ((receta[e.index].recetaOjoDerecho.esfera === null) ? '-0.00' : receta[e.index].recetaOjoDerecho.esfera).toString() &&
+        i.cilindro === ((receta[e.index].recetaOjoDerecho.cilindro === null) ? '-0.00' : receta[e.index].recetaOjoDerecho.cilindro).toString() &&
+        i.adicion === ((receta[e.index].recetaOjoDerecho.adicion === null) ? '-0.00' : receta[e.index].recetaOjoDerecho.adicion).toString()
       ) ||
       (
-        i.esfera === ((receta[e.index].recetaOjoIzquierdo.esfera === null) ? '' : receta[e.index].recetaOjoIzquierdo.esfera).toString() &&
-        i.cilindro === ((receta[e.index].recetaOjoIzquierdo.cilindro === null) ? '' : receta[e.index].recetaOjoIzquierdo.cilindro).toString() &&
-        i.adicion === ((receta[e.index].recetaOjoIzquierdo.adicion === null) ? '' : receta[e.index].recetaOjoIzquierdo.adicion).toString()
+        i.esfera === ((receta[e.index].recetaOjoIzquierdo.esfera === null) ? '-0.00' : receta[e.index].recetaOjoIzquierdo.esfera).toString() &&
+        i.cilindro === ((receta[e.index].recetaOjoIzquierdo.cilindro === null) ? '-0.00' : receta[e.index].recetaOjoIzquierdo.cilindro).toString() &&
+        i.adicion === ((receta[e.index].recetaOjoIzquierdo.adicion === null) ? '-0.00' : receta[e.index].recetaOjoIzquierdo.adicion).toString()
       ) ||
       (
         i.categoria !== "LENTES"
@@ -408,6 +393,7 @@ export const Pacientes = () => {
 
   const toast = useRef(null);
   const toastForm = useRef(null);
+  const toastFormInv = useRef(null);
   const toastFormVenta = useRef(null);
 
   const rowClassInventario = (data) => {
@@ -422,6 +408,10 @@ export const Pacientes = () => {
 
   const createToastForm = (severity, summary, detail) => {
     toastForm.current.show({ severity: severity, summary: summary, detail: detail, life: 6000 });
+  };
+
+  const createToastInv = (severity, summary, detail) => {
+    toastFormInv.current.show({ severity: severity, summary: summary, detail: detail, life: 6000 });
   };
   const createToastFormVenta = (severity, summary, detail) => {
     toastFormVenta.current.show({ severity: severity, summary: summary, detail: detail, life: 6000 });
@@ -512,14 +502,14 @@ export const Pacientes = () => {
           if (receta) {
             invExp = inventario.filter((i) =>
               (
-                i.esfera === ((receta.recetaOjoDerecho.esfera === null) ? '' : receta.recetaOjoDerecho.esfera).toString() &&
-                i.cilindro === ((receta.recetaOjoDerecho.cilindro === null) ? '' : receta.recetaOjoDerecho.cilindro).toString() &&
-                i.adicion === ((receta.recetaOjoDerecho.adicion === null) ? '' : receta.recetaOjoDerecho.adicion).toString()
+                i.esfera === ((receta.recetaOjoDerecho.esfera === null) ? '-0.00' : receta.recetaOjoDerecho.esfera).toString() &&
+                i.cilindro === ((receta.recetaOjoDerecho.cilindro === null) ? '-0.00' : receta.recetaOjoDerecho.cilindro).toString() &&
+                i.adicion === ((receta.recetaOjoDerecho.adicion === null) ? '-0.00' : receta.recetaOjoDerecho.adicion).toString()
               ) ||
               (
-                i.esfera === ((receta.recetaOjoIzquierdo.esfera === null) ? '' : receta.recetaOjoIzquierdo.esfera).toString() &&
-                i.cilindro === ((receta.recetaOjoIzquierdo.cilindro === null) ? '' : receta.recetaOjoIzquierdo.cilindro).toString() &&
-                i.adicion === ((receta.recetaOjoIzquierdo.adicion === null) ? '' : receta.recetaOjoIzquierdo.adicion).toString()
+                i.esfera === ((receta.recetaOjoIzquierdo.esfera === null) ? '-0.00' : receta.recetaOjoIzquierdo.esfera).toString() &&
+                i.cilindro === ((receta.recetaOjoIzquierdo.cilindro === null) ? '-0.00' : receta.recetaOjoIzquierdo.cilindro).toString() &&
+                i.adicion === ((receta.recetaOjoIzquierdo.adicion === null) ? '-0.00' : receta.recetaOjoIzquierdo.adicion).toString()
               ) ||
               (
                 i.categoria !== "LENTES"
@@ -1036,23 +1026,26 @@ export const Pacientes = () => {
   };
 
   const [filters] = useState({
-    nombre: { value: '', matchMode: FilterMatchMode.STARTS_WITH },
-    telefono: { value: '', matchMode: FilterMatchMode.STARTS_WITH },
-    direccion: { value: '', matchMode: FilterMatchMode.STARTS_WITH },
-    optometrista: { value: '', matchMode: FilterMatchMode.STARTS_WITH },
-    sucursales: { value: '', matchMode: FilterMatchMode.STARTS_WITH },
-    genero: { value: '', matchMode: FilterMatchMode.STARTS_WITH },
+    nombre: { value: '', matchMode: FilterMatchMode.CONTAINS },
+    telefono: { value: '', matchMode: FilterMatchMode.CONTAINS },
+    direccion: { value: '', matchMode: FilterMatchMode.CONTAINS },
+    optometrista: { value: '', matchMode: FilterMatchMode.CONTAINS },
+    sucursales: { value: '', matchMode: FilterMatchMode.CONTAINS },
+    genero: { value: '', matchMode: FilterMatchMode.CONTAINS },
+    fechaRegistro: { value: '', matchMode: FilterMatchMode.CONTAINS },
+    ultimaCita: { value: '', matchMode: FilterMatchMode.CONTAINS },
+    citaProxima: { value: '', matchMode: FilterMatchMode.CONTAINS },
   });
 
   const [filtersInventario] = useState({
     descripcion: { value: '', matchMode: FilterMatchMode.CONTAINS },
-    esfera: { value: '', matchMode: FilterMatchMode.STARTS_WITH },
-    cilindro: { value: '', matchMode: FilterMatchMode.STARTS_WITH },
-    adicion: { value: '', matchMode: FilterMatchMode.STARTS_WITH },
-    categoria: { value: '', matchMode: FilterMatchMode.STARTS_WITH },
-    moda: { value: '', matchMode: FilterMatchMode.STARTS_WITH },
-    proveedor: { value: '', matchMode: FilterMatchMode.STARTS_WITH },
-    linea: { value: '', matchMode: FilterMatchMode.STARTS_WITH }
+    esfera: { value: '', matchMode: FilterMatchMode.CONTAINS },
+    cilindro: { value: '', matchMode: FilterMatchMode.CONTAINS },
+    adicion: { value: '', matchMode: FilterMatchMode.CONTAINS },
+    categoria: { value: '', matchMode: FilterMatchMode.CONTAINS },
+    moda: { value: '', matchMode: FilterMatchMode.CONTAINS },
+    proveedor: { value: '', matchMode: FilterMatchMode.CONTAINS },
+    linea: { value: '', matchMode: FilterMatchMode.CONTAINS }
   });
 
   const onRowEditComplete = (e) => {
@@ -1083,7 +1076,19 @@ export const Pacientes = () => {
     return true;
   };
 
-  const generarFactura = (op) => {
+  // const handleGenerarCobro = () => {
+  //   confirmDialog({
+  //     message: `¿Factura con RTN?`,
+  //     header: 'RTN',
+  //     icon: 'pi pi-info-circle',
+  //     defaultFocus: 'reject',
+  //     acceptClassName: 'p-button-danger',
+  //     accept: acceptDialogDisabled,
+  //     reject: rejectDialogDisabled
+  //   });
+  // };
+
+  const generarCobro = (op) => {
 
     if (!textValidator(formVenta.tipoVenta)) {
       createToastFormVenta(
@@ -1294,14 +1299,6 @@ export const Pacientes = () => {
       ...formValuesInv,
       [select]: target.value
     })
-
-    if (target.value === 'Exento') {
-      setFormValuesInv({
-        ...formValuesInv,
-        valorGravado: '',
-        [select]: target.value
-      })
-    }
   };
 
 
@@ -1346,9 +1343,9 @@ export const Pacientes = () => {
           <Column field="telefono" header="Telefono" filter bodyStyle={{ textAlign: 'center', minWidth: '12rem' }}></Column>
           <Column field="direccion" header="Direccion" filter></Column>
           <Column field="sucursales.nombre" header="Sucursal" filter></Column>
-          <Column field="fechaRegistro" header="Registro" body={(data) => (textValidator(data.fechaRegistro)) ? formatearFecha(data.fechaRegistro) : '-'}></Column>
-          <Column field="ultimaCita" header="Ultima cita" body={(data) => (textValidator(data.ultimaCita)) ? formatearFecha(data.ultimaCita) : '-'}></Column>
-          <Column field="citaProxima" header="Cita Proxima" body={(data) => (textValidator(data.citaProxima)) ? formatearFecha(data.citaProxima) : '-'}></Column>
+          <Column field="fechaRegistro" header="Registro" filter bodyStyle={{ textAlign: 'center', minWidth: '15rem' }} body={(data) => (textValidator(data.fechaRegistro)) ? formatearFecha(data.fechaRegistro) : '-'}></Column>
+          <Column field="ultimaCita" header="Ultima cita" filter bodyStyle={{ textAlign: 'center', minWidth: '15rem' }} body={(data) => (textValidator(data.ultimaCita)) ? formatearFecha(data.ultimaCita) : '-'}></Column>
+          <Column field="citaProxima" header="Cita Proxima" filter bodyStyle={{ textAlign: 'center', minWidth: '15rem' }} body={(data) => (textValidator(data.citaProxima)) ? formatearFecha(data.citaProxima) : '-'}></Column>
         </DataTable>
       </div >
       {/* Formulario para guardar Paciente*/}
@@ -2503,6 +2500,7 @@ export const Pacientes = () => {
             <Column field="cilindro" header="Cilindro" filter style={{ minWidth: '10rem' }}></Column>
             <Column field="adicion" header="Adición" filter style={{ minWidth: '10rem' }}></Column>
             <Column field="linea" header="Linea" filter style={{ minWidth: '10em' }}></Column>
+            <Column field="categoria" header="Categoria"></Column>
             <Column field="importe" header="Importe"></Column>
             <Column field="valorGravado" header="Gravado"></Column>
             <Column field="existencia" header="Existencia" sortable ></Column>
@@ -2539,6 +2537,7 @@ export const Pacientes = () => {
                 <Column field="cilindro" header="Cilindro"></Column>
                 <Column field="adicion" header="Adición"></Column>
                 <Column field="linea" header="Linea"></Column>
+                <Column field="categoria" header="Categoria"></Column>
                 <Column field="importe" header="Importe"></Column>
                 <Column field="valorGravado" header="Gravado"></Column>
                 <Column field="cantidad" header="Cantidad"></Column>
@@ -2573,6 +2572,7 @@ export const Pacientes = () => {
                 <Column field="cilindro" header="Cilindro"></Column>
                 <Column field="adicion" header="Adición"></Column>
                 <Column field="linea" header="Linea"></Column>
+                <Column field="categoria" header="Categoria"></Column>
                 <Column field="cantidad" header="Cantidad"></Column>
                 <Column field="precioVenta" header="Precio Venta" body={(data) => precioBodyTemplate(data.precioVenta)}></Column>
               </DataTable>
@@ -2798,8 +2798,8 @@ export const Pacientes = () => {
               alignItems: 'center',
               gap: '30px'
             }}>
-              <Button variant='contained' onClick={() => generarFactura('recibo')}>Generar recibo</Button>
-              <Button variant='contained' onClick={() => generarFactura('factura')} type="submit">Generar factura</Button>
+              <Button variant='contained' onClick={() => generarCobro('recibo')}>Generar recibo</Button>
+              <Button variant='contained' onClick={() => generarCobro('factura')} type="submit">Generar factura</Button>
             </div>
           }
         </DialogContent>
@@ -2817,10 +2817,24 @@ export const Pacientes = () => {
           component: 'form',
           onSubmit: (event) => {
             event.preventDefault();
+            console.log(formValuesInv);
+            let test = {
+              ...formValuesInv,
+              sucursales: localStorage.getItem('sucursalID')
+            }
+            console.log(test);
+
+            setFormValuesInv({
+              ...formValuesInv,
+              sucursales: localStorage.getItem('sucursalID')
+            })
+
             opticaControlApi.post('inventario', formValuesInv)
               .then((response) => {
+                console.log(response);
+
                 if (response.status === 201) {
-                  createToast(
+                  createToastFormVenta(
                     'success',
                     'Confirmado',
                     'El registro fue creado correctamente'
@@ -2850,7 +2864,7 @@ export const Pacientes = () => {
                 }
               })
               .catch((err) => {
-                createToast(
+                createToastFormVenta(
                   'error',
                   'Error',
                   'Ha ocurrido un error'
@@ -2896,7 +2910,7 @@ export const Pacientes = () => {
             })
             }
           </TabView>
-          <Toast ref={toastForm} />
+          <Toast ref={toastFormInv} />
           <div style={{
             display: 'flex',
             flexDirection: 'row',
@@ -2925,7 +2939,7 @@ export const Pacientes = () => {
                 value={formValuesInv.precioVenta}
                 onChange={(event) => {
                   if (event.target.value <= 0) {
-                    createToastForm(
+                    createToastInv(
                       'error',
                       'Error',
                       'No se puede ingresar una cantidad negativa'
